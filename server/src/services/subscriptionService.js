@@ -8,8 +8,108 @@ class SubscriptionService {
   /**
    * Get all active subscription plans
    */
+  /**
+   * Helper: Resolve plan by ObjectId or code (e.g. 'basic', 'pro', 'plan_basic_local')
+   */
+  async resolvePlan(planIdOrCode) {
+    if (!planIdOrCode) return null;
+
+    let plan = null;
+    if (mongoose.Types.ObjectId.isValid(planIdOrCode)) {
+      plan = await SubscriptionPlan.findById(planIdOrCode);
+    }
+
+    if (!plan) {
+      const cleanCode = String(planIdOrCode)
+        .replace(/^plan_/, '')
+        .replace(/_local$/, '')
+        .toLowerCase()
+        .trim();
+      plan = await SubscriptionPlan.findOne({ code: cleanCode, isActive: true });
+    }
+
+    if (!plan) {
+      // Ensure default plans exist and try resolving again
+      await this.getPlans();
+      const cleanCode = String(planIdOrCode)
+        .replace(/^plan_/, '')
+        .replace(/_local$/, '')
+        .toLowerCase()
+        .trim();
+      plan = (await SubscriptionPlan.findOne({ code: cleanCode, isActive: true })) || (await SubscriptionPlan.findOne({ isActive: true }));
+    }
+
+    return plan;
+  }
+
+  /**
+   * Get all active subscription plans (auto-seeds defaults if empty)
+   */
   async getPlans() {
-    return await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+    let plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+    if (!plans || plans.length === 0) {
+      const defaultPlans = [
+        {
+          name: 'Basic Plan',
+          code: 'basic',
+          description: 'Ideal for independent contractors starting with a small machinery fleet.',
+          price: 49900, // ₹499 in paise
+          billingInterval: 'monthly',
+          listingLimit: 2,
+          features: [
+            'Up to 2 active equipment listings',
+            'Standard search placement',
+            'Direct customer booking requests',
+            'Online payment verification',
+            'Basic listing analytics',
+          ],
+          isActive: true,
+        },
+        {
+          name: 'Pro Plan',
+          code: 'pro',
+          description: 'Perfect for rental businesses managing multiple machines across regions.',
+          price: 99900, // ₹999 in paise
+          billingInterval: 'monthly',
+          listingLimit: 10,
+          features: [
+            'Up to 10 active equipment listings',
+            'Priority badge & top search placement',
+            'Instant booking request alerts',
+            'Advanced availability blackout calendar',
+            'Dedicated partner support',
+          ],
+          isActive: true,
+        },
+        {
+          name: 'Business Fleet',
+          code: 'business',
+          description: 'Enterprise tier for fleet owners and contractors with large inventories.',
+          price: 249900, // ₹2,499 in paise
+          billingInterval: 'monthly',
+          listingLimit: 50,
+          features: [
+            'Up to 50 active equipment listings',
+            'Featured homepage banner rotation',
+            'Multi-city and multi-depot management',
+            'Custom invoice branding & automated receipts',
+            '24/7 Priority phone support & account manager',
+          ],
+          isActive: true,
+        },
+      ];
+
+      for (const p of defaultPlans) {
+        await SubscriptionPlan.findOneAndUpdate({ code: p.code }, p, {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        });
+      }
+
+      plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+    }
+    return plans;
   }
 
   /**
@@ -31,7 +131,7 @@ class SubscriptionService {
    * Initiate a pending payment order for a subscription plan
    */
   async createSubscriptionOrder(userId, planId) {
-    const plan = await SubscriptionPlan.findById(planId);
+    const plan = await this.resolvePlan(planId);
     if (!plan || !plan.isActive) {
       const error = new Error('Selected subscription plan is invalid or no longer active');
       error.statusCode = 404;
@@ -128,7 +228,7 @@ class SubscriptionService {
     await payment.save();
 
     // 4. Calculate subscription start and end dates (30 days for monthly)
-    const plan = await SubscriptionPlan.findById(planId || payment.notes.get('planId'));
+    const plan = await this.resolvePlan(planId || payment.notes?.get?.('planId') || payment.notes?.planId);
     if (!plan) {
       throw new Error('Subscription plan not found during activation');
     }

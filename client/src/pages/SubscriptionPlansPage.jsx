@@ -117,7 +117,7 @@ const SubscriptionPlansPage = () => {
     try {
       // 1. Create order on backend
       const res = await api.post('/subscriptions/create-order', {
-        planId: plan._id,
+        planId: plan._id || plan.code,
       });
 
       if (!res.data?.success) {

@@ -9,7 +9,7 @@
     "seed:categories": "node scripts/seedCategories.js",
     "seed:admin": "node scripts/seedAdmin.js",
     "seed:equipment": "node scripts/seedEquipment.js",
-    "seed": "node scripts/seedCategories.js && node scripts/seedAdmin.js && node scripts/seedEquipment.js"
+    "seed": "node scripts/seedAll.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

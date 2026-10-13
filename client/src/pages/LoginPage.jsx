@@ -49,10 +49,17 @@ const LoginPage = () => {
     });
   };
 
-  const fillSampleUser = () => {
+  const fillSampleFleetOwner = () => {
     setFormData({
-      email: 'contractor@example.com',
-      password: 'Password123',
+      email: 'rajesh.fleet@equipmenthub.com',
+      password: 'Password@123',
+    });
+  };
+
+  const fillSampleRenter = () => {
+    setFormData({
+      email: 'amit.builder@equipmenthub.com',
+      password: 'Password@123',
     });
   };
 
@@ -144,20 +151,27 @@ const LoginPage = () => {
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2 text-center">
             Quick fill test accounts:
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
-              onClick={fillSampleAdmin}
-              className="px-2.5 py-1.5 text-xs font-medium rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition text-center"
+              onClick={fillSampleFleetOwner}
+              className="px-2 py-1.5 text-[11px] font-semibold rounded border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 transition text-center"
             >
-              Seed Admin Credentials
+              Fleet Owner (Rajesh)
             </button>
             <button
               type="button"
-              onClick={fillSampleUser}
-              className="px-2.5 py-1.5 text-xs font-medium rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition text-center"
+              onClick={fillSampleRenter}
+              className="px-2 py-1.5 text-[11px] font-semibold rounded border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-900 transition text-center"
             >
-              Contractor Demo
+              Renter (Amit)
+            </button>
+            <button
+              type="button"
+              onClick={fillSampleAdmin}
+              className="px-2 py-1.5 text-[11px] font-semibold rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition text-center"
+            >
+              Admin Demo
             </button>
           </div>
         </div>

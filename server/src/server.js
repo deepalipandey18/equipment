@@ -11,8 +11,20 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Connect to Database
-connectDB();
+// Connect to Database and auto-seed if empty
+connectDB().then(async () => {
+  try {
+    const Equipment = require('./models/Equipment');
+    const count = await Equipment.countDocuments();
+    if (count === 0) {
+      console.log('[Auto-Seed] Empty database detected. Populating sample data across all tables...');
+      const seedAll = require('../scripts/seedAll');
+      await seedAll(false);
+    }
+  } catch (err) {
+    console.warn('[Auto-Seed Warning] Could not auto-seed data:', err.message);
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 
