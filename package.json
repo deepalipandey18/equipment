@@ -1,0 +1,20 @@
+{
+  "name": "equipment-hub",
+  "version": "1.0.0",
+  "description": "Equipment Rental Marketplace with Subscription System",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "server:dev": "npm --prefix server run dev",
+    "client:dev": "npm --prefix client run dev",
+    "server:seed": "npm --prefix server run seed",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

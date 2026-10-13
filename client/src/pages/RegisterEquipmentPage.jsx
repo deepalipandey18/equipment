@@ -1,0 +1,830 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/client';
+import {
+  Truck,
+  MapPin,
+  IndianRupee,
+  ShieldCheck,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Navigation,
+  ArrowRight,
+  ArrowLeft,
+  Camera,
+  Layers,
+  FileText,
+  Crown,
+} from 'lucide-react';
+
+const sampleMachineryPhotos = [
+  {
+    name: 'JCB Backhoe Loader',
+    url: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=800&auto=format&fit=crop&q=80',
+  },
+  {
+    name: 'Heavy Hydraulic Excavator',
+    url: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=800&auto=format&fit=crop&q=80',
+  },
+  {
+    name: 'Tractor with Loader',
+    url: 'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=800&auto=format&fit=crop&q=80',
+  },
+  {
+    name: 'Diesel Silent Generator',
+    url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80',
+  },
+];
+
+const RegisterEquipmentPage = () => {
+  const { user, hasActiveSubscription, refreshUser } = useAuth();
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [checkingQuota, setCheckingQuota] = useState(true);
+  const [quotaInfo, setQuotaInfo] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successData, setSuccessData] = useState(null);
+  const [locating, setLocating] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    // Step 1: Basic
+    name: '',
+    categoryId: '',
+    brand: '',
+    model: '',
+    year: new Date().getFullYear(),
+    condition: 'good',
+    description: '',
+
+    // Step 2: Rates & Terms
+    dailyRate: '',
+    hourlyRate: '',
+    monthlyRate: '',
+    securityDeposit: '',
+    deliveryCharges: '',
+    operatorOption: 'optional',
+    minRentalDurationDays: 1,
+
+    // Step 3: Location
+    address: {
+      street: '',
+      area: '',
+      city: 'Gurugram',
+      state: 'Haryana',
+      pincode: '122002',
+      landmark: '',
+    },
+    coordinates: [77.0878, 28.4595], // Default [lng, lat] Delhi-NCR
+    locationSource: 'gps',
+    deliveryRadiusKm: 50,
+
+    // Step 4: Media & Specs
+    photos: [sampleMachineryPhotos[0].url],
+    serialNumber: '',
+  });
+
+  // Verify Subscription and Quota on mount
+  useEffect(() => {
+    const verifyQuota = async () => {
+      try {
+        const res = await api.get('/subscriptions/check-quota');
+        if (res.data?.success) {
+          setQuotaInfo(res.data.quota);
+          if (!res.data.quota.allowed) {
+            navigate('/plans?reason=subscription_required');
+          }
+        }
+      } catch (err) {
+        console.warn('Quota check error:', err);
+        if (!hasActiveSubscription) {
+          navigate('/plans?reason=subscription_required');
+        }
+      } finally {
+        setCheckingQuota(false);
+      }
+    };
+
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        if (res.data?.success && res.data.data.length > 0) {
+          setCategories(res.data.data);
+          setFormData((prev) => ({
+            ...prev,
+            categoryId: res.data.data[0]._id,
+          }));
+        }
+      } catch (err) {
+        console.warn('Categories fetch error:', err);
+      }
+    };
+
+    verifyQuota();
+    fetchCategories();
+  }, [hasActiveSubscription, navigate]);
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddressChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      address: { ...prev.address, [field]: value },
+    }));
+  };
+
+  // Browser Geolocation API
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lng = Number(position.coords.longitude.toFixed(6));
+        const lat = Number(position.coords.latitude.toFixed(6));
+        setFormData((prev) => ({
+          ...prev,
+          coordinates: [lng, lat],
+          locationSource: 'gps',
+        }));
+        setLocating(false);
+      },
+      (error) => {
+        setLocating(false);
+        alert(`Location permission denied or unavailable: ${error.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const handleNextStep = (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (step === 1) {
+      if (!formData.name || !formData.categoryId || !formData.brand || !formData.model) {
+        setErrorMessage('Please fill in all basic equipment details.');
+        return;
+      }
+      if (formData.description.length < 20) {
+        setErrorMessage('Description must be at least 20 characters long.');
+        return;
+      }
+    }
+
+    if (step === 2) {
+      if (!formData.dailyRate || Number(formData.dailyRate) < 100) {
+        setErrorMessage('Daily rental rate is required and must be at least ₹100.');
+        return;
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.address.city || !formData.address.state || !formData.address.pincode) {
+        setErrorMessage('City, State, and Pincode are required.');
+        return;
+      }
+      if (!formData.coordinates || formData.coordinates.length !== 2) {
+        setErrorMessage('GPS coordinates are required for geospatial discovery.');
+        return;
+      }
+    }
+
+    setStep((prev) => prev + 1);
+  };
+
+  const handlePrevStep = () => {
+    setErrorMessage('');
+    setStep((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSubmitting(true);
+
+    try {
+      const res = await api.post('/equipment', formData);
+      if (res.data?.success) {
+        await refreshUser();
+        setSuccessData(res.data.data);
+      } else {
+        throw new Error(res.data?.message || 'Failed to register machinery.');
+      }
+    } catch (err) {
+      setErrorMessage(
+        err.userMessage || err.response?.data?.message || err.message || 'Registration failed.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (checkingQuota) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <p className="text-sm text-slate-500 font-medium">Verifying subscription listing quota...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-3"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to Dashboard</span>
+          </Link>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Register Equipment for Rent
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                List your machinery on India's network with verified rates and GPS discovery.
+              </p>
+            </div>
+
+            {quotaInfo && (
+              <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-lg text-emerald-800 text-xs font-medium self-start sm:self-auto">
+                <Crown className="h-4 w-4 text-amber-500" />
+                <span>
+                  Quota: <strong>{quotaInfo.remaining}</strong> listings remaining on {quotaInfo.planName}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Step Indicator */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-8">
+          <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold">
+            {[
+              { num: 1, label: 'Basic Info', icon: Layers },
+              { num: 2, label: 'Pricing & Terms', icon: IndianRupee },
+              { num: 3, label: 'Location & GPS', icon: MapPin },
+              { num: 4, label: 'Photos & Specs', icon: Camera },
+            ].map((s) => {
+              const Icon = s.icon;
+              const isCurrent = step === s.num;
+              const isPassed = step > s.num;
+              return (
+                <div
+                  key={s.num}
+                  className={`flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg transition ${
+                    isCurrent
+                      ? 'bg-brand-50 text-brand-700 border border-brand-200'
+                      : isPassed
+                      ? 'text-emerald-700 bg-emerald-50'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="hidden sm:inline">
+                    Step {s.num}: {s.label}
+                  </span>
+                  <span className="sm:hidden">{s.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center space-x-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* Multi-step Form Card */}
+        <div className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-sm">
+          <form onSubmit={step === 4 ? handleSubmit : handleNextStep}>
+            {/* STEP 1: Basic Machine Info */}
+            {step === 1 && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                  Step 1: Machinery Specifications
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Equipment Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. JCB 3DX Super Backhoe Loader"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Category *
+                    </label>
+                    <select
+                      value={formData.categoryId}
+                      onChange={(e) => handleInputChange('categoryId', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                    >
+                      {categories.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Condition *
+                    </label>
+                    <select
+                      value={formData.condition}
+                      onChange={(e) => handleInputChange('condition', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                    >
+                      <option value="excellent">Excellent (Like New, Low Hours)</option>
+                      <option value="good">Good (Well Maintained, Regularly Serviced)</option>
+                      <option value="fair">Fair (Fully Functional)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Manufacturer Brand *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. JCB, Caterpillar, Tata Hitachi"
+                      value={formData.brand}
+                      onChange={(e) => handleInputChange('brand', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Model Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 3DX Plus, 320D2"
+                      value={formData.model}
+                      onChange={(e) => handleInputChange('model', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Manufacturing Year
+                    </label>
+                    <input
+                      type="number"
+                      min="1990"
+                      max={new Date().getFullYear() + 1}
+                      value={formData.year}
+                      onChange={(e) => handleInputChange('year', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Description & Work Capability * (Min 20 characters)
+                    </label>
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="Specify operating weight, bucket capacity, recent servicing, attachments included..."
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: Pricing & Operator */}
+            {step === 2 && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                  Step 2: Rental Rates & Terms
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Daily Rate (₹) *
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="number"
+                        required
+                        min="100"
+                        placeholder="e.g. 8500"
+                        value={formData.dailyRate}
+                        onChange={(e) => handleInputChange('dailyRate', e.target.value)}
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Hourly Rate (₹) (Optional)
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 1200"
+                        value={formData.hourlyRate}
+                        onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Monthly Rate (₹) (Optional)
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 180000"
+                        value={formData.monthlyRate}
+                        onChange={(e) => handleInputChange('monthlyRate', e.target.value)}
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Security Deposit (₹)
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 20000"
+                        value={formData.securityDeposit}
+                        onChange={(e) => handleInputChange('securityDeposit', e.target.value)}
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Transport / Delivery Charges (₹)
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 3500 (or 0 if pickup)"
+                        value={formData.deliveryCharges}
+                        onChange={(e) => handleInputChange('deliveryCharges', e.target.value)}
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Operator Option *
+                    </label>
+                    <select
+                      value={formData.operatorOption}
+                      onChange={(e) => handleInputChange('operatorOption', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                    >
+                      <option value="included">Operator Included in Rate</option>
+                      <option value="optional">Operator Available at Extra Cost</option>
+                      <option value="not_included">No Operator (Dry Hire Only)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: Location & Coordinates */}
+            {step === 3 && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      Step 3: Yard Location & Geospatial Radar
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      Used for MongoDB 2dsphere proximity search so nearby contractors find your machine.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGetCurrentLocation}
+                    disabled={locating}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-brand-50 border border-brand-300 text-brand-800 text-xs font-bold uppercase tracking-wider hover:bg-brand-100 transition self-start sm:self-auto"
+                  >
+                    <Navigation className={`h-3.5 w-3.5 ${locating ? 'animate-spin' : ''}`} />
+                    <span>{locating ? 'Detecting GPS...' : 'Use Current Device GPS'}</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Yard / Plot Street Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Plot 42, Sector 37 Industrial Area, Pace City"
+                      value={formData.address.street}
+                      onChange={(e) => handleAddressChange('street', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Gurugram"
+                      value={formData.address.city}
+                      onChange={(e) => handleAddressChange('city', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Haryana"
+                      value={formData.address.state}
+                      onChange={(e) => handleAddressChange('state', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Postal Code / PIN *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="122002"
+                      value={formData.address.pincode}
+                      onChange={(e) => handleAddressChange('pincode', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Delivery Radius (km)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.deliveryRadiusKm}
+                      onChange={(e) => handleInputChange('deliveryRadiusKm', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  {/* Stored Coordinates Display */}
+                  <div className="sm:col-span-2 p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+                    <div className="flex items-center space-x-2 text-slate-700">
+                      <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+                      <span>
+                        GeoJSON Point: <strong>[{formData.coordinates[0]}, {formData.coordinates[1]}]</strong> (Longitude, Latitude)
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      2dsphere Indexed
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: Photos, Serial & Review */}
+            {step === 4 && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                  Step 4: Machine Photos & Final Review
+                </h2>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                    Select Machinery Photo Preset or Enter URL *
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                    {sampleMachineryPhotos.map((photo, i) => (
+                      <div
+                        key={i}
+                        onClick={() => handleInputChange('photos', [photo.url])}
+                        className={`cursor-pointer rounded-xl overflow-hidden border-2 transition ${
+                          formData.photos[0] === photo.url
+                            ? 'border-brand-600 ring-2 ring-brand-500/20'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <img src={photo.url} alt={photo.name} className="h-24 w-full object-cover" />
+                        <div className="p-1.5 text-[10px] font-semibold text-slate-700 text-center truncate">
+                          {photo.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <input
+                    type="url"
+                    placeholder="Or enter custom image URL"
+                    value={formData.photos[0]}
+                    onChange={(e) => handleInputChange('photos', [e.target.value])}
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Chassis / Serial Number (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. JCB-IND-2023-88912"
+                    value={formData.serialNumber}
+                    onChange={(e) => handleInputChange('serialNumber', e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                  />
+                </div>
+
+                {/* Summary Card */}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
+                  <div className="font-bold text-slate-900 text-sm pb-1 border-b border-slate-200">
+                    Listing Summary
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-slate-600">
+                    <div>
+                      <strong>Equipment:</strong> {formData.name || 'Unnamed Machine'}
+                    </div>
+                    <div>
+                      <strong>Make & Model:</strong> {formData.brand} {formData.model}
+                    </div>
+                    <div>
+                      <strong>Daily Rental Rate:</strong> ₹{formData.dailyRate}
+                    </div>
+                    <div>
+                      <strong>City & State:</strong> {formData.address.city}, {formData.address.state}
+                    </div>
+                    <div>
+                      <strong>Operator Option:</strong> {formData.operatorOption}
+                    </div>
+                    <div>
+                      <strong>Location Type:</strong> GPS Point [{formData.coordinates.join(', ')}]
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step Navigation Buttons */}
+            <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={handlePrevStep}
+                  className="px-4 py-2.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center space-x-1.5"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span>Previous Step</span>
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {step < 4 ? (
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-xs font-bold uppercase tracking-wider text-white shadow-sm flex items-center space-x-1.5"
+                >
+                  <span>Continue</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-600/30 flex items-center space-x-2 disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Publishing Listing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Publish Equipment Listing</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* Success Modal */}
+        {successData && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-slate-200">
+              <div className="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900">Equipment Listed Successfully!</h3>
+              <p className="text-xs text-slate-600 mt-2">
+                Your <strong>{successData.name}</strong> is now live on the EquipmentHub network and ready to receive rental bookings from nearby contractors.
+              </p>
+
+              <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 text-left space-y-1">
+                <div>
+                  <strong>Daily Rate:</strong> ₹{successData.dailyRate}
+                </div>
+                <div>
+                  <strong>Location:</strong> {successData.address?.city}, {successData.address?.state}
+                </div>
+                <div>
+                  <strong>Status:</strong>{' '}
+                  <span className="text-emerald-700 font-bold uppercase">
+                    {successData.approvalStatus}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col space-y-2">
+                <Link
+                  to="/dashboard"
+                  className="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 font-bold text-xs uppercase tracking-wider text-white transition"
+                >
+                  Manage in Dashboard
+                </Link>
+                <Link
+                  to="/browse"
+                  className="w-full py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  View in Marketplace
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default RegisterEquipmentPage;
+
