@@ -101,6 +101,14 @@ app.use('/api/equipment', equipmentRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Fallback routes if client requests omit /api prefix
+app.use('/auth', authRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/subscriptions', subscriptionRoutes);
+app.use('/equipment', equipmentRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/admin', adminRoutes);
+
 // Catch-all 404 Route
 app.use('*', (req, res) => {
   res.status(404).json({
