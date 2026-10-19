@@ -42,7 +42,7 @@ const showcaseItems = [
     location: 'Gurugram, Haryana',
     distance: '2.4 km away',
     image:
-      'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=900&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=1200&auto=format&fit=crop&q=80',
     specs: 'Bucket: 1.0 m³ • Certified Operator • CPCB Compliant',
     tag: 'Highest Demand',
   },
@@ -82,8 +82,12 @@ const HERO_SCENES = [
     name: 'BharatBenz 3528C Heavy Tipper',
     category: 'Mining & Road Construction • 28 Ton Heavy Dump Truck',
     bgImage: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=2400&auto=format&fit=crop&q=80',
-    videoFile: '/videos/truck-driving.mp4',
-    altVideo: 'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
+    videoSources: [
+      '/videos/truck-driving.mp4',
+      '/videos/truck.mp4',
+      '/videos/tipper.mp4',
+      'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
+    ],
     specs: [
       { label: 'Engine', value: '280 HP Turbo' },
       { label: 'Box Volume', value: '18 m³ HD Box' },
@@ -102,9 +106,13 @@ const HERO_SCENES = [
     badge: 'Heavy Earthmoving Active',
     name: 'JCB 3DX Super EcoXcellence',
     category: 'Heavy Earthmoving • Hydraulic Backhoe Loader',
-    bgImage: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=2400&auto=format&fit=crop&q=80',
-    videoFile: '/videos/jcb-working.mp4',
-    altVideo: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/3/30/Dumptruck_-_Kanagawa_-_2024_Jan_26.webm/Dumptruck_-_Kanagawa_-_2024_Jan_26.webm.720p.vp9.webm',
+    bgImage: 'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=2400&auto=format&fit=crop&q=80',
+    videoSources: [
+      '/videos/jcb.mp4',
+      '/videos/jcb-working.mp4',
+      '/videos/jcb-3dx.mp4',
+      '/videos/excavator.mp4',
+    ],
     specs: [
       { label: 'Engine', value: '76 HP Turbo' },
       { label: 'Bucket', value: '1.1 m³ HD' },
@@ -124,8 +132,11 @@ const HERO_SCENES = [
     name: 'ACE 25X Mobile Telescopic Crane',
     category: 'Heavy Lifting & Aerial • 25 Ton Telescopic Boom',
     bgImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=2400&auto=format&fit=crop&q=80',
-    videoFile: '/videos/crane-working.mp4',
-    altVideo: 'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
+    videoSources: [
+      '/videos/crane-working.mp4',
+      '/videos/crane.mp4',
+      '/videos/crane-lifting.mp4',
+    ],
     specs: [
       { label: 'Boom Reach', value: '34.5 m Reach' },
       { label: 'Capacity', value: '25 Ton Safe Load' },
@@ -150,6 +161,15 @@ const LandingPage = () => {
   // Multi-machine sequential showcase (Truck ➔ JCB ➔ Crane ➔ Loop)
   const [activeSceneIndex, setActiveSceneIndex] = useState(0);
   const [hudFading, setHudFading] = useState(false);
+  const [playingVideos, setPlayingVideos] = useState({});
+
+  const handleVideoPlaying = (sceneId) => {
+    setPlayingVideos((prev) => ({ ...prev, [sceneId]: true }));
+  };
+
+  const handleVideoError = (sceneId) => {
+    setPlayingVideos((prev) => ({ ...prev, [sceneId]: false }));
+  };
 
   const changeScene = (nextIdx) => {
     if (nextIdx === activeSceneIndex) return;
@@ -242,11 +262,13 @@ const LandingPage = () => {
         >
           {HERO_SCENES.map((scene, idx) => {
             const isCurrent = activeSceneIndex === idx;
+            const isVideoPlaying = !!playingVideos[scene.id];
+
             return (
               <div
                 key={scene.id}
                 className={`absolute inset-0 w-full h-full transition-opacity duration-[2200ms] ease-in-out ${
-                  isCurrent ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  isCurrent ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                 }`}
                 style={{
                   willChange: 'opacity',
@@ -254,30 +276,44 @@ const LandingPage = () => {
               >
                 {/* High-Resolution Stable Machinery Background Image */}
                 <div
-                  className="absolute inset-0 w-full h-full bg-cover bg-center"
+                  className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-[8500ms] ease-out"
                   style={{
                     backgroundImage: `url('${scene.bgImage}')`,
                     backgroundPosition: 'center 48%',
+                    transform: isCurrent ? 'scale(1.04)' : 'scale(1)',
                     filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
                   }}
                 />
 
-                {/* Local Video / Stream for this machine */}
+                {/* Local Video / Stream for this machine (Smoothly fades in only once frames actually play) */}
                 <video
                   autoPlay
                   loop
                   muted
                   playsInline
                   preload="auto"
-                  poster={scene.bgImage}
-                  className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+                  ref={(el) => {
+                    if (el && isCurrent && el.paused) {
+                      el.play().catch(() => {});
+                    }
+                  }}
+                  onPlaying={() => handleVideoPlaying(scene.id)}
+                  onError={() => handleVideoError(scene.id)}
+                  className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-1000 ease-in-out ${
+                    isVideoPlaying ? 'opacity-100' : 'opacity-0'
+                  }`}
                   style={{
                     filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
                   }}
                 >
-                  <source src={scene.videoFile} type="video/mp4" />
+                  {scene.videoSources.map((vSrc, vIdx) => (
+                    <source
+                      key={vIdx}
+                      src={vSrc}
+                      type={vSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4'}
+                    />
+                  ))}
                   <source src="/videos/hero-sequence.mp4" type="video/mp4" />
-                  <source src={scene.altVideo} type="video/mp4" />
                 </video>
               </div>
             );

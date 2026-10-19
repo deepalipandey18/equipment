@@ -1,16 +1,22 @@
 # MachineHub Multi-Machine Cinematic Video Showcase
-You can place your real-life working footage videos in this directory:
+You can place your real-life working footage videos directly in this directory:
 `equipment-hub/client/public/videos/`
 
-Supported files:
-1. `truck-driving.mp4`
-   -> Plays during the Heavy Dump Truck scene (Scene 1).
-2. `jcb-working.mp4`
-   -> Plays during the JCB Excavator on-site digging scene (Scene 2).
-3. `crane-working.mp4`
-   -> Plays during the Mobile Hydraulic Crane lifting scene (Scene 3).
-4. `hero-sequence.mp4`
-   -> Unified sequential clip that plays across all scenes if individual clips are not provided.
+Supported file names:
+1. For JCB Backhoe / Excavator Scene:
+   - `jcb.mp4` (or `jcb-working.mp4`, `jcb-3dx.mp4`, `excavator.mp4`)
+   -> Plays automatically whenever JCB Backhoe is selected or reached in the sequence.
 
-Format: MP4 (H.264 / AAC or H.265 / AV1) or WebM.
-If any video file is not present locally, high-resolution photorealistic working machinery posters with smooth stable crossfades will automatically display.
+2. For Heavy Truck Scene:
+   - `truck.mp4` (or `truck-driving.mp4`, `tipper.mp4`)
+   -> Plays during the Heavy Dump Truck scene.
+
+3. For Mobile Crane Scene:
+   - `crane.mp4` (or `crane-working.mp4`, `crane-lifting.mp4`)
+   -> Plays during the Mobile Crane lifting scene.
+
+4. Unified single video:
+   - `hero-sequence.mp4`
+
+Format: MP4 (H.264 / AAC) or WebM.
+Whenever any of these video files is present in this folder, the website will immediately detect and play it in high resolution in the background.

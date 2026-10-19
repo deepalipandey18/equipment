@@ -219,6 +219,105 @@
   animation: truckEntranceDrive 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Auth Pages Cinematic Animated Background Effects */
+@keyframes authBgDrift {
+  0% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate3d(-18px, -12px, 0);
+  }
+  100% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes authGridMove {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 48px 48px;
+  }
+}
+
+@keyframes authOrbFloat1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(40px, -30px) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes authOrbFloat2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-35px, 35px) scale(1.25);
+    opacity: 0.75;
+  }
+}
+
+@keyframes authLightSweep {
+  0% {
+    transform: translateX(-160%) rotate(25deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.18;
+  }
+  100% {
+    transform: translateX(260%) rotate(25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes authPulseRing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.animate-auth-bg {
+  animation: authBgDrift 24s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-auth-grid {
+  animation: authGridMove 24s linear infinite;
+}
+
+.animate-auth-orb-1 {
+  animation: authOrbFloat1 8s ease-in-out infinite;
+}
+
+.animate-auth-orb-2 {
+  animation: authOrbFloat2 10s ease-in-out infinite;
+}
+
+.animate-auth-sweep {
+  animation: authLightSweep 12s ease-in-out infinite;
+}
+
+.animate-auth-ring {
+  animation: authPulseRing 6s ease-in-out infinite;
+}
+
+
 
 
 

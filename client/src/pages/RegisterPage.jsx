@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Truck, User, Mail, Phone, Lock, AlertCircle, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
+import AuthBackgroundLayout from '../components/auth/AuthBackgroundLayout';
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -58,23 +59,23 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
-      <div className="max-w-md w-full space-y-6 bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-sm">
+    <AuthBackgroundLayout badgeText="One Unified Account for Heavy Machinery">
+      <div className="space-y-5 bg-slate-900/85 backdrop-blur-2xl p-7 sm:p-9 rounded-3xl border border-white/15 shadow-2xl shadow-black/80">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
-            <Truck className="h-7 w-7" />
+          <div className="mx-auto h-12 w-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-brand-500 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/25">
+            <Truck className="h-6 w-6 stroke-[2.3]" />
           </div>
-          <h2 className="mt-4 text-2xl font-black text-slate-900 tracking-tight">
+          <h2 className="mt-4 text-2xl font-black text-white tracking-tight">
             Create Your Account
           </h2>
-          <p className="mt-1.5 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-300">
             One unified account to rent machinery and list your equipment
           </p>
         </div>
 
         {/* Dual Capability Badge */}
-        <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start space-x-2 text-xs text-amber-900">
-          <ShieldCheck className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+        <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/25 flex items-start space-x-2 text-xs text-amber-200">
+          <ShieldCheck className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
           <span>
             No separate owner or customer accounts needed. You can rent equipment and register your
             own machines simultaneously.
@@ -82,15 +83,15 @@ const RegisterPage = () => {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 flex items-start space-x-2 text-sm text-red-700">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 flex items-start space-x-2 text-sm text-red-200">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-400" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Full Name *
             </label>
             <div className="relative">
@@ -102,13 +103,13 @@ const RegisterPage = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Ramesh Sharma"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Email Address *
             </label>
             <div className="relative">
@@ -120,13 +121,13 @@ const RegisterPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="ramesh@infraprojects.com"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Phone Number (Optional)
             </label>
             <div className="relative">
@@ -137,13 +138,13 @@ const RegisterPage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 98765 43210"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Password * (Min 6 characters)
             </label>
             <div className="relative">
@@ -155,13 +156,13 @@ const RegisterPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
               Confirm Password *
             </label>
             <div className="relative">
@@ -173,7 +174,7 @@ const RegisterPage = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
               />
             </div>
           </div>
@@ -181,11 +182,11 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full mt-2 py-3 px-4 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-70"
+            className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-brand-500 hover:from-amber-600 hover:to-brand-600 text-slate-950 font-black text-sm transition shadow-lg shadow-amber-500/25 flex items-center justify-center space-x-2 disabled:opacity-70"
           >
             {submitting ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
                 <span>Creating Account...</span>
               </>
             ) : (
@@ -197,14 +198,14 @@ const RegisterPage = () => {
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <div className="text-center text-xs text-slate-400 pt-3 border-t border-white/10">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/login" className="font-bold text-amber-400 hover:text-amber-300 transition">
             Log in here
           </Link>
         </div>
       </div>
-    </div>
+    </AuthBackgroundLayout>
   );
 };
 
