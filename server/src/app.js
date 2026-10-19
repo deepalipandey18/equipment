@@ -19,20 +19,40 @@ const app = express();
 app.use(helmet());
 
 // CORS Configuration allowing client credentials (cookies)
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
+const configuredOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map((url) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const defaultOrigins = [
+  'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
 ];
+
+const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultOrigins]));
 
 app.use(
   cors({
     origin: function (origin, callback) {
       // allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.replace(/\/$/, '');
+      const isAllowedConfigured = allowedOrigins.includes(cleanOrigin);
+
+      let isVercelDomain = false;
+      try {
+        const parsedUrl = new URL(origin);
+        isVercelDomain = parsedUrl.hostname.endsWith('.vercel.app');
+      } catch (e) {
+        isVercelDomain = false;
+      }
+
+      if (isAllowedConfigured || isVercelDomain) {
         return callback(null, true);
       }
-      return callback(new Error('CORS policy violation: origin not allowed'), false);
+      return callback(new Error(`CORS policy violation: origin ${origin} not allowed`), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
