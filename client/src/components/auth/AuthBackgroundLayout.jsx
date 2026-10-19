@@ -6,11 +6,15 @@ import { ShieldCheck, MapPin, Truck, Zap, Activity } from 'lucide-react';
  * Replaces the plain white background with a cinematic, animated machinery backdrop,
  * glowing ambient orbs, moving blueprint grid, and live floating trust badges.
  */
-const AuthBackgroundLayout = ({ children, badgeText = 'Secure Dual-Account Gateway' }) => {
+const AuthBackgroundLayout = ({
+  children,
+  badgeText = 'Secure Dual-Account Gateway',
+  maxWidth = 'max-w-md',
+}) => {
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center py-6 sm:py-8 px-4 sm:px-6 lg:px-8 bg-slate-950 overflow-hidden">
       {/* 1. Deep Animated Blueprint / Radar Grid Layer */}
       <div
         className="absolute inset-0 pointer-events-none opacity-20 animate-auth-grid"
@@ -105,7 +109,7 @@ const AuthBackgroundLayout = ({ children, badgeText = 'Secure Dual-Account Gatew
       </div>
 
       {/* 8. Main Form Card Container (Rendered with glassmorphic depth & entrance animation) */}
-      <div className="relative z-10 w-full max-w-md animate-hero-fade-in">
+      <div className={`relative z-10 w-full ${maxWidth} animate-hero-fade-in`}>
         {children}
       </div>
     </div>

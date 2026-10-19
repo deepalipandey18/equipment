@@ -317,8 +317,19 @@ class BookingService {
       throw error;
     }
 
-    // Confirm booking
-    booking.bookingStatus = 'Confirmed';
+    // Confirm booking and transition to Ongoing if rental start date is today/past
+    const now = new Date();
+    const start = new Date(booking.startDate);
+    const isImmediateOrPast = start <= now || start.toDateString() === now.toDateString();
+
+    if (isImmediateOrPast) {
+      booking.bookingStatus = 'Ongoing';
+      booking.handoverDetails = booking.handoverDetails || {};
+      booking.handoverDetails.handedOverAt = new Date();
+    } else {
+      booking.bookingStatus = 'Confirmed';
+    }
+
     booking.paymentStatus = 'paid';
     booking.depositStatus = booking.pricingBreakdown.securityDepositPaise > 0 ? 'held' : 'pending';
     booking.razorpayPaymentId = paymentId;
@@ -359,21 +370,23 @@ class BookingService {
     }
 
     if (status === 'Ongoing') {
-      if (booking.bookingStatus !== 'Confirmed') {
+      if (booking.bookingStatus !== 'Confirmed' && booking.bookingStatus !== 'Ongoing') {
         const error = new Error('Booking must be confirmed before recording handover');
         error.statusCode = 400;
         throw error;
       }
       booking.bookingStatus = 'Ongoing';
+      booking.handoverDetails = booking.handoverDetails || {};
       booking.handoverDetails.handedOverAt = new Date();
       if (meterHours) booking.handoverDetails.initialMeterHours = meterHours;
     } else if (status === 'Completed') {
-      if (booking.bookingStatus !== 'Ongoing') {
-        const error = new Error('Booking must be Ongoing before marking Completed');
+      if (!['Ongoing', 'Confirmed'].includes(booking.bookingStatus)) {
+        const error = new Error('Booking must be Ongoing or Confirmed before marking Completed');
         error.statusCode = 400;
         throw error;
       }
       booking.bookingStatus = 'Completed';
+      booking.handoverDetails = booking.handoverDetails || {};
       booking.handoverDetails.returnedAt = new Date();
       if (meterHours) booking.handoverDetails.finalMeterHours = meterHours;
       booking.depositStatus = 'refunded'; // Security deposit released upon clean return
@@ -418,6 +431,122 @@ class BookingService {
     await booking.save();
 
     return booking;
+  }
+
+  /**
+   * Update real-time GPS telematics ping (from driver device or AIS-140 IoT tracker)
+   */
+  async updateTelematicsPing(bookingId, userId, { lat, lng, speed, heading, trackerType, batteryLevel }) {
+    const booking = await Booking.findById(bookingId).populate('equipmentId');
+    if (!booking) {
+      const error = new Error('Booking not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const isParty =
+      booking.renterId.toString() === userId.toString() ||
+      booking.ownerId.toString() === userId.toString();
+
+    if (!isParty) {
+      const error = new Error('Unauthorized to send telematics for this booking');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const numLat = Number(lat);
+    const numLng = Number(lng);
+    const numSpeed = Number(speed) || 0;
+    const numHeading = Number(heading) || 0;
+
+    if (isNaN(numLat) || isNaN(numLng)) {
+      const error = new Error('Invalid latitude or longitude coordinates');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!booking.telematics) {
+      booking.telematics = {};
+    }
+
+    booking.telematics.isTrackingActive = true;
+    booking.telematics.trackerType = trackerType || 'driver_gps';
+    booking.telematics.currentCoordinates = [numLng, numLat];
+    booking.telematics.speedKmh = numSpeed;
+    booking.telematics.heading = numHeading;
+    booking.telematics.batteryLevel = Number(batteryLevel) || 100;
+    booking.telematics.lastPingAt = new Date();
+
+    // Maintain recent ping history (last 50 breadcrumb points)
+    if (!booking.telematics.history) {
+      booking.telematics.history = [];
+    }
+    booking.telematics.history.push({
+      coordinates: [numLng, numLat],
+      speedKmh: numSpeed,
+      recordedAt: new Date(),
+    });
+
+    if (booking.telematics.history.length > 50) {
+      booking.telematics.history.shift();
+    }
+
+    await booking.save();
+
+    return {
+      bookingId: booking._id,
+      telematics: booking.telematics,
+      status: booking.bookingStatus,
+    };
+  }
+
+  /**
+   * Retrieve real-time telematics coordinates and history
+   */
+  async getBookingTelematics(bookingId, userId) {
+    const booking = await Booking.findById(bookingId)
+      .populate('equipmentId')
+      .populate('ownerId', 'name phone')
+      .populate('renterId', 'name phone');
+
+    if (!booking) {
+      const error = new Error('Booking not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const isParty =
+      booking.renterId._id.toString() === userId.toString() ||
+      booking.ownerId._id.toString() === userId.toString();
+
+    if (!isParty) {
+      const error = new Error('Unauthorized');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const originCoords = booking.equipmentId?.coordinates || [77.0878, 28.4595];
+    const currentCoords = booking.telematics?.currentCoordinates || originCoords;
+
+    return {
+      bookingId: booking._id,
+      status: booking.bookingStatus,
+      origin: {
+        coordinates: originCoords,
+        address: booking.equipmentId?.address,
+      },
+      destination: {
+        address: booking.deliveryAddress,
+      },
+      telematics: booking.telematics || {
+        isTrackingActive: false,
+        trackerType: 'driver_gps',
+        currentCoordinates: originCoords,
+        speedKmh: 0,
+        heading: 0,
+        lastPingAt: new Date(),
+      },
+    };
   }
 }
 

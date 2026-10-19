@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
@@ -17,24 +17,171 @@ import {
   Layers,
   FileText,
   Crown,
+  Sparkles,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
+
+const photoCategories = [
+  'All',
+  'Earthmoving',
+  'Lifting & Cranes',
+  'Hauling & Trucks',
+  'Concrete',
+  'Road & Compaction',
+  'Material Handling',
+  'Access & Aerial',
+  'Power & Towing',
+];
 
 const sampleMachineryPhotos = [
   {
-    name: 'JCB Backhoe Loader',
-    url: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=800&auto=format&fit=crop&q=80',
+    id: 'jcb-3dx',
+    name: 'JCB 3DX Backhoe Loader',
+    category: 'Earthmoving',
+    badge: 'Most Popular',
+    url: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=900&auto=format&fit=crop&q=80',
   },
   {
-    name: 'Heavy Hydraulic Excavator',
-    url: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=800&auto=format&fit=crop&q=80',
+    id: 'heavy-excavator',
+    name: 'Heavy Hydraulic Excavator (CAT/Komatsu)',
+    category: 'Earthmoving',
+    badge: 'Heavy Duty',
+    url: 'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=900&auto=format&fit=crop&q=80',
   },
   {
-    name: 'Tractor with Loader',
-    url: 'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=800&auto=format&fit=crop&q=80',
+    id: 'crawler-excavator',
+    name: 'Crawler Track Excavator 20-Ton',
+    category: 'Earthmoving',
+    badge: 'CPCB IV+',
+    url: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=900&auto=format&fit=crop&q=80',
   },
   {
-    name: 'Diesel Silent Generator',
-    url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80',
+    id: 'crawler-bulldozer',
+    name: 'Caterpillar D6 Heavy Bulldozer',
+    category: 'Earthmoving',
+    badge: 'Grading Pro',
+    url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'wheel-loader',
+    name: 'Front-End Wheel Loader / Payloader',
+    category: 'Earthmoving',
+    badge: 'Fast Cycle',
+    url: 'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'mobile-crane',
+    name: 'Hydraulic Mobile Telescopic Crane 40T',
+    category: 'Lifting & Cranes',
+    badge: 'Certified',
+    url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18615f8?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'tower-crane',
+    name: 'High-Rise Construction Tower Crane',
+    category: 'Lifting & Cranes',
+    badge: 'Skyline Lift',
+    url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'dump-truck',
+    name: 'Multi-Axle Heavy Dump Tipper 16m³',
+    category: 'Hauling & Trucks',
+    badge: 'High Payload',
+    url: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'mining-dumper',
+    name: 'Off-Highway Heavy Mining Haul Truck',
+    category: 'Hauling & Trucks',
+    badge: 'Mega Fleet',
+    url: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'concrete-mixer',
+    name: 'Transit Concrete RMC Drum Mixer 7m³',
+    category: 'Concrete',
+    badge: 'Batching',
+    url: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'road-roller',
+    name: 'Vibratory Soil Compactor / Road Roller',
+    category: 'Road & Compaction',
+    badge: 'Paving Pro',
+    url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'motor-grader',
+    name: 'Precision Road Leveling Motor Grader',
+    category: 'Road & Compaction',
+    badge: 'Grade Master',
+    url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'asphalt-paver',
+    name: 'Tracked Bitumen Asphalt Paver',
+    category: 'Road & Compaction',
+    badge: 'Highway Spec',
+    url: 'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'forklift',
+    name: 'Industrial Heavy Diesel Forklift 5-Ton',
+    category: 'Material Handling',
+    badge: 'Yard Pro',
+    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'telehandler',
+    name: 'All-Terrain Reach Telehandler 17m',
+    category: 'Material Handling',
+    badge: 'Multi-Reach',
+    url: 'https://images.unsplash.com/photo-1586528116493-a029325540fa?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'skid-steer',
+    name: 'Compact Skid Steer Loader (Bobcat)',
+    category: 'Material Handling',
+    badge: 'Agile 360°',
+    url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'boom-lift',
+    name: 'Articulated Hydraulic Aerial Boom Lift',
+    category: 'Access & Aerial',
+    badge: 'Aerial 28m',
+    url: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'scissor-lift',
+    name: 'Self-Propelled Rough Terrain Scissor Lift',
+    category: 'Access & Aerial',
+    badge: 'Platform Access',
+    url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'heavy-tractor',
+    name: '4WD Heavy Haulage / Site Tractor',
+    category: 'Power & Towing',
+    badge: 'High Torque',
+    url: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'silent-generator',
+    name: 'Acoustic Silent Diesel Generator 125 kVA',
+    category: 'Power & Towing',
+    badge: 'Site Power',
+    url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=900&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'lighting-tower',
+    name: 'Mobile High-Mast LED Lighting Tower',
+    category: 'Power & Towing',
+    badge: 'Night Shift',
+    url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&auto=format&fit=crop&q=80',
   },
 ];
 
@@ -50,6 +197,20 @@ const RegisterEquipmentPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successData, setSuccessData] = useState(null);
   const [locating, setLocating] = useState(false);
+  const [photoCategoryFilter, setPhotoCategoryFilter] = useState('All');
+  const scrollGalleryRef = useRef(null);
+
+  const scrollGallery = (direction) => {
+    if (scrollGalleryRef.current) {
+      const scrollAmount = direction === 'left' ? -340 : 340;
+      scrollGalleryRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const filteredPhotos =
+    photoCategoryFilter === 'All'
+      ? sampleMachineryPhotos
+      : sampleMachineryPhotos.filter((p) => p.category === photoCategoryFilter);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -71,14 +232,14 @@ const RegisterEquipmentPage = () => {
     operatorOption: 'optional',
     minRentalDurationDays: 1,
 
-    // Step 3: Location
+    // Step 3: Location (Pre-filled by default, fully editable)
     address: {
-      street: '',
-      area: '',
+      street: 'Plot 42, Sector 37 Industrial Area, Pace City',
+      area: 'Sector 37 Industrial Corridor',
       city: 'Gurugram',
       state: 'Haryana',
       pincode: '122002',
-      landmark: '',
+      landmark: 'Near Hero Honda Chowk Yard',
     },
     coordinates: [77.0878, 28.4595], // Default [lng, lat] Delhi-NCR
     locationSource: 'gps',
@@ -140,7 +301,7 @@ const RegisterEquipmentPage = () => {
     }));
   };
 
-  // Browser Geolocation API
+  // Browser Geolocation API + Reverse Geocoding
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser.');
@@ -148,7 +309,7 @@ const RegisterEquipmentPage = () => {
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lng = Number(position.coords.longitude.toFixed(6));
         const lat = Number(position.coords.latitude.toFixed(6));
         setFormData((prev) => ({
@@ -156,7 +317,42 @@ const RegisterEquipmentPage = () => {
           coordinates: [lng, lat],
           locationSource: 'gps',
         }));
-        setLocating(false);
+
+        // Attempt reverse-geocoding to automatically update address from device location
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.address) {
+              const a = data.address;
+              const detectedStreet = [a.road, a.suburb || a.neighbourhood].filter(Boolean).join(', ');
+              const detectedArea = a.suburb || a.neighbourhood || a.county || '';
+              const detectedCity = a.city || a.town || a.village || a.state_district || 'Gurugram';
+              const detectedState = a.state || 'Haryana';
+              const detectedPin = a.postcode || '122002';
+
+              setFormData((prev) => ({
+                ...prev,
+                coordinates: [lng, lat],
+                locationSource: 'gps',
+                address: {
+                  ...prev.address,
+                  street: detectedStreet || prev.address.street,
+                  area: detectedArea || prev.address.area,
+                  city: detectedCity,
+                  state: detectedState,
+                  pincode: detectedPin,
+                },
+              }));
+            }
+          }
+        } catch (geoErr) {
+          console.warn('Reverse geocoding warning:', geoErr);
+        } finally {
+          setLocating(false);
+        }
       },
       (error) => {
         setLocating(false);
@@ -164,6 +360,36 @@ const RegisterEquipmentPage = () => {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleCoordinateChange = (index, value) => {
+    const num = parseFloat(value);
+    setFormData((prev) => {
+      const coords = [...prev.coordinates];
+      coords[index] = isNaN(num) ? value : num;
+      return {
+        ...prev,
+        coordinates: coords,
+        locationSource: 'manual',
+      };
+    });
+  };
+
+  const handleResetLocationDefaults = () => {
+    setFormData((prev) => ({
+      ...prev,
+      address: {
+        street: 'Plot 42, Sector 37 Industrial Area, Pace City',
+        area: 'Sector 37 Industrial Corridor',
+        city: 'Gurugram',
+        state: 'Haryana',
+        pincode: '122002',
+        landmark: 'Near Hero Honda Chowk Yard',
+      },
+      coordinates: [77.0878, 28.4595],
+      deliveryRadiusKm: 50,
+      locationSource: 'gps',
+    }));
   };
 
   const handleNextStep = (e) => {
@@ -554,15 +780,39 @@ const RegisterEquipmentPage = () => {
                       Used for MongoDB 2dsphere proximity search so nearby contractors find your machine.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleGetCurrentLocation}
-                    disabled={locating}
-                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-brand-50 border border-brand-300 text-brand-800 text-xs font-bold uppercase tracking-wider hover:bg-brand-100 transition self-start sm:self-auto"
-                  >
-                    <Navigation className={`h-3.5 w-3.5 ${locating ? 'animate-spin' : ''}`} />
-                    <span>{locating ? 'Detecting GPS...' : 'Use Current Device GPS'}</span>
-                  </button>
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={handleResetLocationDefaults}
+                      title="Reset to recommended default yard values"
+                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      <span>Reset Defaults</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentLocation}
+                      disabled={locating}
+                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-brand-50 border border-brand-300 text-brand-800 text-xs font-bold uppercase tracking-wider hover:bg-brand-100 transition shadow-sm"
+                    >
+                      <Navigation className={`h-3.5 w-3.5 ${locating ? 'animate-spin' : ''}`} />
+                      <span>{locating ? 'Detecting GPS...' : 'Use Current Device GPS'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Auto-filled Notification Banner */}
+                <div className="flex items-start sm:items-center justify-between p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-900 gap-3">
+                  <div className="flex items-center space-x-2.5">
+                    <Sparkles className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span>
+                      <strong>All location and GPS fields are pre-filled automatically!</strong> You can proceed directly or edit any field below.
+                    </span>
+                  </div>
+                  <span className="hidden sm:inline-block shrink-0 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-semibold text-[11px] rounded-full border border-emerald-300">
+                    Ready to Next
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -575,6 +825,32 @@ const RegisterEquipmentPage = () => {
                       placeholder="e.g. Plot 42, Sector 37 Industrial Area, Pace City"
                       value={formData.address.street}
                       onChange={(e) => handleAddressChange('street', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Area / Industrial Zone
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Sector 37 Industrial Corridor"
+                      value={formData.address.area}
+                      onChange={(e) => handleAddressChange('area', e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Landmark / Nearby Hub
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Near Hero Honda Chowk Yard"
+                      value={formData.address.landmark}
+                      onChange={(e) => handleAddressChange('landmark', e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
                     />
                   </div>
@@ -634,17 +910,44 @@ const RegisterEquipmentPage = () => {
                     />
                   </div>
 
-                  {/* Stored Coordinates Display */}
-                  <div className="sm:col-span-2 p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
-                    <div className="flex items-center space-x-2 text-slate-700">
-                      <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
-                      <span>
-                        GeoJSON Point: <strong>[{formData.coordinates[0]}, {formData.coordinates[1]}]</strong> (Longitude, Latitude)
+                  {/* Manual Coordinates Tuning */}
+                  <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Latitude (° N)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={formData.coordinates[1]}
+                        onChange={(e) => handleCoordinateChange(1, e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Longitude (° E)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={formData.coordinates[0]}
+                        onChange={(e) => handleCoordinateChange(0, e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white font-mono"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 pt-2 border-t border-slate-200/60">
+                      <div className="flex items-center space-x-2 text-slate-600">
+                        <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+                        <span>
+                          GeoJSON Index: <strong>[{formData.coordinates[0]}, {formData.coordinates[1]}]</strong> [lng, lat]
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 self-start sm:self-auto">
+                        2dsphere Proximity Radar Ready
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                      2dsphere Indexed
-                    </span>
                   </div>
                 </div>
               </div>
@@ -653,40 +956,137 @@ const RegisterEquipmentPage = () => {
             {/* STEP 4: Photos, Serial & Review */}
             {step === 4 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
-                  Step 4: Machine Photos & Final Review
-                </h2>
+                <div className="border-b border-slate-100 pb-3">
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Step 4: Machine Photos & Final Review
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Choose from comprehensive machinery photo presets or provide a custom image URL.
+                  </p>
+                </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                    Select Machinery Photo Preset or Enter URL *
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-                    {sampleMachineryPhotos.map((photo, i) => (
-                      <div
-                        key={i}
-                        onClick={() => handleInputChange('photos', [photo.url])}
-                        className={`cursor-pointer rounded-xl overflow-hidden border-2 transition ${
-                          formData.photos[0] === photo.url
-                            ? 'border-brand-600 ring-2 ring-brand-500/20'
-                            : 'border-slate-200 hover:border-slate-300'
+                  {/* Gallery Header & Navigation Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
+                        Select Machinery Preset ({filteredPhotos.length} Available)
+                      </label>
+                      <p className="text-[11px] text-slate-500">
+                        Scroll horizontally to browse all machinery types (JCB, Excavators, Cranes, Rollers, Trucks, DG Sets).
+                      </p>
+                    </div>
+
+                    {/* Scroll Buttons */}
+                    <div className="flex items-center space-x-1.5 self-start sm:self-auto shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => scrollGallery('left')}
+                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs flex items-center justify-center hover:border-slate-300"
+                        title="Scroll Left"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollGallery('right')}
+                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs flex items-center justify-center hover:border-slate-300"
+                        title="Scroll Right"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Category Filter Pills */}
+                  <div className="flex items-center space-x-1.5 overflow-x-auto pb-2.5 scrollbar-none mb-2">
+                    {photoCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setPhotoCategoryFilter(cat)}
+                        className={`text-xs px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
+                          photoCategoryFilter === cat
+                            ? 'bg-brand-600 text-white shadow-xs font-semibold'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
-                        <img src={photo.url} alt={photo.name} className="h-24 w-full object-cover" />
-                        <div className="p-1.5 text-[10px] font-semibold text-slate-700 text-center truncate">
-                          {photo.name}
-                        </div>
-                      </div>
+                        {cat}
+                      </button>
                     ))}
                   </div>
 
-                  <input
-                    type="url"
-                    placeholder="Or enter custom image URL"
-                    value={formData.photos[0]}
-                    onChange={(e) => handleInputChange('photos', [e.target.value])}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
-                  />
+                  {/* Horizontally Scrollable Machinery Strip */}
+                  <div
+                    ref={scrollGalleryRef}
+                    className="flex space-x-3.5 overflow-x-auto pb-3 pt-1 scroll-smooth snap-x snap-mandatory focus:outline-none"
+                    style={{ scrollbarWidth: 'thin' }}
+                  >
+                    {filteredPhotos.map((photo) => {
+                      const isSelected = formData.photos[0] === photo.url;
+                      return (
+                        <div
+                          key={photo.id}
+                          onClick={() => handleInputChange('photos', [photo.url])}
+                          className={`group cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 snap-start shrink-0 w-60 sm:w-64 bg-white flex flex-col ${
+                            isSelected
+                              ? 'border-brand-600 ring-2 ring-brand-500/30 shadow-md scale-[1.01]'
+                              : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="relative h-32 sm:h-36 w-full bg-slate-100 overflow-hidden">
+                            <img
+                              src={photo.url}
+                              alt={photo.name}
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                            {/* Badges */}
+                            <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                              <span className="text-[10px] font-semibold bg-black/65 backdrop-blur-xs text-white px-2 py-0.5 rounded-full">
+                                {photo.category}
+                              </span>
+                              {photo.badge && (
+                                <span className="text-[9px] font-bold bg-amber-500/90 text-white px-1.5 py-0.2 rounded">
+                                  {photo.badge}
+                                </span>
+                              )}
+                            </div>
+
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 bg-brand-600 text-white p-1 rounded-full shadow-md animate-in fade-in">
+                                <CheckCircle className="h-4 w-4 fill-white text-brand-600" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div
+                            className={`p-2.5 text-xs text-center truncate ${
+                              isSelected
+                                ? 'bg-brand-50/80 text-brand-900 font-bold'
+                                : 'text-slate-800 font-semibold'
+                            }`}
+                          >
+                            {photo.name}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Custom Photo URL Input */}
+                  <div className="mt-3">
+                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                      Or paste a custom machinery photo URL:
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://example.com/my-machinery-image.jpg"
+                      value={formData.photos[0]}
+                      onChange={(e) => handleInputChange('photos', [e.target.value])}
+                      className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:border-brand-500 outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -702,29 +1102,57 @@ const RegisterEquipmentPage = () => {
                   />
                 </div>
 
-                {/* Summary Card */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
-                  <div className="font-bold text-slate-900 text-sm pb-1 border-b border-slate-200">
-                    Listing Summary
+                {/* Summary Card with Image Preview */}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
+                  <div className="font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200 flex items-center justify-between">
+                    <span>Listing Summary & Verification</span>
+                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      Ready to Publish
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-slate-600">
-                    <div>
-                      <strong>Equipment:</strong> {formData.name || 'Unnamed Machine'}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Selected Machinery Image Preview */}
+                    <div className="sm:col-span-1 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs">
+                      <div className="relative h-32 sm:h-full min-h-[120px] w-full bg-slate-100">
+                        <img
+                          src={formData.photos[0] || sampleMachineryPhotos[0].url}
+                          alt="Selected Machinery Preview"
+                          className="h-full w-full object-cover"
+                        />
+                        <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-black/70 backdrop-blur-xs text-white px-2 py-0.5 rounded-md">
+                          Selected Machinery
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <strong>Make & Model:</strong> {formData.brand} {formData.model}
-                    </div>
-                    <div>
-                      <strong>Daily Rental Rate:</strong> ₹{formData.dailyRate}
-                    </div>
-                    <div>
-                      <strong>City & State:</strong> {formData.address.city}, {formData.address.state}
-                    </div>
-                    <div>
-                      <strong>Operator Option:</strong> {formData.operatorOption}
-                    </div>
-                    <div>
-                      <strong>Location Type:</strong> GPS Point [{formData.coordinates.join(', ')}]
+
+                    {/* Details list */}
+                    <div className="sm:col-span-2 grid grid-cols-2 gap-2.5 text-slate-600">
+                      <div>
+                        <strong>Equipment:</strong> {formData.name || 'Unnamed Machine'}
+                      </div>
+                      <div>
+                        <strong>Make & Model:</strong> {formData.brand} {formData.model}
+                      </div>
+                      <div>
+                        <strong>Daily Rental Rate:</strong> ₹{formData.dailyRate}
+                      </div>
+                      <div>
+                        <strong>City & State:</strong> {formData.address.city}, {formData.address.state}
+                      </div>
+                      <div>
+                        <strong>Yard Address:</strong>{' '}
+                        {formData.address.street || `${formData.address.city}, ${formData.address.state}`}
+                      </div>
+                      <div>
+                        <strong>Operator Option:</strong> {formData.operatorOption}
+                      </div>
+                      <div>
+                        <strong>Delivery Radius:</strong> {formData.deliveryRadiusKm} km
+                      </div>
+                      <div>
+                        <strong>GPS Coordinates:</strong> [{formData.coordinates.join(', ')}]
+                      </div>
                     </div>
                   </div>
                 </div>

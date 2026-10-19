@@ -96,6 +96,67 @@ const BrowseEquipmentPage = () => {
     fetchEquipment();
   }, [fetchEquipment]);
 
+  // Auto-request current location on initial mount if supported
+  useEffect(() => {
+    if (navigator.geolocation && !userLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: Number(position.coords.latitude.toFixed(6)),
+            lng: Number(position.coords.longitude.toFixed(6)),
+          };
+          setUserLocation(coords);
+          setSortBy('nearest');
+        },
+        (err) => {
+          console.log('Auto geolocation prompt dismissed or unavailable:', err.message);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  }, []);
+
+  // Real-time client-side distance calculator using Haversine formula
+  const getDistanceKm = useCallback(
+    (item) => {
+      if (item?.distanceKm !== undefined && item?.distanceKm !== null) {
+        return Number(item.distanceKm).toFixed(1);
+      }
+      if (!userLocation) return null;
+
+      let itemLng, itemLat;
+      if (Array.isArray(item?.location?.coordinates) && item.location.coordinates.length === 2) {
+        [itemLng, itemLat] = item.location.coordinates;
+      } else if (item?.location?.lng && item?.location?.lat) {
+        itemLng = item.location.lng;
+        itemLat = item.location.lat;
+      } else {
+        return null;
+      }
+
+      const lat1 = userLocation.lat;
+      const lon1 = userLocation.lng;
+      const lat2 = Number(itemLat);
+      const lon2 = Number(itemLng);
+
+      if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
+
+      const R = 6371; // Earth's mean radius in km
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos((lat1 * Math.PI) / 180) *
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const d = R * c;
+      return Number(d.toFixed(1));
+    },
+    [userLocation]
+  );
+
   // Browser Geolocation API handler
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -376,21 +437,29 @@ const BrowseEquipmentPage = () => {
                   <span className="text-[10px] text-slate-400">OpenStreetMap</span>
                 </div>
                 <div className="space-y-2">
-                  {equipmentList.slice(0, 5).map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/equipment/${item._id}`}
-                      className="block p-2 rounded-lg bg-slate-50 hover:bg-brand-50 border border-slate-200 transition text-xs"
-                    >
-                      <div className="font-bold text-slate-800 truncate">{item.name}</div>
-                      <div className="flex justify-between text-slate-500 text-[11px] mt-0.5">
-                        <span>₹{item.dailyRate?.toLocaleString('en-IN')}/day</span>
-                        <span>
-                          {item.distanceKm !== undefined ? `📍 ${item.distanceKm} km away` : item.address?.city}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                  {equipmentList.slice(0, 8).map((item) => {
+                    const dist = getDistanceKm(item);
+                    return (
+                      <Link
+                        key={item._id}
+                        to={`/equipment/${item._id}`}
+                        className="block p-2 rounded-lg bg-slate-50 hover:bg-brand-50 border border-slate-200 transition text-xs"
+                      >
+                        <div className="font-bold text-slate-800 truncate">{item.name}</div>
+                        <div className="flex justify-between items-center text-slate-500 text-[11px] mt-0.5">
+                          <span>₹{item.dailyRate?.toLocaleString('en-IN')}/day</span>
+                          <div className="flex items-center space-x-1">
+                            <span>{item.address?.city || 'Site'}</span>
+                            {dist !== null && (
+                              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                • 📍 {dist} km
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -398,140 +467,193 @@ const BrowseEquipmentPage = () => {
         ) : viewMode === 'list' ? (
           /* LIST VIEW */
           <div className="space-y-4">
-            {equipmentList.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand-500 hover:shadow-md transition flex flex-col md:flex-row gap-6"
-              >
-                <img
-                  src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
-                  alt={item.name}
-                  className="w-full md:w-56 h-44 object-cover rounded-xl bg-slate-100 shrink-0"
-                />
-                <div className="flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
-                          {item.categoryId?.name || 'Heavy Equipment'}
-                        </span>
-                        <h3 className="text-lg font-bold text-slate-900 mt-1">{item.name}</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {item.brand} {item.model} {item.year ? `• Year ${item.year}` : ''}
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <div className="text-2xl font-black text-slate-900">
-                          ₹{item.dailyRate?.toLocaleString('en-IN')}
+            {equipmentList.map((item) => {
+              const dist = getDistanceKm(item);
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand-500 hover:shadow-md transition flex flex-col md:flex-row gap-6"
+                >
+                  <img
+                    src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
+                    alt={item.name}
+                    className="w-full md:w-56 h-44 object-cover rounded-xl bg-slate-100 shrink-0"
+                  />
+                  <div className="flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                            {item.categoryId?.name || 'Heavy Equipment'}
+                          </span>
+                          <h3 className="text-lg font-bold text-slate-900 mt-1">{item.name}</h3>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {item.brand} {item.model} {item.year ? `• Year ${item.year}` : ''}
+                          </p>
                         </div>
-                        <div className="text-[11px] text-slate-400 font-medium">per day</div>
+
+                        <div className="text-right">
+                          <div className="text-2xl font-black text-slate-900">
+                            ₹{item.dailyRate?.toLocaleString('en-IN')}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-medium">per day</div>
+                        </div>
                       </div>
+
+                      <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
                     </div>
 
-                    <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div className="flex flex-wrap items-center gap-2 text-slate-600">
+                        <div className="flex items-center space-x-1 font-semibold text-slate-800">
+                          <MapPin className="h-3.5 w-3.5 text-brand-600" />
+                          <span>{item.address?.city || 'Local Site'}{item.address?.state ? `, ${item.address.state}` : ''}</span>
+                        </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center space-x-3 text-slate-600">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="h-3.5 w-3.5 text-brand-600" />
-                        <span>{item.address?.city}, {item.address?.state}</span>
-                      </div>
-                      {item.distanceKm !== undefined && (
-                        <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          📍 {item.distanceKm} km away
+                        {/* Distance Badge RIGHT NEXT to Address */}
+                        {dist !== null ? (
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
+                            <Navigation className="h-2.5 w-2.5 text-emerald-600 fill-emerald-600 rotate-45" />
+                            <span>{dist} km away</span>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleUseCurrentLocation();
+                            }}
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-brand-50 text-slate-500 hover:text-brand-600 text-[10px] font-medium border border-slate-200 hover:border-brand-200 transition"
+                            title="Calculate distance from your current location"
+                          >
+                            <Navigation className="h-2.5 w-2.5" />
+                            <span>Get distance</span>
+                          </button>
+                        )}
+
+                        <span className="capitalize text-slate-500">
+                          • {item.operatorOption === 'included' ? 'Operator Included' : item.operatorOption === 'optional' ? 'Operator Optional' : 'Dry Hire'}
                         </span>
-                      )}
-                      <span className="capitalize text-slate-500">
-                        • {item.operatorOption === 'included' ? 'Operator Included' : item.operatorOption === 'optional' ? 'Operator Optional' : 'Dry Hire'}
-                      </span>
-                    </div>
+                      </div>
 
-                    <Link
-                      to={`/equipment/${item._id}`}
-                      className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition"
-                    >
-                      View Details & Rent
-                    </Link>
+                      <Link
+                        to={`/equipment/${item._id}`}
+                        className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition"
+                      >
+                        View Details & Rent
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* GRID VIEW (Default) */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {equipmentList.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:border-brand-500 hover:shadow-lg transition-all flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Photo Container */}
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
-                      alt={item.name}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-800 uppercase tracking-wider shadow-sm">
-                      {item.categoryId?.name || 'Machinery'}
-                    </div>
-
-                    {item.distanceKm !== undefined && (
-                      <div className="absolute bottom-3 left-3 bg-emerald-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center space-x-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{item.distanceKm} km away</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-5">
-                    <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                      {item.brand} • {item.model}
-                    </div>
-                    <h3 className="font-bold text-base text-slate-900 mt-1 line-clamp-1 group-hover:text-brand-600 transition">
-                      {item.name}
-                    </h3>
-
-                    <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-                      <div className="flex items-center space-x-1 truncate max-w-[150px]">
-                        <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{item.address?.city}, {item.address?.state}</span>
-                      </div>
-                      <span className="text-[11px] font-medium text-slate-500">
-                        {item.operatorOption === 'included' ? 'Operator Included' : 'Dry Hire'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer with Rate & Action */}
-                <div className="p-5 pt-0 flex items-center justify-between">
+            {equipmentList.map((item) => {
+              const dist = getDistanceKm(item);
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:border-brand-500 hover:shadow-lg transition-all flex flex-col justify-between group"
+                >
                   <div>
-                    <span className="text-xs text-slate-400">Daily Rate</span>
-                    <div className="text-lg font-black text-slate-900">
-                      ₹{item.dailyRate?.toLocaleString('en-IN')}
+                    {/* Photo Container */}
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                      <img
+                        src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
+                        alt={item.name}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-800 uppercase tracking-wider shadow-sm">
+                        {item.categoryId?.name || 'Machinery'}
+                      </div>
+
+                      {dist !== null && (
+                        <div className="absolute bottom-3 left-3 bg-emerald-600/95 backdrop-blur text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center space-x-1">
+                          <Navigation className="h-3 w-3 fill-white rotate-45" />
+                          <span>{dist} km from you</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-5">
+                      <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                        {item.brand} • {item.model}
+                      </div>
+                      <h3 className="font-bold text-base text-slate-900 mt-1 line-clamp-1 group-hover:text-brand-600 transition">
+                        {item.name}
+                      </h3>
+
+                      <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+
+                      {/* Address and Distance Side by Side */}
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                          <div className="flex items-center space-x-1 font-semibold text-slate-800 shrink-0">
+                            <MapPin className="h-3.5 w-3.5 text-brand-600 shrink-0" />
+                            <span>
+                              {item.address?.city || 'Local Site'}
+                              {item.address?.state ? `, ${item.address.state}` : ''}
+                            </span>
+                          </div>
+
+                          {/* Distance Badge RIGHT NEXT to Address */}
+                          {dist !== null ? (
+                            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200 shrink-0">
+                              <Navigation className="h-2.5 w-2.5 text-emerald-600 fill-emerald-600 rotate-45" />
+                              <span>{dist} km away</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleUseCurrentLocation();
+                              }}
+                              className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-brand-50 text-slate-500 hover:text-brand-600 text-[10px] font-medium border border-slate-200 hover:border-brand-200 transition shrink-0"
+                              title="Calculate distance from your current location"
+                            >
+                              <Navigation className="h-2.5 w-2.5" />
+                              <span>Get distance</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <span className="text-[11px] font-medium text-slate-500 shrink-0">
+                          {item.operatorOption === 'included' ? 'Operator Inc.' : 'Dry Hire'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <Link
-                    to={`/equipment/${item._id}`}
-                    className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-brand-600 text-white font-bold text-xs uppercase tracking-wider transition"
-                  >
-                    Details & Rent
-                  </Link>
+                  {/* Footer with Rate & Action */}
+                  <div className="p-5 pt-0 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-slate-400">Daily Rate</span>
+                      <div className="text-lg font-black text-slate-900">
+                        ₹{item.dailyRate?.toLocaleString('en-IN')}
+                      </div>
+                    </div>
+
+                    <Link
+                      to={`/equipment/${item._id}`}
+                      className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-brand-600 text-white font-bold text-xs uppercase tracking-wider transition"
+                    >
+                      Details & Rent
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

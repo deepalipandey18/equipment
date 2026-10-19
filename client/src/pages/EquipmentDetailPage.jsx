@@ -29,6 +29,70 @@ const EquipmentDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activePhoto, setActivePhoto] = useState(0);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locating, setLocating] = useState(false);
+
+  // Auto-request current location on initial mount if available
+  useEffect(() => {
+    if (navigator.geolocation && !userLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: Number(pos.coords.latitude.toFixed(6)),
+            lng: Number(pos.coords.longitude.toFixed(6)),
+          });
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  }, []);
+
+  const requestUserLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        });
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  // Distance calculator
+  const calculateDistance = () => {
+    if (equipment?.distanceKm !== undefined && equipment?.distanceKm !== null) {
+      return Number(equipment.distanceKm).toFixed(1);
+    }
+    if (!userLocation || !equipment?.location?.coordinates) return null;
+
+    const [itemLng, itemLat] = equipment.location.coordinates;
+    const lat1 = userLocation.lat;
+    const lon1 = userLocation.lng;
+    const lat2 = Number(itemLat);
+    const lon2 = Number(itemLng);
+
+    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
+
+    const R = 6371; // Earth radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((R * c).toFixed(1));
+  };
+
+  const distanceKm = calculateDistance();
 
   // Booking Calculator State
   const today = new Date().toISOString().split('T')[0];
@@ -212,12 +276,33 @@ const EquipmentDetailPage = () => {
                   {equipment.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-slate-500">
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="h-4 w-4 text-brand-600" />
-                    <span>
-                      {equipment.address?.city}, {equipment.address?.state} (Pincode: {equipment.address?.pincode})
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center space-x-1 text-slate-700 font-semibold">
+                      <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+                      <span>
+                        {equipment.address?.city}, {equipment.address?.state} (Pincode: {equipment.address?.pincode})
+                      </span>
+                    </div>
+
+                    {/* Distance Badge next to address */}
+                    {distanceKm !== null ? (
+                      <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
+                        <Navigation className="h-3 w-3 text-emerald-600 fill-emerald-600 rotate-45" />
+                        <span>{distanceKm} km from your location</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={requestUserLocation}
+                        disabled={locating}
+                        className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 text-xs font-semibold border border-slate-200 hover:border-brand-200 transition"
+                      >
+                        <Navigation className={`h-3 w-3 ${locating ? 'animate-spin' : ''}`} />
+                        <span>{locating ? 'Acquiring GPS...' : 'Check distance from you'}</span>
+                      </button>
+                    )}
                   </div>
+
                   {equipment.year && <span>• Mfg Year: {equipment.year}</span>}
                   <span>• Service Area: Within {equipment.deliveryRadiusKm || 50} km</span>
                 </div>

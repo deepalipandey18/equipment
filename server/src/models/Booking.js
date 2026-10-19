@@ -122,6 +122,31 @@ const bookingSchema = new mongoose.Schema(
       sparse: true,
       index: true,
     },
+
+    // Production-Grade IoT / GPS Telematics Radar
+    telematics: {
+      isTrackingActive: { type: Boolean, default: false },
+      trackerType: {
+        type: String,
+        enum: ['driver_gps', 'ais140_iot', 'manual'],
+        default: 'driver_gps',
+      },
+      currentCoordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [77.0878, 28.4595],
+      },
+      speedKmh: { type: Number, default: 0 },
+      heading: { type: Number, default: 0 },
+      batteryLevel: { type: Number, default: 100 },
+      lastPingAt: { type: Date, default: Date.now },
+      history: [
+        {
+          coordinates: [Number],
+          speedKmh: Number,
+          recordedAt: { type: Date, default: Date.now },
+        },
+      ],
+    },
   },
   {
     timestamps: true,

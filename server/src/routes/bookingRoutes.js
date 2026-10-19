@@ -31,5 +31,9 @@ router.patch('/:id/progress', bookingController.updateProgress);
 // Cancel booking
 router.post('/:id/cancel', bookingController.cancelBooking);
 
+// Live Telematics & GPS Radar Tracking (Production-Grade)
+router.post('/:id/telematics/ping', bookingController.pingTelematics);
+router.get('/:id/telematics', bookingController.getTelematics);
+
 module.exports = router;
 

@@ -156,3 +156,38 @@ exports.cancelBooking = async (req, res, next) => {
   }
 };
 
+exports.pingTelematics = async (req, res, next) => {
+  try {
+    const { lat, lng, speed, heading, trackerType, batteryLevel } = req.body;
+    const updated = await bookingService.updateTelematicsPing(
+      req.params.id,
+      req.user._id,
+      { lat, lng, speed, heading, trackerType, batteryLevel }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Telematics GPS ping recorded successfully',
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getTelematics = async (req, res, next) => {
+  try {
+    const telematicsData = await bookingService.getBookingTelematics(
+      req.params.id,
+      req.user._id
+    );
+
+    res.status(200).json({
+      success: true,
+      data: telematicsData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
