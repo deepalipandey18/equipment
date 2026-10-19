@@ -36,7 +36,7 @@
     "@rollup/rollup-linux-x64-musl": "4.64.5"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   }
 }
 
