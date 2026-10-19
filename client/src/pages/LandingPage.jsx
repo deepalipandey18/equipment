@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
@@ -72,6 +72,72 @@ const showcaseItems = [
   },
 ];
 
+const HERO_SCENES = [
+  {
+    id: 'truck',
+    title: 'Heavy Haulage Tipper',
+    shortLabel: 'Dump Truck',
+    icon: Truck,
+    badge: 'Mining & Aggregate Transport',
+    name: 'BharatBenz 3528C Heavy Tipper',
+    category: 'Mining & Road Construction • 28 Ton Heavy Dump Truck',
+    bgImage: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=2400&auto=format&fit=crop&q=80',
+    videoFile: '/videos/truck-driving.mp4',
+    altVideo: 'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
+    specs: [
+      { label: 'Engine', value: '280 HP Turbo' },
+      { label: 'Box Volume', value: '18 m³ HD Box' },
+      { label: 'Payload', value: '28,000 kg' },
+    ],
+    distance: '1.8 km away',
+    rate: '₹9,200',
+    unit: '/day',
+    operatorStatus: 'Certified Heavy Driver Included',
+  },
+  {
+    id: 'jcb',
+    title: 'JCB 3DX Excavator',
+    shortLabel: 'JCB Backhoe',
+    icon: Wrench,
+    badge: 'Heavy Earthmoving Active',
+    name: 'JCB 3DX Super EcoXcellence',
+    category: 'Heavy Earthmoving • Hydraulic Backhoe Loader',
+    bgImage: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=2400&auto=format&fit=crop&q=80',
+    videoFile: '/videos/jcb-working.mp4',
+    altVideo: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/3/30/Dumptruck_-_Kanagawa_-_2024_Jan_26.webm/Dumptruck_-_Kanagawa_-_2024_Jan_26.webm.720p.vp9.webm',
+    specs: [
+      { label: 'Engine', value: '76 HP Turbo' },
+      { label: 'Bucket', value: '1.1 m³ HD' },
+      { label: 'Dig Depth', value: '4.77 m' },
+    ],
+    distance: '2.4 km away',
+    rate: '₹8,500',
+    unit: '/day',
+    operatorStatus: 'Certified Operator Included',
+  },
+  {
+    id: 'crane',
+    title: 'Hydraulic Mobile Crane',
+    shortLabel: '25T Crane',
+    icon: Container,
+    badge: 'Infrastructure Heavy Lifting',
+    name: 'ACE 25X Mobile Telescopic Crane',
+    category: 'Heavy Lifting & Aerial • 25 Ton Telescopic Boom',
+    bgImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=2400&auto=format&fit=crop&q=80',
+    videoFile: '/videos/crane-working.mp4',
+    altVideo: 'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
+    specs: [
+      { label: 'Boom Reach', value: '34.5 m Reach' },
+      { label: 'Capacity', value: '25 Ton Safe Load' },
+      { label: 'Hoist Winch', value: '4-Fall Wire Hoist' },
+    ],
+    distance: '3.1 km away',
+    rate: '₹14,500',
+    unit: '/day',
+    operatorStatus: 'Load Chart & Rigger Certified',
+  },
+];
+
 const LandingPage = () => {
   const { user, hasActiveSubscription } = useAuth();
   const navigate = useNavigate();
@@ -80,6 +146,34 @@ const LandingPage = () => {
 
   // Scroll position state for dynamic scroll-driven animation
   const [scrollY, setScrollY] = useState(0);
+
+  // Multi-machine sequential showcase (Truck ➔ JCB ➔ Crane ➔ Loop)
+  const [activeSceneIndex, setActiveSceneIndex] = useState(0);
+  const [hudFading, setHudFading] = useState(false);
+
+  const changeScene = (nextIdx) => {
+    if (nextIdx === activeSceneIndex) return;
+    setHudFading(true);
+    setTimeout(() => {
+      setActiveSceneIndex(nextIdx);
+      setTimeout(() => setHudFading(false), 50);
+    }, 450);
+  };
+
+  // Relaxed 8.5-second timer with smooth crossfade
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHudFading(true);
+      setTimeout(() => {
+        setActiveSceneIndex((prev) => (prev + 1) % HERO_SCENES.length);
+        setTimeout(() => setHudFading(false), 50);
+      }, 450);
+    }, 8500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentScene = HERO_SCENES[activeSceneIndex];
+
 
   useEffect(() => {
     let ticking = false;
@@ -137,29 +231,63 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col overflow-x-hidden">
-      {/* Hero Section with Scroll-Animated Full Background Image */}
+      {/* Hero Section with Multi-Machine Cinematic Video Showcase (Truck ➔ JCB ➔ Crane) */}
       <section className="relative bg-slate-950 text-white overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-32 border-b border-slate-800">
-        {/* Full-bleed JCB Background Image with Entrance Zoom, Continuous Ambient Animation & Scroll Parallax */}
+        {/* Full-bleed Stable Multi-Scene Background Container */}
         <div
-          className="absolute inset-0 w-full h-[125%] -top-[12%] pointer-events-none will-change-transform"
+          className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
           style={{
-            transform: `translate3d(0, ${scrollY * 0.32}px, 0) scale(${1.02 + scrollY * 0.0006})`,
+            transform: `translate3d(0, ${scrollY * 0.16}px, 0)`,
           }}
         >
-          <div
-            className="w-full h-full bg-cover bg-no-repeat will-change-transform animate-jcb-full-motion"
-            style={{
-              backgroundImage: `url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/JCB_3CX_ECO_backhoe_loader_at_VDNKh%2C_Moscow.jpg/2560px-JCB_3CX_ECO_backhoe_loader_at_VDNKh%2C_Moscow.jpg')`,
-              backgroundPosition: 'center 50%',
-              filter: 'brightness(0.75) contrast(1.15)',
-            }}
-          />
+          {HERO_SCENES.map((scene, idx) => {
+            const isCurrent = activeSceneIndex === idx;
+            return (
+              <div
+                key={scene.id}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-[2200ms] ease-in-out ${
+                  isCurrent ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
+                style={{
+                  willChange: 'opacity',
+                }}
+              >
+                {/* High-Resolution Stable Machinery Background Image */}
+                <div
+                  className="absolute inset-0 w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url('${scene.bgImage}')`,
+                    backgroundPosition: 'center 48%',
+                    filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
+                  }}
+                />
+
+                {/* Local Video / Stream for this machine */}
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  poster={scene.bgImage}
+                  className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+                  style={{
+                    filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
+                  }}
+                >
+                  <source src={scene.videoFile} type="video/mp4" />
+                  <source src="/videos/hero-sequence.mp4" type="video/mp4" />
+                  <source src={scene.altVideo} type="video/mp4" />
+                </video>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Multi-layer Dark Cinematic Overlays: Balanced for Deep Moody Contrast while keeping the JCB clearly visible */}
-        <div className="absolute inset-0 bg-slate-950/35 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/70 to-slate-950/35 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-slate-950/70 pointer-events-none" />
+        {/* Clean, Stable Directional Overlays: Text legibility on left, 100% clear & bright over machines on right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-slate-950/50 to-transparent pointer-events-none" />
 
         {/* Ambient Glow Orbs */}
         <div className="absolute -top-32 -right-32 w-[35rem] h-[35rem] rounded-full bg-amber-500/15 blur-3xl pointer-events-none animate-pulse-glow" />
@@ -239,9 +367,37 @@ const LandingPage = () => {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
+
+              {/* Interactive Multi-Machine Sequence Selector (Truck ➔ JCB ➔ Crane) */}
+              <div className="mt-7 flex flex-wrap items-center gap-2 animate-hero-fade-in-delay-3">
+                <span className="text-xs font-bold text-slate-400 mr-1 uppercase tracking-wider">
+                  Live Fleet View:
+                </span>
+                <div className="inline-flex p-1 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/15">
+                  {HERO_SCENES.map((scene, idx) => {
+                    const isSelected = activeSceneIndex === idx;
+                    const SceneIcon = scene.icon;
+                    return (
+                      <button
+                        key={scene.id}
+                        type="button"
+                        onClick={() => changeScene(idx)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-500 ease-in-out flex items-center space-x-1.5 ${
+                          isSelected
+                            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25'
+                            : 'text-slate-300 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        <SceneIcon className={`h-3.5 w-3.5 transition-colors duration-500 ${isSelected ? 'text-slate-950' : 'text-amber-400'}`} />
+                        <span>{scene.shortLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Right: Translucent Glassmorphism Live Machine Radar & Telemetry HUD (Over the Full JCB Background) */}
+            {/* Right: Translucent Glassmorphism Live Machine Radar & Telemetry HUD (Synced with Active Scene) */}
             <div className="lg:col-span-5 relative perspective-1000 mt-6 lg:mt-0 animate-hero-zoom-in">
               <div
                 className="relative rounded-3xl p-6 sm:p-7 bg-slate-950/40 backdrop-blur-xl border border-white/20 shadow-2xl transition-transform duration-300 ease-out preserve-3d"
@@ -251,74 +407,71 @@ const LandingPage = () => {
               >
                 {/* HUD Header */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                  <div className={`inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider transition-opacity duration-500 ${hudFading ? 'opacity-30' : 'opacity-100'}`}>
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span>Live On-Site Telemetry</span>
+                    <span>{currentScene.badge}</span>
                   </div>
                   <span className="text-[11px] font-semibold text-slate-400">NCR Fleet Radar</span>
                 </div>
 
-                {/* Machine Name & Class */}
-                <div className="mt-4">
-                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                    JCB 3DX Super EcoXcellence
-                  </h3>
-                  <p className="text-xs text-slate-300 mt-0.5">
-                    Heavy Earthmoving • Hydraulic Backhoe Loader
-                  </p>
-                </div>
+                {/* Machine Details with Gentle Fade & Settle */}
+                <div className={`transition-all duration-500 ease-out ${hudFading ? 'opacity-20 translate-y-1' : 'opacity-100 translate-y-0'}`}>
+                  {/* Machine Name & Class */}
+                  <div className="mt-4">
+                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                      {currentScene.name}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      {currentScene.category}
+                    </p>
+                  </div>
 
-                {/* 3-Col Quick Technical Specs */}
-                <div className="mt-5 grid grid-cols-3 gap-2.5">
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
-                    <div className="text-[10px] uppercase font-bold text-slate-400">Engine</div>
-                    <div className="text-sm font-black text-amber-400 mt-0.5">76 HP Turbo</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
-                    <div className="text-[10px] uppercase font-bold text-slate-400">Bucket</div>
-                    <div className="text-sm font-black text-amber-400 mt-0.5">1.1 m³ HD</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
-                    <div className="text-[10px] uppercase font-bold text-slate-400">Dig Depth</div>
-                    <div className="text-sm font-black text-amber-400 mt-0.5">4.77 m</div>
-                  </div>
-                </div>
-
-                {/* Live Distance & Verification Row */}
-                <div className="mt-5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                      <MapPin className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                        <span className="text-xs font-black text-white">2.4 km away</span>
+                  {/* 3-Col Quick Technical Specs */}
+                  <div className="mt-5 grid grid-cols-3 gap-2.5">
+                    {currentScene.specs.map((sp, sIdx) => (
+                      <div key={sIdx} className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
+                        <div className="text-[10px] uppercase font-bold text-slate-400">{sp.label}</div>
+                        <div className="text-sm font-black text-amber-400 mt-0.5 truncate">{sp.value}</div>
                       </div>
-                      <div className="text-[10px] text-emerald-300/80 font-medium">
-                        MongoDB 2dsphere GPS Proximity
+                    ))}
+                  </div>
+
+                  {/* Live Distance & Verification Row */}
+                  <div className="mt-5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                        <MapPin className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                          <span className="text-xs font-black text-white">{currentScene.distance}</span>
+                        </div>
+                        <div className="text-[10px] text-emerald-300/80 font-medium">
+                          MongoDB 2dsphere GPS Proximity
+                        </div>
                       </div>
                     </div>
+                    <div className="text-right">
+                      <div className="text-sm font-black text-white">{currentScene.rate}<span className="text-[10px] text-slate-300 font-normal">{currentScene.unit}</span></div>
+                      <div className="text-[10px] text-slate-400">Escrow Secured</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-black text-white">₹8,500<span className="text-[10px] text-slate-300 font-normal">/day</span></div>
-                    <div className="text-[10px] text-slate-400">Escrow Secured</div>
-                  </div>
-                </div>
 
-                {/* Direct Action Link */}
-                <div className="mt-5 flex items-center justify-between pt-4 border-t border-white/10">
-                  <span className="text-xs text-slate-300 flex items-center space-x-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>Certified Operator Included</span>
-                  </span>
-                  <Link
-                    to="/browse?search=JCB"
-                    className="inline-flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition"
-                  >
-                    <span>View Machine</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+                  {/* Direct Action Link */}
+                  <div className="mt-5 flex items-center justify-between pt-4 border-t border-white/10">
+                    <span className="text-xs text-slate-300 flex items-center space-x-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>{currentScene.operatorStatus}</span>
+                    </span>
+                    <Link
+                      to={`/browse?search=${encodeURIComponent(currentScene.shortLabel)}`}
+                      className="inline-flex items-center space-x-1 text-xs font-bold text-amber-400 hover:text-amber-300 transition"
+                    >
+                      <span>View Machine</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Floating Parallax Badge 1: GPS Radar (Top-Left) */}
