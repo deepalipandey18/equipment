@@ -43,9 +43,28 @@ class SubscriptionService {
   }
 
   /**
-   * Get all active subscription plans (auto-seeds defaults if empty)
+   * Get all active subscription plans (auto-seeds defaults if empty or missing lifetime)
    */
   async getPlans() {
+    const lifetimePlanData = {
+      name: 'Lifetime VIP Access',
+      code: 'lifetime',
+      description: 'One-time investment for permanent platform access. Unlimited machinery listings & VIP privileges forever.',
+      price: 999900, // ₹9,999 in paise (one-time)
+      billingInterval: 'lifetime',
+      listingLimit: 999,
+      features: [
+        'Unlimited active equipment listings forever',
+        'No monthly or yearly renewal fees (Pay once, own forever)',
+        'Top priority VIP badge & search radar placement',
+        'Zero commission on direct contractor rental inquiries',
+        'Live GPS Telematics & fleet tracking included',
+        'Dedicated VIP Account Manager & 24/7 priority phone line',
+        'Free access to all future marketplace feature updates',
+      ],
+      isActive: true,
+    };
+
     let plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
     if (!plans || plans.length === 0) {
       const defaultPlans = [
@@ -97,6 +116,7 @@ class SubscriptionService {
           ],
           isActive: true,
         },
+        lifetimePlanData,
       ];
 
       for (const p of defaultPlans) {
@@ -108,6 +128,17 @@ class SubscriptionService {
       }
 
       plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+    } else {
+      // Ensure lifetime plan exists even if other plans were already seeded
+      const hasLifetime = plans.some((p) => p.code === 'lifetime');
+      if (!hasLifetime) {
+        await SubscriptionPlan.findOneAndUpdate(
+          { code: lifetimePlanData.code },
+          lifetimePlanData,
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+        plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+      }
     }
     return plans;
   }
@@ -244,7 +275,12 @@ class SubscriptionService {
       endDate = new Date(currentActive.endDate);
     }
 
-    const durationDays = plan.billingInterval === 'yearly' ? 365 : 30;
+    let durationDays = 30;
+    if (plan.billingInterval === 'yearly') {
+      durationDays = 365;
+    } else if (plan.billingInterval === 'lifetime') {
+      durationDays = 365 * 100; // 100 years lifetime duration
+    }
     endDate.setDate(endDate.getDate() + durationDays);
 
     // 5. Create active Subscription document

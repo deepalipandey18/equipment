@@ -26,7 +26,7 @@ const subscriptionPlanSchema = new mongoose.Schema(
     },
     billingInterval: {
       type: String,
-      enum: ['monthly', 'yearly'],
+      enum: ['monthly', 'yearly', 'lifetime'],
       default: 'monthly',
     },
     listingLimit: {

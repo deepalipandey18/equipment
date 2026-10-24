@@ -112,6 +112,24 @@ const plansData = [
     ],
     isActive: true,
   },
+  {
+    name: 'Lifetime VIP Access',
+    code: 'lifetime',
+    description: 'One-time investment for permanent platform access. Unlimited machinery listings & VIP privileges forever.',
+    price: 999900, // ₹9,999 in paise (one-time)
+    billingInterval: 'lifetime',
+    listingLimit: 999,
+    features: [
+      'Unlimited active equipment listings forever',
+      'No monthly or yearly renewal fees (Pay once, own forever)',
+      'Top priority VIP badge & search radar placement',
+      'Zero commission on direct contractor rental inquiries',
+      'Live GPS Telematics & fleet tracking included',
+      'Dedicated VIP Account Manager & 24/7 priority phone line',
+      'Free access to all future marketplace feature updates',
+    ],
+    isActive: true,
+  },
 ];
 
 async function seedAll(exitOnFinish = true) {

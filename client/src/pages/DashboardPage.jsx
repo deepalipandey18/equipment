@@ -894,15 +894,17 @@ const DashboardPage = () => {
                         {activePlan.name}
                       </h4>
                       <p className="text-xs text-slate-600 mt-1">
-                        Billing: ₹{(activePlan.price / 100).toLocaleString('en-IN')}/
-                        {activePlan.billingInterval || 'month'}
+                        Billing: ₹{(activePlan.price / 100).toLocaleString('en-IN')}
+                        {activePlan.billingInterval === 'lifetime' ? ' (One-Time Lifetime)' : `/${activePlan.billingInterval || 'month'}`}
                       </p>
                     </div>
 
                     <div className="sm:text-right">
                       <div className="text-xs text-slate-500 font-medium">Valid Until</div>
                       <div className="text-sm font-bold text-slate-900">
-                        {new Date(subDetails?.subscription?.endDate || user.activeSubscription?.endDate).toLocaleDateString()}
+                        {activePlan.billingInterval === 'lifetime'
+                          ? 'Lifetime (Never Expires ♾️)'
+                          : new Date(subDetails?.subscription?.endDate || user.activeSubscription?.endDate).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -912,7 +914,9 @@ const DashboardPage = () => {
                     <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
                       <span>Listing Allowance Usage:</span>
                       <span>
-                        {myEquipment.length} of {activePlan.listingLimit} machine slots used
+                        {activePlan.billingInterval === 'lifetime'
+                          ? `${myEquipment.length} machines listed (Unlimited Quota)`
+                          : `${myEquipment.length} of ${activePlan.listingLimit} machine slots used`}
                       </span>
                     </div>
                     <div className="w-full h-3 bg-emerald-200/60 rounded-full overflow-hidden">
@@ -921,14 +925,16 @@ const DashboardPage = () => {
                         style={{
                           width: `${Math.min(
                             100,
-                            ((myEquipment.length / activePlan.listingLimit) * 100) || 0
+                            ((myEquipment.length / (activePlan.listingLimit || 999)) * 100) || 0
                           )}%`,
                         }}
                       />
                     </div>
                     <div className="text-[11px] text-slate-500 mt-2 flex justify-between">
                       <span>
-                        Remaining slots: {Math.max(0, activePlan.listingLimit - myEquipment.length)}
+                        {activePlan.billingInterval === 'lifetime'
+                          ? 'Unlimited listing slots available'
+                          : `Remaining slots: ${Math.max(0, activePlan.listingLimit - myEquipment.length)}`}
                       </span>
                       <span className="text-emerald-700 font-medium">Verified by Backend</span>
                     </div>

@@ -789,7 +789,7 @@ const LandingPage = () => {
                 <ul className="space-y-3 text-sm text-slate-600 mb-6">
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                    <span>Choose affordable subscription plans starting at ₹499/mo</span>
+                    <span>Choose monthly tiers from ₹499/mo or Lifetime Unlimited VIP</span>
                   </li>
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
