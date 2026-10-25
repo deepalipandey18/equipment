@@ -451,7 +451,7 @@ const BrowseEquipmentPage = () => {
                           <div className="flex items-center space-x-1">
                             <span>{item.address?.city || 'Site'}</span>
                             {dist !== null && (
-                              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                              <span className="font-bold text-[#222428] bg-[#FCC837]/20 px-1.5 py-0.2 rounded border border-[#FCC837]/40">
                                 • 📍 {dist} km
                               </span>
                             )}

@@ -30,6 +30,31 @@ export default {
           800: '#34373C', // Dark grey
           900: '#222428', // Charcoal
         },
+        // Enforce Yellow on any amber or orange references across the entire application
+        amber: {
+          50: '#FEF9E7',
+          100: '#FDF3CF',
+          200: '#FCE79F',
+          300: '#FADB6E',
+          400: '#FCC837',
+          500: '#FCC837',
+          600: '#F0BA28',
+          700: '#E6B01B',
+          800: '#34373C',
+          900: '#222428',
+        },
+        orange: {
+          50: '#FEF9E7',
+          100: '#FDF3CF',
+          200: '#FCE79F',
+          300: '#FADB6E',
+          400: '#FCC837',
+          500: '#FCC837',
+          600: '#F0BA28',
+          700: '#E6B01B',
+          800: '#34373C',
+          900: '#222428',
+        },
         slate: {
           850: '#222428',
           900: '#222428',

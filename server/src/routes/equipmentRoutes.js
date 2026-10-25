@@ -7,8 +7,9 @@ const { verifySubscriptionQuota } = require('../middleware/subscriptionGate');
 // Public: Marketplace Search with 2dsphere Nearby Radar & Filters
 router.get('/', equipmentController.searchMarketplace);
 
-// Protected: Get owner's own equipment listings
+// Protected: Get owner's own equipment listings (supports /my and /my-equipment)
 router.get('/my', protect, equipmentController.getMyEquipment);
+router.get('/my-equipment', protect, equipmentController.getMyEquipment);
 
 // Protected: Register new equipment (Strictly gated by Subscription and Quota!)
 router.post('/', protect, verifySubscriptionQuota, equipmentController.createEquipment);

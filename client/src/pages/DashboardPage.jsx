@@ -63,16 +63,27 @@ const DashboardPage = () => {
   const [paymentModal, setPaymentModal] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
-  // Fetch machinery owned by user
+  // Fetch machinery owned by user (safely parses arrays from /equipment/my or /equipment/my-equipment)
   const fetchMyEquipment = async () => {
     try {
       setLoadingEquipment(true);
-      const res = await api.get('/equipment/my-equipment');
+      const res = await api.get('/equipment/my');
       if (res.data?.success) {
-        setMyEquipment(res.data.data.equipment);
+        const raw = res.data.data;
+        const list = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.equipment)
+          ? raw.equipment
+          : Array.isArray(res.data?.equipment)
+          ? res.data.equipment
+          : [];
+        setMyEquipment(list);
+      } else {
+        setMyEquipment([]);
       }
     } catch (err) {
       console.warn('Failed to load owned equipment:', err);
+      setMyEquipment([]);
     } finally {
       setLoadingEquipment(false);
     }
@@ -84,10 +95,21 @@ const DashboardPage = () => {
       setLoadingRentals(true);
       const res = await api.get('/bookings/my-rentals');
       if (res.data?.success) {
-        setMyRentals(res.data.data.bookings);
+        const raw = res.data.data;
+        const list = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.bookings)
+          ? raw.bookings
+          : Array.isArray(res.data?.bookings)
+          ? res.data.bookings
+          : [];
+        setMyRentals(list);
+      } else {
+        setMyRentals([]);
       }
     } catch (err) {
       console.warn('Failed to load customer rentals:', err);
+      setMyRentals([]);
     } finally {
       setLoadingRentals(false);
     }
@@ -99,10 +121,21 @@ const DashboardPage = () => {
       setLoadingRequests(true);
       const res = await api.get('/bookings/owner-requests');
       if (res.data?.success) {
-        setOwnerRequests(res.data.data.bookings);
+        const raw = res.data.data;
+        const list = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.bookings)
+          ? raw.bookings
+          : Array.isArray(res.data?.requests)
+          ? res.data.requests
+          : [];
+        setOwnerRequests(list);
+      } else {
+        setOwnerRequests([]);
       }
     } catch (err) {
       console.warn('Failed to load owner requests:', err);
+      setOwnerRequests([]);
     } finally {
       setLoadingRequests(false);
     }
@@ -112,12 +145,15 @@ const DashboardPage = () => {
   const fetchSubscriptionDetails = async () => {
     try {
       setLoadingSub(true);
-      const res = await api.get('/subscriptions/my-subscription');
+      const res = await api.get('/subscriptions/my');
       if (res.data?.success) {
-        setSubDetails(res.data.data);
+        setSubDetails(res.data.data || res.data || null);
+      } else {
+        setSubDetails(null);
       }
     } catch (err) {
       console.warn('Failed to load subscription:', err);
+      setSubDetails(null);
     } finally {
       setLoadingSub(false);
     }
@@ -144,6 +180,7 @@ const DashboardPage = () => {
     const nextStatus = item.listingStatus === 'active' ? 'maintenance' : 'active';
     try {
       const res = await api.patch(`/equipment/${item._id}/status`, {
+        status: nextStatus,
         listingStatus: nextStatus,
       });
       if (res.data?.success) {
@@ -176,7 +213,7 @@ const DashboardPage = () => {
   // Owner responds to booking request (accept / reject)
   const handleOwnerResponse = async (bookingId, decision) => {
     try {
-      const res = await api.patch(`/bookings/${bookingId}/respond`, {
+      const res = await api.post(`/bookings/${bookingId}/respond`, {
         action: decision,
       });
       if (res.data?.success) {
@@ -245,11 +282,24 @@ const DashboardPage = () => {
     }
   };
 
-  const activePlan = subDetails?.subscription?.planId || user?.activeSubscription?.planId;
-  const activeRentalsCount = myRentals.filter(
+  // Safe Array Wrappers to prevent any crash
+  const myEquipmentList = Array.isArray(myEquipment) ? myEquipment : [];
+  const myRentalsList = Array.isArray(myRentals) ? myRentals : [];
+  const ownerRequestsList = Array.isArray(ownerRequests) ? ownerRequests : [];
+
+  const activePlan =
+    subDetails?.subscription?.planId ||
+    subDetails?.planId ||
+    user?.activeSubscription?.planId ||
+    null;
+
+  const activeRentalsCount = myRentalsList.filter(
     (r) => r.bookingStatus === 'Ongoing' || r.bookingStatus === 'Confirmed'
   ).length;
-  const pendingRequestsCount = ownerRequests.filter((r) => r.bookingStatus === 'Pending').length;
+
+  const pendingRequestsCount = ownerRequestsList.filter(
+    (r) => r.bookingStatus === 'Pending'
+  ).length;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-8">
@@ -289,7 +339,7 @@ const DashboardPage = () => {
                     <>
                       <span className="text-[#FCC837] font-black">{activePlan.name}</span>
                       <span className="text-xs text-white/60 font-normal">
-                        ({myEquipment.length} of {activePlan.billingInterval === 'lifetime' ? '∞' : activePlan.listingLimit} slots used)
+                        ({myEquipmentList.length} of {activePlan.billingInterval === 'lifetime' ? '∞' : (activePlan.listingLimit || 2)} slots used)
                       </span>
                     </>
                   ) : (
@@ -331,7 +381,7 @@ const DashboardPage = () => {
                   <p className="mt-2 text-xs text-[#FCC837] font-semibold flex items-center space-x-1">
                     <CheckCircle className="h-3.5 w-3.5 text-[#FCC837]" />
                     <span>
-                      Quota: {myEquipment.length} listed / {activePlan?.billingInterval === 'lifetime' ? 'Unlimited' : (activePlan?.listingLimit || 2)} allowed
+                      Quota: {myEquipmentList.length} listed / {activePlan?.billingInterval === 'lifetime' ? 'Unlimited' : (activePlan?.listingLimit || 2)} allowed
                     </span>
                   </p>
                 )}
@@ -372,11 +422,11 @@ const DashboardPage = () => {
         <div className="flex border-b border-[#34373C]/20 mb-6 overflow-x-auto space-x-2">
           {[
             { id: 'overview', label: 'Overview', icon: ShieldCheck },
-            { id: 'my-equipment', label: `My Equipment (${myEquipment.length})`, icon: Truck },
-            { id: 'my-rentals', label: `My Rental Bookings (${myRentals.length})`, icon: CalendarCheck },
+            { id: 'my-equipment', label: `My Equipment (${myEquipmentList.length})`, icon: Truck },
+            { id: 'my-rentals', label: `My Rental Bookings (${myRentalsList.length})`, icon: CalendarCheck },
             {
               id: 'booking-requests',
-              label: `Requests Received (${ownerRequests.length})`,
+              label: `Requests Received (${ownerRequestsList.length})`,
               badge: pendingRequestsCount > 0 ? pendingRequestsCount : null,
               icon: Inbox,
             },
@@ -416,7 +466,7 @@ const DashboardPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-xl bg-[#F8F9FA] border border-[#34373C]/15">
                   <div className="text-xs font-semibold text-[#34373C]/70 uppercase">My Listed Machines</div>
-                  <div className="text-2xl font-black text-[#222428] mt-1">{myEquipment.length}</div>
+                  <div className="text-2xl font-black text-[#222428] mt-1">{myEquipmentList.length}</div>
                   <div className="text-xs text-[#34373C]/60 mt-1">
                     {hasActiveSubscription ? `Allowed: ${activePlan?.billingInterval === 'lifetime' ? 'Unlimited' : (activePlan?.listingLimit || 2)}` : 'Subscription required'}
                   </div>
@@ -464,7 +514,7 @@ const DashboardPage = () => {
                 <div className="py-12 flex justify-center items-center">
                   <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
-              ) : myEquipment.length === 0 ? (
+              ) : myEquipmentList.length === 0 ? (
                 <div className="text-center py-12">
                   <Truck className="h-12 w-12 text-[#34373C]/40 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-[#222428]">No Equipment Listed Yet</h3>
@@ -480,7 +530,7 @@ const DashboardPage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {myEquipment.map((item) => (
+                  {myEquipmentList.map((item) => (
                     <div
                       key={item._id}
                       className="border border-[#34373C]/15 rounded-xl p-4 flex flex-col sm:flex-row gap-4 hover:border-[#222428] transition bg-white"
@@ -497,7 +547,7 @@ const DashboardPage = () => {
                               {item.name}
                             </h4>
                             {(() => {
-                              const activeRental = ownerRequests.find(
+                              const activeRental = ownerRequestsList.find(
                                 (r) =>
                                   (r.equipmentId?._id === item._id || r.equipmentId === item._id) &&
                                   ['Ongoing', 'Confirmed'].includes(r.bookingStatus)
@@ -520,7 +570,7 @@ const DashboardPage = () => {
                                       : 'bg-[#34373C]/10 text-[#34373C]'
                                   }`}
                                 >
-                                  {item.listingStatus}
+                                  {item.listingStatus || 'active'}
                                 </span>
                               );
                             })()}
@@ -600,7 +650,7 @@ const DashboardPage = () => {
                 <div className="py-12 flex justify-center items-center">
                   <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
-              ) : myRentals.length === 0 ? (
+              ) : myRentalsList.length === 0 ? (
                 <div className="text-center py-12">
                   <CalendarCheck className="h-12 w-12 text-[#34373C]/40 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-[#222428]">No Rental Bookings Found</h3>
@@ -616,7 +666,7 @@ const DashboardPage = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {myRentals.map((booking) => {
+                  {myRentalsList.map((booking) => {
                     const totalRupees = (booking.pricingBreakdown?.totalAmountPaise || 0) / 100;
                     return (
                       <div
@@ -736,7 +786,7 @@ const DashboardPage = () => {
                 <div className="py-12 flex justify-center items-center">
                   <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
-              ) : ownerRequests.length === 0 ? (
+              ) : ownerRequestsList.length === 0 ? (
                 <div className="text-center py-12">
                   <Inbox className="h-12 w-12 text-[#34373C]/40 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-[#222428]">No Booking Requests Received</h3>
@@ -746,7 +796,7 @@ const DashboardPage = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {ownerRequests.map((req) => {
+                  {ownerRequestsList.map((req) => {
                     const totalRupees = (req.pricingBreakdown?.totalAmountPaise || 0) / 100;
                     return (
                       <div
@@ -900,7 +950,7 @@ const DashboardPage = () => {
                         {activePlan.name}
                       </h4>
                       <p className="text-xs text-white/70 mt-1">
-                        Billing: ₹{(activePlan.price / 100).toLocaleString('en-IN')}
+                        Billing: ₹{((activePlan.price || 0) / 100).toLocaleString('en-IN')}
                         {activePlan.billingInterval === 'lifetime' ? ' (One-Time Lifetime VIP)' : `/${activePlan.billingInterval || 'month'}`}
                       </p>
                     </div>
@@ -910,7 +960,7 @@ const DashboardPage = () => {
                       <div className="text-sm font-bold text-[#FCC837]">
                         {activePlan.billingInterval === 'lifetime'
                           ? 'Lifetime (Never Expires ♾️)'
-                          : new Date(subDetails?.subscription?.endDate || user.activeSubscription?.endDate).toLocaleDateString()}
+                          : new Date(subDetails?.subscription?.endDate || user?.activeSubscription?.endDate || Date.now()).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -921,8 +971,8 @@ const DashboardPage = () => {
                       <span>Listing Allowance Usage:</span>
                       <span className="text-[#FCC837]">
                         {activePlan.billingInterval === 'lifetime'
-                          ? `${myEquipment.length} machines listed (Unlimited Quota)`
-                          : `${myEquipment.length} of ${activePlan.listingLimit} machine slots used`}
+                          ? `${myEquipmentList.length} machines listed (Unlimited Quota)`
+                          : `${myEquipmentList.length} of ${activePlan.listingLimit || 2} machine slots used`}
                       </span>
                     </div>
                     <div className="w-full h-3 bg-[#34373C] rounded-full overflow-hidden">
@@ -931,7 +981,7 @@ const DashboardPage = () => {
                         style={{
                           width: `${Math.min(
                             100,
-                            ((myEquipment.length / (activePlan.listingLimit || 999)) * 100) || 0
+                            ((myEquipmentList.length / (activePlan.listingLimit || 999)) * 100) || 0
                           )}%`,
                         }}
                       />
@@ -940,7 +990,7 @@ const DashboardPage = () => {
                       <span>
                         {activePlan.billingInterval === 'lifetime'
                           ? 'Unlimited listing slots available'
-                          : `Remaining slots: ${Math.max(0, activePlan.listingLimit - myEquipment.length)}`}
+                          : `Remaining slots: ${Math.max(0, (activePlan.listingLimit || 2) - myEquipmentList.length)}`}
                       </span>
                       <span className="text-[#FCC837] font-semibold">Verified by Backend</span>
                     </div>
