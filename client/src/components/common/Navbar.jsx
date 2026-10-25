@@ -109,43 +109,45 @@ const Navbar = () => {
                   to="/dashboard"
                   className="flex items-center space-x-2 text-sm text-slate-700 hover:text-slate-900"
                 >
-                  <div className="h-8 w-8 rounded-full bg-[#222428] flex items-center justify-center text-[#FCC837] font-black text-xs border border-[#34373C]">
+                  <div className="h-8 w-8 rounded-full bg-[#222428] text-[#FCC837] border border-[#34373C] flex items-center justify-center font-bold text-xs">
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="font-bold max-w-[120px] truncate">{user.name}</span>
+                  <span className="font-semibold hidden lg:inline max-w-[120px] truncate">
+                    {user.name || user.email}
+                  </span>
                 </Link>
 
                 <button
                   onClick={handleLogout}
-                  title="Log out"
-                  className="p-1.5 rounded-md text-slate-500 hover:text-slate-950 hover:bg-slate-100 transition"
+                  title="Sign out of STORENT"
+                  className="p-2 text-slate-400 hover:text-slate-700 rounded-lg transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 pl-2 border-l border-slate-200">
                 <Link
                   to="/login"
-                  className="px-3.5 py-2 text-sm font-bold text-slate-800 hover:text-black transition"
+                  className="px-3 py-1.5 text-sm font-semibold text-slate-700 hover:text-slate-950 transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 text-sm font-black text-slate-950 bg-[#FCC837] hover:bg-[#F0BA28] rounded-lg border border-[#E6B01B] shadow-sm transition"
+                  className="px-3.5 py-1.5 text-sm font-bold rounded-lg bg-[#222428] text-[#FCC837] hover:bg-black transition-colors border border-[#34373C]"
                 >
-                  Sign Up Free
+                  Sign Up
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center space-x-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-950 focus:outline-none"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -153,9 +155,9 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu dropdown */}
+      {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3">
           <Link
             to="/browse"
             onClick={() => setMobileMenuOpen(false)}

@@ -22,6 +22,11 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  Tag,
+  Phone,
+  MessageSquare,
+  Clock,
+  FileCheck,
 } from 'lucide-react';
 
 const photoCategories = [
@@ -98,28 +103,56 @@ const sampleMachineryPhotos = [
     id: 'concrete-mixer',
     name: 'Schwing Stetter 6 Cu.M Transit Mixer',
     category: 'Concrete',
-    badge: '3D Cartoon • RMC Batching',
+    badge: '3D Cartoon • High Output',
+    url: '/images/illustrations/concrete-mixer.svg',
+  },
+  {
+    id: 'batching-plant',
+    name: 'Self Loading Mobile Concrete Mixer',
+    category: 'Concrete',
+    badge: '3D Cartoon • On-Site Mix',
     url: '/images/illustrations/concrete-mixer.svg',
   },
   {
     id: 'forklift',
-    name: 'Toyota 3-Ton Rough Terrain Forklift',
+    name: 'Godrej 3-Ton Diesel Forklift',
     category: 'Material Handling',
-    badge: '3D Cartoon • Yard Pro',
+    badge: '3D Cartoon • Warehouse Pro',
+    url: '/images/illustrations/forklift.svg',
+  },
+  {
+    id: 'electric-stacker',
+    name: 'Heavy Duty Electric Reach Truck',
+    category: 'Material Handling',
+    badge: '3D Cartoon • High Mast',
     url: '/images/illustrations/forklift.svg',
   },
   {
     id: 'farm-tractor',
     name: 'Mahindra 575 DI Heavy Farm Tractor',
     category: 'Farm & Agricultural',
-    badge: '3D Cartoon • Multi-Purpose',
+    badge: '3D Cartoon • High Torque',
+    url: '/images/illustrations/tractor.svg',
+  },
+  {
+    id: 'commercial-tractor',
+    name: 'John Deere 5310 4WD Heavy Tractor',
+    category: 'Farm & Agricultural',
+    badge: '3D Cartoon • 4x4 Haulage',
     url: '/images/illustrations/tractor.svg',
   },
   {
     id: 'road-roller',
-    name: 'L&T 1190 Vibratory Soil Compactor',
+    name: 'L&T 1190 Soil Compactor Roller',
     category: 'Road & Compaction',
-    badge: '3D Cartoon • Paving Pro',
+    badge: '3D Cartoon • Highway Grade',
+    url: '/images/illustrations/road-roller.svg',
+  },
+  {
+    id: 'tandem-roller',
+    name: 'Vibratory Tandem Asphalt Roller',
+    category: 'Road & Compaction',
+    badge: '3D Cartoon • Dual Drum',
     url: '/images/illustrations/road-roller.svg',
   },
 ];
@@ -128,6 +161,7 @@ const RegisterEquipmentPage = () => {
   const { user, hasActiveSubscription, refreshUser } = useAuth();
   const navigate = useNavigate();
 
+  // Multi-step form step state (1 to 4)
   const [step, setStep] = useState(1);
   const [categories, setCategories] = useState([]);
   const [checkingQuota, setCheckingQuota] = useState(true);
@@ -141,8 +175,8 @@ const RegisterEquipmentPage = () => {
 
   const scrollGallery = (direction) => {
     if (scrollGalleryRef.current) {
-      const scrollAmount = direction === 'left' ? -340 : 340;
-      scrollGalleryRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      const offset = direction === 'left' ? -280 : 280;
+      scrollGalleryRef.current.scrollBy({ left: offset, behavior: 'smooth' });
     }
   };
 
@@ -153,6 +187,17 @@ const RegisterEquipmentPage = () => {
 
   // Form State
   const [formData, setFormData] = useState({
+    // Marketplace Listing Mode (Rent vs OLX Sell)
+    listingType: 'rent', // 'rent' | 'sale' | 'both'
+    salePrice: '',
+    isNegotiable: true,
+    usageHours: '',
+    ownershipType: 'first_owner',
+    rcAvailable: true,
+    nocAvailable: true,
+    sellerContactPhone: user?.phone || '',
+    sellerWhatsApp: user?.phone || '',
+
     // Step 1: Basic
     name: '',
     categoryId: '',
@@ -279,7 +324,6 @@ const RegisterEquipmentPage = () => {
           locationSource: 'gps',
         }));
 
-        // Attempt reverse-geocoding to automatically update address from device location
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
@@ -369,9 +413,16 @@ const RegisterEquipmentPage = () => {
     }
 
     if (step === 2) {
-      if (!formData.dailyRate || Number(formData.dailyRate) < 100) {
-        setErrorMessage('Daily rental rate is required and must be at least ₹100.');
-        return;
+      if (formData.listingType === 'rent') {
+        if (!formData.dailyRate || Number(formData.dailyRate) < 100) {
+          setErrorMessage('Daily rental rate is required and must be at least ₹100.');
+          return;
+        }
+      } else if (formData.listingType === 'sale') {
+        if (!formData.salePrice || Number(formData.salePrice) < 1000) {
+          setErrorMessage('Expected sale price is required for sale listing (min ₹1,000).');
+          return;
+        }
       }
     }
 
@@ -400,7 +451,25 @@ const RegisterEquipmentPage = () => {
     setSubmitting(true);
 
     try {
-      const res = await api.post('/equipment', formData);
+      const defaultIllustration = getIllustrationForEquipment(
+        formData.name || 'Machinery',
+        categories.find((c) => c._id === formData.categoryId)?.slug || ''
+      );
+      const finalPhoto =
+        formData.photos && formData.photos[0] && formData.photos[0].trim()
+          ? formData.photos[0].trim()
+          : defaultIllustration;
+
+      // Ensure dailyRate is 0 if pure sale listing and empty
+      const payload = {
+        ...formData,
+        photos: [finalPhoto],
+        dailyRate: formData.listingType === 'sale' ? (formData.dailyRate ? Number(formData.dailyRate) : 0) : Number(formData.dailyRate),
+        salePrice: formData.salePrice ? Number(formData.salePrice) : 0,
+        usageHours: formData.usageHours ? Number(formData.usageHours) : 0,
+      };
+
+      const res = await api.post('/equipment', payload);
       if (res.data?.success) {
         await refreshUser();
         setSuccessData(res.data.data);
@@ -441,10 +510,12 @@ const RegisterEquipmentPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-[#222428] tracking-tight">
-                Register Equipment for Rent
+                {formData.listingType === 'sale'
+                  ? 'Sell Equipment'
+                  : 'Register Equipment for Rent'}
               </h1>
               <p className="text-xs sm:text-sm text-[#34373C]/70 mt-1">
-                List your machinery on STORENT platform with verified rates and 3D cartoon visuals.
+                List your heavy machinery on STORENT with verified rates, 3D cartoon visuals, and direct buyer/renter contact.
               </p>
             </div>
 
@@ -464,39 +535,39 @@ const RegisterEquipmentPage = () => {
           <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold">
             {[
               { num: 1, label: 'Basic Info', icon: Layers },
-              { num: 2, label: 'Pricing & Terms', icon: IndianRupee },
+              { num: 2, label: formData.listingType === 'sale' ? 'Sale Pricing' : 'Pricing & Terms', icon: IndianRupee },
               { num: 3, label: 'Location & GPS', icon: MapPin },
               { num: 4, label: '3D Photos & Review', icon: Camera },
             ].map((s) => {
               const Icon = s.icon;
-              const isCurrent = step === s.num;
-              const isPassed = step > s.num;
+              const isActive = step === s.num;
+              const isPast = step > s.num;
               return (
                 <div
                   key={s.num}
-                  className={`flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg transition ${
-                    isCurrent
-                      ? 'bg-[#FCC837] text-[#222428] font-black border border-[#E6B01B] shadow-sm'
-                      : isPassed
-                      ? 'text-[#222428] bg-[#FCC837]/20 font-bold'
-                      : 'text-[#34373C]/40'
+                  className={`flex flex-col items-center p-2 rounded-lg transition ${
+                    isActive
+                      ? 'bg-[#222428] text-[#FCC837]'
+                      : isPast
+                      ? 'bg-[#FCC837]/20 text-[#222428]'
+                      : 'text-[#34373C]/50'
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="hidden sm:inline">
-                    Step {s.num}: {s.label}
-                  </span>
-                  <span className="sm:hidden">{s.label}</span>
+                  <div className="flex items-center space-x-1 mb-1">
+                    <Icon className="h-4 w-4" />
+                    <span>Step {s.num}</span>
+                  </div>
+                  <span className="text-[11px] font-medium hidden sm:inline">{s.label}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Error Alert */}
+        {/* Error Banner */}
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center space-x-2">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center space-x-2 font-medium">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -504,12 +575,73 @@ const RegisterEquipmentPage = () => {
         {/* Multi-step Form Card */}
         <div className="bg-white rounded-2xl p-6 sm:p-10 border border-[#34373C]/15 shadow-sm">
           <form onSubmit={step === 4 ? handleSubmit : handleNextStep}>
-            {/* STEP 1: Basic Machine Info */}
+            {/* STEP 1: Basic Machine Info & Listing Purpose */}
             {step === 1 && (
               <div className="space-y-6">
                 <h2 className="text-lg font-bold text-[#222428] border-b border-[#34373C]/10 pb-3">
-                  Step 1: Machinery Specifications
+                  Step 1: Machinery Specifications & Listing Purpose
                 </h2>
+
+                {/* Listing Purpose 3-Way Selector */}
+                <div className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#34373C]/15 space-y-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-[#222428]">
+                      Marketplace Listing Purpose *
+                    </label>
+                    <p className="text-[11px] text-[#34373C]/70">
+                      Choose how contractors and buyers interact with your machine on STORENT.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      {
+                        type: 'rent',
+                        title: 'For Rent Only',
+                        badge: 'Rental Fleet',
+                        desc: 'Earn recurring daily or monthly rental income from project contractors.',
+                        icon: Truck,
+                      },
+                      {
+                        type: 'sale',
+                        title: 'For Sale',
+                        badge: 'Direct Sell',
+                        desc: 'Sell used or new heavy machinery directly to buyers with phone & WhatsApp.',
+                        icon: Tag,
+                      },
+                    ].map((opt) => {
+                      const isSelected = formData.listingType === opt.type;
+                      const Icon = opt.icon;
+                      return (
+                        <button
+                          key={opt.type}
+                          type="button"
+                          onClick={() => handleInputChange('listingType', opt.type)}
+                          className={`p-3.5 rounded-xl border-2 text-left transition-all flex flex-col justify-between ${
+                            isSelected
+                              ? 'border-[#FCC837] bg-white ring-2 ring-[#FCC837]/30 shadow-md'
+                              : 'border-[#34373C]/15 bg-white/70 hover:border-[#FCC837]/60'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-[#222428] text-[#FCC837]' : 'bg-slate-100 text-[#34373C]'}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                              isSelected ? 'bg-[#FCC837] text-[#222428]' : 'bg-slate-200 text-[#34373C]'
+                            }`}>
+                              {opt.badge}
+                            </span>
+                          </div>
+                          <div className="mt-3">
+                            <h4 className="text-sm font-black text-[#222428]">{opt.title}</h4>
+                            <p className="text-[11px] text-[#34373C]/70 mt-0.5 leading-snug">{opt.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
@@ -617,115 +749,285 @@ const RegisterEquipmentPage = () => {
               </div>
             )}
 
-            {/* STEP 2: Pricing & Operator */}
+            {/* STEP 2: Pricing, Sale Details & Terms */}
             {step === 2 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-bold text-[#222428] border-b border-[#34373C]/10 pb-3">
-                  Step 2: Rental Rates & Terms
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="border-b border-[#34373C]/10 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Daily Rate (₹) *
-                    </label>
-                    <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
-                      <input
-                        type="number"
-                        required
-                        min="100"
-                        placeholder="e.g. 8500"
-                        value={formData.dailyRate}
-                        onChange={(e) => handleInputChange('dailyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
+                    <h2 className="text-lg font-bold text-[#222428]">
+                      Step 2: {formData.listingType === 'sale' ? 'Equipment Sale Pricing & Documents' : 'Rental Rates & Terms'}
+                    </h2>
+                    <p className="text-xs text-[#34373C]/70">
+                      {formData.listingType === 'sale'
+                        ? 'Set your expected sale price, operating hours, RC status, and direct buyer contact numbers.'
+                        : 'Configure your rental rates, security deposits, and operator availability.'}
+                    </p>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Hourly Rate (₹) (Optional)
-                    </label>
-                    <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 1200"
-                        value={formData.hourlyRate}
-                        onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Monthly Rate (₹) (Optional)
-                    </label>
-                    <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 180000"
-                        value={formData.monthlyRate}
-                        onChange={(e) => handleInputChange('monthlyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Security Deposit (₹)
-                    </label>
-                    <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 20000"
-                        value={formData.securityDeposit}
-                        onChange={(e) => handleInputChange('securityDeposit', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Transport / Delivery Charges (₹)
-                    </label>
-                    <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 3500 (or 0 if site pickup)"
-                        value={formData.deliveryCharges}
-                        onChange={(e) => handleInputChange('deliveryCharges', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                      Operator Option *
-                    </label>
-                    <select
-                      value={formData.operatorOption}
-                      onChange={(e) => handleInputChange('operatorOption', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-medium"
-                    >
-                      <option value="included">Operator Included in Rate</option>
-                      <option value="optional">Operator Available at Extra Cost</option>
-                      <option value="not_included">No Operator (Dry Hire Only)</option>
-                    </select>
-                  </div>
+                  <span className="text-[11px] font-black bg-[#222428] text-[#FCC837] px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto border border-[#34373C]">
+                    Mode: {formData.listingType === 'sale' ? 'For Sale' : 'For Rent'}
+                  </span>
                 </div>
+
+                {/* SALE SECTION (Rendered if sale) */}
+                {formData.listingType === 'sale' && (
+                  <div className="p-5 bg-white rounded-2xl border-2 border-[#FCC837] shadow-sm space-y-4">
+                    <div className="flex items-center space-x-2 pb-2 border-b border-[#FCC837]/30">
+                      <Tag className="h-4 w-4 text-[#222428]" />
+                      <h3 className="text-sm font-black text-[#222428] uppercase tracking-wider">
+                        Equipment Sale Specifications
+                      </h3>
+                      <span className="text-[10px] font-bold bg-[#FCC837] text-[#222428] px-2 py-0.5 rounded-full ml-auto">
+                        Direct Buyer Connect
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Expected Sale Price (₹) *
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            required
+                            min="1000"
+                            placeholder="e.g. 2850000"
+                            value={formData.salePrice}
+                            onChange={(e) => handleInputChange('salePrice', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none font-bold"
+                          />
+                        </div>
+                        <p className="text-[11px] text-[#34373C]/60 mt-1 font-medium">
+                          {formData.salePrice ? `₹${Number(formData.salePrice).toLocaleString('en-IN')}` : 'Enter full amount in ₹ (e.g. ₹28,50,000)'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Price Negotiation
+                        </label>
+                        <div className="flex items-center space-x-4 pt-2">
+                          <label className="flex items-center space-x-2 text-xs font-bold text-[#222428] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="isNegotiable"
+                              checked={formData.isNegotiable === true}
+                              onChange={() => handleInputChange('isNegotiable', true)}
+                              className="accent-[#222428]"
+                            />
+                            <span>Negotiable Price</span>
+                          </label>
+                          <label className="flex items-center space-x-2 text-xs font-bold text-[#34373C] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="isNegotiable"
+                              checked={formData.isNegotiable === false}
+                              onChange={() => handleInputChange('isNegotiable', false)}
+                              className="accent-[#222428]"
+                            />
+                            <span>Fixed Price</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Operating / Usage Meter Reading (Hours)
+                        </label>
+                        <div className="relative">
+                          <Clock className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 2450 (Engine hours)"
+                            value={formData.usageHours}
+                            onChange={(e) => handleInputChange('usageHours', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Ownership History
+                        </label>
+                        <select
+                          value={formData.ownershipType}
+                          onChange={(e) => handleInputChange('ownershipType', e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-medium"
+                        >
+                          <option value="first_owner">1st Owner (Direct First Hand)</option>
+                          <option value="second_owner">2nd Owner</option>
+                          <option value="third_or_more">3rd Owner or More</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Direct Contact Phone (For Buyer Calls)
+                        </label>
+                        <div className="relative">
+                          <Phone className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="tel"
+                            placeholder="e.g. +91 9876543210"
+                            value={formData.sellerContactPhone}
+                            onChange={(e) => handleInputChange('sellerContactPhone', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          WhatsApp Number (For Direct Chats)
+                        </label>
+                        <div className="relative">
+                          <MessageSquare className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="tel"
+                            placeholder="e.g. +91 9876543210"
+                            value={formData.sellerWhatsApp}
+                            onChange={(e) => handleInputChange('sellerWhatsApp', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="sm:col-span-2 flex flex-wrap gap-6 pt-2">
+                        <label className="flex items-center space-x-2 text-xs font-bold text-[#222428] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.rcAvailable}
+                            onChange={(e) => handleInputChange('rcAvailable', e.target.checked)}
+                            className="h-4 w-4 accent-[#222428] rounded"
+                          />
+                          <span>Original RC Book Available</span>
+                        </label>
+
+                        <label className="flex items-center space-x-2 text-xs font-bold text-[#222428] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.nocAvailable}
+                            onChange={(e) => handleInputChange('nocAvailable', e.target.checked)}
+                            className="h-4 w-4 accent-[#222428] rounded"
+                          />
+                          <span>RTO NOC Ready for Interstate Sale & Transfer</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* RENTAL RATES SECTION (Rendered if rent) */}
+                {formData.listingType === 'rent' && (
+                  <div className="space-y-4">
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Daily Rate (₹) *
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            required
+                            min="100"
+                            placeholder="e.g. 8500"
+                            value={formData.dailyRate}
+                            onChange={(e) => handleInputChange('dailyRate', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Hourly Rate (₹) (Optional)
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 1200"
+                            value={formData.hourlyRate}
+                            onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Monthly Rate (₹) (Optional)
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 180000"
+                            value={formData.monthlyRate}
+                            onChange={(e) => handleInputChange('monthlyRate', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Security Deposit (₹)
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 20000"
+                            value={formData.securityDeposit}
+                            onChange={(e) => handleInputChange('securityDeposit', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Transport / Delivery Charges (₹)
+                        </label>
+                        <div className="relative">
+                          <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 3500 (or 0 if site pickup)"
+                            value={formData.deliveryCharges}
+                            onChange={(e) => handleInputChange('deliveryCharges', e.target.value)}
+                            className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                          Operator Option *
+                        </label>
+                        <select
+                          value={formData.operatorOption}
+                          onChange={(e) => handleInputChange('operatorOption', e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-medium"
+                        >
+                          <option value="included">Operator Included in Rate</option>
+                          <option value="optional">Operator Available at Extra Cost</option>
+                          <option value="not_included">No Operator (Dry Hire Only)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1039,17 +1341,33 @@ const RegisterEquipmentPage = () => {
                     })}
                   </div>
 
-                  {/* Custom Photo URL Input */}
-                  <div className="mt-3">
-                    <label className="block text-[11px] font-semibold text-[#34373C]/70 mb-1">
-                      Or paste a custom machinery photo URL:
-                    </label>
+                  {/* Custom Photo URL Input (Completely Optional) */}
+                  <div className="mt-3.5 p-3 rounded-xl bg-slate-50 border border-[#34373C]/10">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[11px] font-bold text-[#34373C]">
+                        Custom Photo URL (Optional):
+                      </label>
+                      <span className="text-[10px] text-[#34373C]/60 bg-white px-2 py-0.5 rounded border border-[#34373C]/15 font-semibold">
+                        Not Required (3D Model Active)
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[#34373C]/60 mb-2">
+                      A high-quality 3D cartoon model is already selected above. Only enter a URL here if you prefer to use your own external photo.
+                    </p>
                     <input
-                      type="url"
-                      placeholder="https://example.com/my-machinery-image.jpg"
-                      value={formData.photos[0]}
-                      onChange={(e) => handleInputChange('photos', [e.target.value])}
-                      className="w-full px-3.5 py-2 rounded-lg border border-[#34373C]/30 text-xs focus:border-[#FCC837] outline-none"
+                      type="text"
+                      placeholder="https://example.com/custom-photo.jpg (Optional)"
+                      value={formData.photos[0]?.startsWith('/images/illustrations/') ? '' : (formData.photos[0] || '')}
+                      onChange={(e) => {
+                        const val = e.target.value.trim();
+                        if (val) {
+                          handleInputChange('photos', [val]);
+                        } else {
+                          const matchingCat = categories.find((c) => c._id === formData.categoryId);
+                          handleInputChange('photos', [getIllustrationForEquipment(formData.name || matchingCat?.name || '', matchingCat?.slug || '')]);
+                        }
+                      }}
+                      className="w-full px-3.5 py-2 rounded-lg border border-[#34373C]/20 bg-white text-xs focus:border-[#FCC837] outline-none"
                     />
                   </div>
                 </div>
@@ -1072,7 +1390,7 @@ const RegisterEquipmentPage = () => {
                   <div className="font-bold text-[#222428] text-sm pb-1.5 border-b border-[#34373C]/10 flex items-center justify-between">
                     <span>Listing Summary & Verification</span>
                     <span className="text-[11px] font-black text-[#222428] bg-[#FCC837] px-2.5 py-0.5 rounded-full border border-[#E6B01B] shadow-xs">
-                      Ready to Publish
+                      Mode: {formData.listingType === 'sale' ? 'For Sale' : 'For Rent'}
                     </span>
                   </div>
 
@@ -1103,9 +1421,27 @@ const RegisterEquipmentPage = () => {
                       <div>
                         <strong>Make & Model:</strong> {formData.brand} {formData.model}
                       </div>
-                      <div>
-                        <strong>Daily Rental Rate:</strong> ₹{formData.dailyRate}
-                      </div>
+
+                      {/* Display either or both rates */}
+                      {formData.listingType !== 'sale' && (
+                        <div>
+                          <strong>Daily Rental Rate:</strong> ₹{formData.dailyRate}
+                        </div>
+                      )}
+
+                      {formData.listingType !== 'rent' && (
+                        <div>
+                          <strong>Sale Price:</strong> ₹{Number(formData.salePrice || 0).toLocaleString('en-IN')}{' '}
+                          {formData.isNegotiable && <span className="text-[10px] text-green-700 font-bold">(Negotiable)</span>}
+                        </div>
+                      )}
+
+                      {formData.listingType !== 'rent' && formData.usageHours && (
+                        <div>
+                          <strong>Operating Hours:</strong> {formData.usageHours} hrs
+                        </div>
+                      )}
+
                       <div>
                         <strong>City & State:</strong> {formData.address.city}, {formData.address.state}
                       </div>
@@ -1113,9 +1449,11 @@ const RegisterEquipmentPage = () => {
                         <strong>Yard Address:</strong>{' '}
                         {formData.address.street || `${formData.address.city}, ${formData.address.state}`}
                       </div>
-                      <div>
-                        <strong>Operator Option:</strong> {formData.operatorOption}
-                      </div>
+                      {formData.listingType !== 'sale' && (
+                        <div>
+                          <strong>Operator Option:</strong> {formData.operatorOption}
+                        </div>
+                      )}
                       <div>
                         <strong>Delivery Radius:</strong> {formData.deliveryRadiusKm} km
                       </div>
@@ -1165,7 +1503,11 @@ const RegisterEquipmentPage = () => {
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4 text-[#222428]" />
-                      <span>Publish Equipment Listing</span>
+                      <span>
+                        {formData.listingType === 'sale'
+                          ? 'Publish Machinery for Sale'
+                          : 'Publish Equipment Listing'}
+                      </span>
                     </>
                   )}
                 </button>
@@ -1181,9 +1523,13 @@ const RegisterEquipmentPage = () => {
               <div className="h-14 w-14 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center mx-auto mb-4 font-black shadow-md border border-[#E6B01B]">
                 <CheckCircle className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-black text-[#222428]">Equipment Listed Successfully!</h3>
+              <h3 className="text-xl font-black text-[#222428]">
+                {successData.listingType === 'sale'
+                  ? 'Equipment Listed For Sale!'
+                  : 'Equipment Listed Successfully!'}
+              </h3>
               <p className="text-xs text-[#34373C]/80 mt-2">
-                Your <strong>{successData.name}</strong> is now live on the STORENT platform with 3D cartoon visuals and ready to receive rental bookings from nearby contractors.
+                Your <strong>{successData.name}</strong> is now live on the STORENT marketplace with 3D cartoon visuals and ready to receive buyer inquiries and bookings.
               </p>
 
               {/* 3D Model Display in Success Modal */}
@@ -1196,16 +1542,24 @@ const RegisterEquipmentPage = () => {
               </div>
 
               <div className="mt-4 p-3 rounded-xl bg-[#F8F9FA] border border-[#34373C]/10 text-xs text-[#34373C] text-left space-y-1">
-                <div>
-                  <strong>Daily Rate:</strong> ₹{successData.dailyRate}
-                </div>
+                {successData.listingType !== 'sale' && (
+                  <div>
+                    <strong>Daily Rate:</strong> ₹{successData.dailyRate}
+                  </div>
+                )}
+                {successData.listingType === 'sale' && (
+                  <div>
+                    <strong>Sale Price:</strong> ₹{Number(successData.salePrice || 0).toLocaleString('en-IN')}{' '}
+                    {successData.isNegotiable && <span className="text-[10px] text-green-700 font-bold">(Negotiable)</span>}
+                  </div>
+                )}
                 <div>
                   <strong>Location:</strong> {successData.address?.city}, {successData.address?.state}
                 </div>
                 <div>
-                  <strong>Status:</strong>{' '}
+                  <strong>Marketplace Mode:</strong>{' '}
                   <span className="text-[#222428] font-black uppercase">
-                    {successData.approvalStatus}
+                    {successData.listingType === 'sale' ? 'For Sale' : 'For Rent'}
                   </span>
                 </div>
               </div>

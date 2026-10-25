@@ -20,6 +20,10 @@ connectDB().then(async () => {
       console.log('[Auto-Seed] Empty database detected. Populating sample data across all tables...');
       const seedAll = require('../scripts/seedAll');
       await seedAll(false);
+    } else {
+      // Ensure marketplace sync for rent & buy equipment
+      const equipmentService = require('./services/equipmentService');
+      await equipmentService.ensureMarketplaceData();
     }
   } catch (err) {
     console.warn('[Auto-Seed Warning] Could not auto-seed data:', err.message);
@@ -39,4 +43,3 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
-

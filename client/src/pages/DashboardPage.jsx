@@ -581,12 +581,27 @@ const DashboardPage = () => {
                             <span>{item.brand} {item.model}</span>
                             <span>•</span>
                             <span>{item.categoryId?.name || 'Heavy Equipment'}</span>
+                            {item.listingType === 'sale' ? (
+                              <span className="text-[9px] font-black uppercase bg-[#222428] text-[#FCC837] px-1.5 py-0.2 rounded">
+                                For Sale
+                              </span>
+                            ) : (
+                              <span className="text-[9px] font-black uppercase bg-slate-100 text-[#34373C] px-1.5 py-0.2 rounded border border-slate-300">
+                                For Rent
+                              </span>
+                            )}
                           </div>
 
-                          <div className="mt-2 text-xs flex items-center space-x-3 text-[#222428]">
-                            <div className="font-black text-[#222428]">
-                              ₹{item.dailyRate?.toLocaleString('en-IN')}/day
-                            </div>
+                          <div className="mt-2 text-xs flex flex-wrap items-center gap-2 text-[#222428]">
+                            {item.listingType === 'sale' ? (
+                              <div className="font-black text-[#222428] bg-[#FCC837]/20 px-2 py-0.5 rounded border border-[#FCC837]/50">
+                                Sale: ₹{Number(item.salePrice || 0).toLocaleString('en-IN')}
+                              </div>
+                            ) : (
+                              <div className="font-black text-[#222428]">
+                                ₹{item.dailyRate?.toLocaleString('en-IN')}/day
+                              </div>
+                            )}
                             <div className="flex items-center space-x-1 text-[#34373C]/70">
                               <MapPin className="h-3 w-3 text-[#222428]" />
                               <span>{item.address?.city}, {item.address?.state}</span>

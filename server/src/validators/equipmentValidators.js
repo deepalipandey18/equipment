@@ -16,13 +16,24 @@ const createEquipmentSchema = z.object({
     .min(20, 'Description must be at least 20 characters'),
   condition: z.enum(['excellent', 'good', 'fair']).default('good'),
   photos: z
-    .array(z.string().url('Invalid photo URL'))
+    .array(z.string().min(1, 'Photo path or URL is required'))
     .min(1, 'Please provide at least one photo'),
   videoUrl: z.string().optional().default(''),
 
-  // Rates in rupees
+  // Marketplace Listing Mode (Rent vs OLX Sell)
+  listingType: z.enum(['rent', 'sale', 'both']).default('rent'),
+  salePrice: z.coerce.number().min(0).default(0),
+  isNegotiable: z.boolean().default(true),
+  usageHours: z.coerce.number().min(0).default(0),
+  ownershipType: z.enum(['first_owner', 'second_owner', 'third_or_more']).default('first_owner'),
+  rcAvailable: z.boolean().default(true),
+  nocAvailable: z.boolean().default(true),
+  sellerContactPhone: z.string().optional().default(''),
+  sellerWhatsApp: z.string().optional().default(''),
+
+  // Rates in rupees (for rental or both)
   hourlyRate: z.coerce.number().min(0).default(0),
-  dailyRate: z.coerce.number({ required_error: 'Daily rate is required' }).min(100, 'Daily rate must be at least ₹100'),
+  dailyRate: z.coerce.number().min(0).default(0),
   monthlyRate: z.coerce.number().min(0).default(0),
   minRentalDurationDays: z.coerce.number().min(1).default(1),
   securityDeposit: z.coerce.number().min(0).default(0),
@@ -58,4 +69,3 @@ module.exports = {
   createEquipmentSchema,
   updateEquipmentSchema,
 };
-

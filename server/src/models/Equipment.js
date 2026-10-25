@@ -44,13 +44,13 @@ const equipmentSchema = new mongoose.Schema(
     },
     condition: {
       type: String,
-      enum: ['excellent', 'good', 'fair'],
+      enum: ['brand_new', 'excellent', 'good', 'fair'],
       default: 'good',
     },
     photos: {
       type: [String],
       default: [
-        'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=800&auto=format&fit=crop&q=80',
+        '/images/illustrations/jcb-excavator.svg',
       ],
       validate: [
         (val) => val.length > 0,
@@ -61,7 +61,60 @@ const equipmentSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    // Rates (in rupees / integer currency unit)
+
+    // OLX-Style Listing Intent (Rent, Sell, or Both)
+    listingType: {
+      type: String,
+      enum: ['rent', 'sale', 'both'],
+      default: 'rent',
+      index: true,
+    },
+
+    // Sale Pricing & OLX Machine Details
+    salePrice: {
+      type: Number,
+      default: 0,
+      min: [0, 'Sale price cannot be negative'],
+    },
+    isNegotiable: {
+      type: Boolean,
+      default: true,
+    },
+    usageHours: {
+      type: Number,
+      default: 0,
+      min: [0, 'Operating hours cannot be negative'],
+    },
+    ownershipType: {
+      type: String,
+      enum: ['first_owner', 'second_owner', 'third_or_more'],
+      default: 'first_owner',
+    },
+    rcAvailable: {
+      type: Boolean,
+      default: true,
+    },
+    nocAvailable: {
+      type: Boolean,
+      default: true,
+    },
+    sellerContactPhone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    sellerWhatsApp: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    soldOut: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    // Rental Rates (in rupees)
     hourlyRate: {
       type: Number,
       default: 0,
@@ -69,8 +122,8 @@ const equipmentSchema = new mongoose.Schema(
     },
     dailyRate: {
       type: Number,
-      required: [true, 'Daily rental rate is required'],
-      min: [100, 'Daily rate must be at least ₹100'],
+      default: 0,
+      min: [0, 'Daily rate cannot be negative'],
     },
     monthlyRate: {
       type: Number,
@@ -193,8 +246,9 @@ const equipmentSchema = new mongoose.Schema(
 // 2dsphere index for MongoDB geospatial queries ($near, $geoNear)
 equipmentSchema.index({ location: '2dsphere' });
 equipmentSchema.index({ categoryId: 1, approvalStatus: 1, listingStatus: 1 });
+equipmentSchema.index({ listingType: 1, approvalStatus: 1, listingStatus: 1 });
 equipmentSchema.index({ dailyRate: 1 });
+equipmentSchema.index({ salePrice: 1 });
 
 const Equipment = mongoose.model('Equipment', equipmentSchema);
 module.exports = Equipment;
-

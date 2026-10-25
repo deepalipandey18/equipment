@@ -23,6 +23,7 @@ import {
   Compass,
   Star,
   ExternalLink,
+  Tag,
 } from 'lucide-react';
 
 const categoryIcons = {
