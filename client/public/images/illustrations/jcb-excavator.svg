@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <!-- 3D Lighting & Shading Gradients -->
+    <linearGradient id="yellowTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE169"/>
+      <stop offset="100%" stop-color="#FCC837"/>
+    </linearGradient>
+    <linearGradient id="yellowFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCC837"/>
+      <stop offset="100%" stop-color="#E5AA15"/>
+    </linearGradient>
+    <linearGradient id="yellowSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5AA15"/>
+      <stop offset="100%" stop-color="#B88005"/>
+    </linearGradient>
+    <linearGradient id="darkCharcoal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#464A50"/>
+      <stop offset="100%" stop-color="#222428"/>
+    </linearGradient>
+    <linearGradient id="deepDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#282A2E"/>
+      <stop offset="100%" stop-color="#121315"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#80A5B8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#344855" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="groundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#181A1D" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#181A1D" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#181A1D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#181A1D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Ambient 3D Shadow -->
+  <ellipse cx="200" cy="255" rx="160" ry="24" fill="url(#groundShadow)"/>
+
+  <!-- BACK WHEELS (Left & Right) -->
+  <g filter="url(#softGlow)">
+    <!-- Back Far Wheel -->
+    <ellipse cx="140" cy="180" rx="36" ry="46" fill="url(#deepDark)"/>
+    <ellipse cx="140" cy="180" rx="22" ry="30" fill="url(#darkCharcoal)"/>
+    <circle cx="140" cy="180" r="12" fill="#FCC837"/>
+
+    <!-- FRONT BUCKET LOADER ARM & PISTONS (Far) -->
+    <path d="M 120 195 L 45 220 L 52 235 L 125 210 Z" fill="url(#yellowSide)"/>
+    
+    <!-- FRONT BUCKET (3D Scoop) -->
+    <path d="M 25 185 L 65 175 L 75 225 L 30 245 Z" fill="url(#yellowFront)"/>
+    <path d="M 25 185 L 15 205 L 18 250 L 30 245 Z" fill="url(#yellowSide)"/>
+    <path d="M 25 185 L 65 175 L 60 165 L 18 175 Z" fill="url(#yellowTop)"/>
+    <!-- Bucket Teeth -->
+    <polygon points="18,250 14,258 22,254" fill="#222428"/>
+    <polygon points="22,248 20,256 26,251" fill="#222428"/>
+    <polygon points="26,246 25,254 30,248" fill="#222428"/>
+
+    <!-- MAIN CHASSIS & HOOD -->
+    <!-- Lower Body -->
+    <path d="M 110 195 L 240 185 L 245 220 L 105 225 Z" fill="url(#darkCharcoal)"/>
+    
+    <!-- Engine Hood (Front Yellow Block) -->
+    <path d="M 110 160 L 175 155 L 180 195 L 105 198 Z" fill="url(#yellowFront)"/>
+    <path d="M 110 160 L 175 155 L 165 142 L 102 146 Z" fill="url(#yellowTop)"/>
+    <path d="M 102 146 L 110 160 L 105 198 L 98 185 Z" fill="url(#yellowSide)"/>
+    <!-- Engine Grill Vents -->
+    <rect x="106" y="165" width="4" height="22" rx="2" fill="#222428"/>
+    <rect x="114" y="163" width="4" height="24" rx="2" fill="#222428"/>
+    <rect x="122" y="162" width="4" height="25" rx="2" fill="#222428"/>
+
+    <!-- OPERATOR CABIN (3D Modern Curved Glass & Yellow Pillars) -->
+    <!-- Cabin Roof -->
+    <path d="M 160 95 L 235 92 L 245 105 L 155 108 Z" fill="url(#yellowTop)"/>
+    <path d="M 155 108 L 245 105 L 240 114 L 152 116 Z" fill="url(#yellowFront)"/>
+    <!-- Cabin Base & Pillars -->
+    <path d="M 160 108 L 170 160 L 235 155 L 242 105 Z" fill="url(#yellowSide)"/>
+    <!-- Glass Windows (Front & Side) -->
+    <path d="M 163 112 L 172 154 L 202 152 L 198 110 Z" fill="url(#glassGrad)"/>
+    <path d="M 204 110 L 207 151 L 235 148 L 238 107 Z" fill="url(#glassGrad)"/>
+    <!-- Glass Specular Reflection Streak -->
+    <polygon points="172,113 182,112 176,153 168,154" fill="#FFFFFF" opacity="0.45"/>
+    <polygon points="210,111 218,110 215,150 209,151" fill="#FFFFFF" opacity="0.35"/>
+    <!-- Cabin Interior Silhouette -->
+    <circle cx="185" cy="132" r="8" fill="#222428" opacity="0.6"/>
+
+    <!-- REAR EXCAVATOR BOOM & ARM (Backhoe) -->
+    <!-- Swing Post Pivot -->
+    <rect x="238" y="155" width="18" height="40" rx="6" fill="url(#darkCharcoal)"/>
+    <!-- Boom (Main curved arm) -->
+    <path d="M 245 165 C 265 140, 290 120, 310 95 L 325 104 C 300 135, 275 160, 252 185 Z" fill="url(#yellowFront)"/>
+    <path d="M 245 165 L 310 95 L 318 90 L 252 160 Z" fill="url(#yellowTop)"/>
+    <!-- Hydraulic Cylinder -->
+    <line x1="250" y1="180" x2="295" y2="125" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <line x1="250" y1="180" x2="278" y2="145" stroke="#222428" stroke-width="7" stroke-linecap="round"/>
+    <!-- Dipper Arm -->
+    <path d="M 315 98 L 365 140 L 354 150 L 308 108 Z" fill="url(#yellowSide)"/>
+    <path d="M 315 98 L 365 140 L 368 135 L 320 92 Z" fill="url(#yellowTop)"/>
+    <!-- Dipper Hydraulic Ram -->
+    <line x1="305" y1="105" x2="345" y2="128" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="305" y1="105" x2="330" y2="118" stroke="#FCC837" stroke-width="6" stroke-linecap="round"/>
+    <!-- Excavator Backhoe Bucket -->
+    <path d="M 360 142 C 375 148, 385 168, 378 185 L 355 178 C 362 165, 355 152, 348 148 Z" fill="url(#darkCharcoal)"/>
+    <!-- Digging Teeth -->
+    <polygon points="378,185 388,192 376,190" fill="#FCC837"/>
+    <polygon points="374,184 382,190 372,187" fill="#FCC837"/>
+
+    <!-- FRONT NEAR WHEEL (Small Heavy Steering Tire) -->
+    <ellipse cx="112" cy="225" rx="30" ry="38" fill="url(#deepDark)"/>
+    <ellipse cx="112" cy="225" rx="18" ry="24" fill="url(#darkCharcoal)"/>
+    <!-- Rim Hub & Wheel Bolts -->
+    <circle cx="112" cy="225" r="11" fill="url(#yellowFront)"/>
+    <circle cx="112" cy="225" r="4" fill="#222428"/>
+    <!-- Tire Deep Treads -->
+    <rect x="83" y="215" width="6" height="12" rx="2" fill="#121315"/>
+    <rect x="88" y="235" width="6" height="12" rx="2" fill="#121315"/>
+    <rect x="130" y="205" width="6" height="12" rx="2" fill="#121315"/>
+    <rect x="134" y="228" width="6" height="12" rx="2" fill="#121315"/>
+
+    <!-- REAR NEAR WHEEL (Massive Giant Off-Road Tire) -->
+    <ellipse cx="225" cy="210" rx="44" ry="54" fill="url(#deepDark)"/>
+    <ellipse cx="225" cy="210" rx="28" ry="36" fill="url(#darkCharcoal)"/>
+    <!-- Heavy Rim Hub -->
+    <circle cx="225" cy="210" r="17" fill="url(#yellowFront)"/>
+    <circle cx="225" cy="210" r="6" fill="#222428"/>
+    <!-- 8 Lug Nuts -->
+    <circle cx="218" cy="204" r="2" fill="#FFFFFF"/>
+    <circle cx="232" cy="204" r="2" fill="#FFFFFF"/>
+    <circle cx="218" cy="216" r="2" fill="#FFFFFF"/>
+    <circle cx="232" cy="216" r="2" fill="#FFFFFF"/>
+    <!-- Giant Treads -->
+    <rect x="182" y="195" width="8" height="14" rx="2" fill="#121315"/>
+    <rect x="187" y="222" width="8" height="14" rx="2" fill="#121315"/>
+    <rect x="254" y="182" width="8" height="14" rx="2" fill="#121315"/>
+    <rect x="258" y="212" width="8" height="14" rx="2" fill="#121315"/>
+
+    <!-- Exhaust Pipe with cute smoke cap -->
+    <rect x="165" y="125" width="5" height="30" rx="2" fill="#222428"/>
+    <path d="M 163 125 L 172 122 L 171 125 Z" fill="#FCC837"/>
+
+    <!-- STORENT Branding Decal on Engine -->
+    <rect x="128" y="168" width="38" height="12" rx="3" fill="#222428"/>
+    <text x="147" y="177" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="7" fill="#FCC837" text-anchor="middle" letter-spacing="0.5">STORENT</text>
+  </g>
+</svg>
+

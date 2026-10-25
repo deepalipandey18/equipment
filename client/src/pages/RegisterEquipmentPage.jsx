@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import {
   Truck,
   MapPin,
@@ -28,160 +29,98 @@ const photoCategories = [
   'Earthmoving',
   'Lifting & Cranes',
   'Hauling & Trucks',
+  'Power & Generators',
   'Concrete',
-  'Road & Compaction',
   'Material Handling',
-  'Access & Aerial',
-  'Power & Towing',
+  'Farm & Agricultural',
+  'Road & Compaction',
 ];
 
+// STORENT 3D Cartoon Illustrations for Step 4 Machinery Photo Presets
 const sampleMachineryPhotos = [
   {
     id: 'jcb-3dx',
-    name: 'JCB 3DX Backhoe Loader',
+    name: 'JCB 3DX Super Backhoe Loader',
     category: 'Earthmoving',
-    badge: 'Most Popular',
-    url: 'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • Most Popular',
+    url: '/images/illustrations/jcb-excavator.svg',
   },
   {
     id: 'heavy-excavator',
-    name: 'Heavy Hydraulic Excavator (CAT/Komatsu)',
+    name: 'Caterpillar 320D Crawler Excavator',
     category: 'Earthmoving',
-    badge: 'Heavy Duty',
-    url: 'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'crawler-excavator',
-    name: 'Crawler Track Excavator 20-Ton',
-    category: 'Earthmoving',
-    badge: 'CPCB IV+',
-    url: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'crawler-bulldozer',
-    name: 'Caterpillar D6 Heavy Bulldozer',
-    category: 'Earthmoving',
-    badge: 'Grading Pro',
-    url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'wheel-loader',
-    name: 'Front-End Wheel Loader / Payloader',
-    category: 'Earthmoving',
-    badge: 'Fast Cycle',
-    url: 'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • Heavy Digging',
+    url: '/images/illustrations/jcb-excavator.svg',
   },
   {
     id: 'mobile-crane',
-    name: 'Hydraulic Mobile Telescopic Crane 40T',
+    name: 'ACE 25X Mobile Telescopic Crane',
     category: 'Lifting & Cranes',
-    badge: 'Certified',
-    url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18615f8?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • 25-Ton Boom',
+    url: '/images/illustrations/crane.svg',
   },
   {
-    id: 'tower-crane',
-    name: 'High-Rise Construction Tower Crane',
+    id: 'heavy-crane',
+    name: 'Hydraulic Mobile Crane 40-Ton',
     category: 'Lifting & Cranes',
-    badge: 'Skyline Lift',
-    url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • High Reach',
+    url: '/images/illustrations/crane.svg',
   },
   {
     id: 'dump-truck',
-    name: 'Multi-Axle Heavy Dump Tipper 16m³',
+    name: 'BharatBenz 3528C Heavy Tipper',
     category: 'Hauling & Trucks',
-    badge: 'High Payload',
-    url: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • High Payload',
+    url: '/images/illustrations/dump-truck.svg',
   },
   {
     id: 'mining-dumper',
-    name: 'Off-Highway Heavy Mining Haul Truck',
+    name: 'Multi-Axle Heavy Mining Haul Dumper',
     category: 'Hauling & Trucks',
-    badge: 'Mega Fleet',
-    url: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'concrete-mixer',
-    name: 'Transit Concrete RMC Drum Mixer 7m³',
-    category: 'Concrete',
-    badge: 'Batching',
-    url: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'road-roller',
-    name: 'Vibratory Soil Compactor / Road Roller',
-    category: 'Road & Compaction',
-    badge: 'Paving Pro',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'motor-grader',
-    name: 'Precision Road Leveling Motor Grader',
-    category: 'Road & Compaction',
-    badge: 'Grade Master',
-    url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'asphalt-paver',
-    name: 'Tracked Bitumen Asphalt Paver',
-    category: 'Road & Compaction',
-    badge: 'Highway Spec',
-    url: 'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'forklift',
-    name: 'Industrial Heavy Diesel Forklift 5-Ton',
-    category: 'Material Handling',
-    badge: 'Yard Pro',
-    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'telehandler',
-    name: 'All-Terrain Reach Telehandler 17m',
-    category: 'Material Handling',
-    badge: 'Multi-Reach',
-    url: 'https://images.unsplash.com/photo-1586528116493-a029325540fa?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'skid-steer',
-    name: 'Compact Skid Steer Loader (Bobcat)',
-    category: 'Material Handling',
-    badge: 'Agile 360°',
-    url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'boom-lift',
-    name: 'Articulated Hydraulic Aerial Boom Lift',
-    category: 'Access & Aerial',
-    badge: 'Aerial 28m',
-    url: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'scissor-lift',
-    name: 'Self-Propelled Rough Terrain Scissor Lift',
-    category: 'Access & Aerial',
-    badge: 'Platform Access',
-    url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=900&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 'heavy-tractor',
-    name: '4WD Heavy Haulage / Site Tractor',
-    category: 'Power & Towing',
-    badge: 'High Torque',
-    url: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=900&auto=format&fit=crop&q=80',
+    badge: '3D Cartoon • Heavy Haul',
+    url: '/images/illustrations/dump-truck.svg',
   },
   {
     id: 'silent-generator',
-    name: 'Acoustic Silent Diesel Generator 125 kVA',
-    category: 'Power & Towing',
-    badge: 'Site Power',
-    url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=900&auto=format&fit=crop&q=80',
+    name: 'Kirloskar 125 kVA Silent DG Set',
+    category: 'Power & Generators',
+    badge: '3D Cartoon • Prime Power',
+    url: '/images/illustrations/generator.svg',
   },
   {
-    id: 'lighting-tower',
-    name: 'Mobile High-Mast LED Lighting Tower',
-    category: 'Power & Towing',
-    badge: 'Night Shift',
-    url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&auto=format&fit=crop&q=80',
+    id: 'heavy-generator',
+    name: 'Acoustic Soundproof Diesel Generator',
+    category: 'Power & Generators',
+    badge: '3D Cartoon • Low Noise',
+    url: '/images/illustrations/generator.svg',
+  },
+  {
+    id: 'concrete-mixer',
+    name: 'Schwing Stetter 6 Cu.M Transit Mixer',
+    category: 'Concrete',
+    badge: '3D Cartoon • RMC Batching',
+    url: '/images/illustrations/concrete-mixer.svg',
+  },
+  {
+    id: 'forklift',
+    name: 'Toyota 3-Ton Rough Terrain Forklift',
+    category: 'Material Handling',
+    badge: '3D Cartoon • Yard Pro',
+    url: '/images/illustrations/forklift.svg',
+  },
+  {
+    id: 'farm-tractor',
+    name: 'Mahindra 575 DI Heavy Farm Tractor',
+    category: 'Farm & Agricultural',
+    badge: '3D Cartoon • Multi-Purpose',
+    url: '/images/illustrations/tractor.svg',
+  },
+  {
+    id: 'road-roller',
+    name: 'L&T 1190 Vibratory Soil Compactor',
+    category: 'Road & Compaction',
+    badge: '3D Cartoon • Paving Pro',
+    url: '/images/illustrations/road-roller.svg',
   },
 ];
 
@@ -245,8 +184,8 @@ const RegisterEquipmentPage = () => {
     locationSource: 'gps',
     deliveryRadiusKm: 50,
 
-    // Step 4: Media & Specs
-    photos: [sampleMachineryPhotos[0].url],
+    // Step 4: Media & Specs (Defaults to 3D Cartoon Illustration)
+    photos: ['/images/illustrations/jcb-excavator.svg'],
     serialNumber: '',
   });
 
@@ -291,7 +230,29 @@ const RegisterEquipmentPage = () => {
   }, [hasActiveSubscription, navigate]);
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      // When name changes, automatically pick the matching 3D cartoon illustration if user hasn't uploaded custom photo
+      if (field === 'name' && (!prev.photos[0] || prev.photos[0].startsWith('/images/illustrations/'))) {
+        const matchingCat = categories.find((c) => c._id === prev.categoryId);
+        updated.photos = [getIllustrationForEquipment(value, matchingCat?.slug || '')];
+      }
+      return updated;
+    });
+  };
+
+  const handleCategorySelect = (catId) => {
+    const selectedCat = categories.find((c) => c._id === catId);
+    setFormData((prev) => {
+      const matchingIllustration = getIllustrationForEquipment(prev.name || selectedCat?.name || '', selectedCat?.slug || '');
+      return {
+        ...prev,
+        categoryId: catId,
+        photos: (!prev.photos[0] || prev.photos[0].startsWith('/images/illustrations/'))
+          ? [matchingIllustration]
+          : prev.photos,
+      };
+    });
   };
 
   const handleAddressChange = (field, value) => {
@@ -458,20 +419,20 @@ const RegisterEquipmentPage = () => {
   if (checkingQuota) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-900" />
-        <p className="text-sm text-slate-500 font-medium">Verifying subscription listing quota...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-[#222428]" />
+        <p className="text-sm text-[#34373C] font-medium">Verifying subscription listing quota...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F8F9FA] py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Link
             to="/dashboard"
-            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-3"
+            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#34373C] hover:text-[#222428] mb-3"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Back to Dashboard</span>
@@ -479,17 +440,17 @@ const RegisterEquipmentPage = () => {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#222428] tracking-tight">
                 Register Equipment for Rent
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                List your machinery on STORENT platform with verified rates and GPS discovery.
+              <p className="text-xs sm:text-sm text-[#34373C]/70 mt-1">
+                List your machinery on STORENT platform with verified rates and 3D cartoon visuals.
               </p>
             </div>
 
             {quotaInfo && (
-              <div className="flex items-center space-x-2 bg-[#FCC837]/20 border border-[#FCC837]/50 px-3.5 py-1.5 rounded-lg text-slate-950 text-xs font-bold self-start sm:self-auto">
-                <Crown className="h-4 w-4 text-amber-500" />
+              <div className="flex items-center space-x-2 bg-[#FCC837]/20 border border-[#FCC837]/50 px-3.5 py-1.5 rounded-lg text-[#222428] text-xs font-bold self-start sm:self-auto">
+                <Crown className="h-4 w-4 text-[#FCC837]" />
                 <span>
                   Quota: <strong>{quotaInfo.remaining}</strong> listings remaining on {quotaInfo.planName}
                 </span>
@@ -499,13 +460,13 @@ const RegisterEquipmentPage = () => {
         </div>
 
         {/* Step Indicator */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-8">
+        <div className="bg-white p-4 rounded-xl border border-[#34373C]/15 shadow-sm mb-8">
           <div className="grid grid-cols-4 gap-2 text-center text-xs font-bold">
             {[
               { num: 1, label: 'Basic Info', icon: Layers },
               { num: 2, label: 'Pricing & Terms', icon: IndianRupee },
               { num: 3, label: 'Location & GPS', icon: MapPin },
-              { num: 4, label: 'Photos & Specs', icon: Camera },
+              { num: 4, label: '3D Photos & Review', icon: Camera },
             ].map((s) => {
               const Icon = s.icon;
               const isCurrent = step === s.num;
@@ -515,10 +476,10 @@ const RegisterEquipmentPage = () => {
                   key={s.num}
                   className={`flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg transition ${
                     isCurrent
-                      ? 'bg-[#FCC837] text-slate-950 font-black border border-[#E6B01B]'
+                      ? 'bg-[#FCC837] text-[#222428] font-black border border-[#E6B01B] shadow-sm'
                       : isPassed
-                      ? 'text-slate-950 bg-[#FCC837]/20 font-bold'
-                      : 'text-slate-400'
+                      ? 'text-[#222428] bg-[#FCC837]/20 font-bold'
+                      : 'text-[#34373C]/40'
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -541,38 +502,38 @@ const RegisterEquipmentPage = () => {
         )}
 
         {/* Multi-step Form Card */}
-        <div className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 sm:p-10 border border-[#34373C]/15 shadow-sm">
           <form onSubmit={step === 4 ? handleSubmit : handleNextStep}>
             {/* STEP 1: Basic Machine Info */}
             {step === 1 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                <h2 className="text-lg font-bold text-[#222428] border-b border-[#34373C]/10 pb-3">
                   Step 1: Machinery Specifications
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Equipment Name *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. JCB 3DX Super Backhoe Loader"
+                      placeholder="e.g. JCB 3DX Super Backhoe Loader, ACE 25X Mobile Crane..."
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Category *
                     </label>
                     <select
                       value={formData.categoryId}
-                      onChange={(e) => handleInputChange('categoryId', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                      onChange={(e) => handleCategorySelect(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-medium"
                     >
                       {categories.map((c) => (
                         <option key={c._id} value={c._id}>
@@ -583,13 +544,13 @@ const RegisterEquipmentPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Condition *
                     </label>
                     <select
                       value={formData.condition}
                       onChange={(e) => handleInputChange('condition', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white"
                     >
                       <option value="excellent">Excellent (Like New, Low Hours)</option>
                       <option value="good">Good (Well Maintained, Regularly Serviced)</option>
@@ -598,35 +559,35 @@ const RegisterEquipmentPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Manufacturer Brand *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. JCB, Caterpillar, Tata Hitachi"
+                      placeholder="e.g. JCB, Caterpillar, ACE, BharatBenz, Kirloskar"
                       value={formData.brand}
                       onChange={(e) => handleInputChange('brand', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Model Number *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. 3DX Plus, 320D2"
+                      placeholder="e.g. 3DX Super, 320D2, 25X Mobile"
                       value={formData.model}
                       onChange={(e) => handleInputChange('model', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Manufacturing Year
                     </label>
                     <input
@@ -635,21 +596,21 @@ const RegisterEquipmentPage = () => {
                       max={new Date().getFullYear() + 1}
                       value={formData.year}
                       onChange={(e) => handleInputChange('year', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Description & Work Capability * (Min 20 characters)
                     </label>
                     <textarea
                       rows={3}
                       required
-                      placeholder="Specify operating weight, bucket capacity, recent servicing, attachments included..."
+                      placeholder="Specify operating weight, boom reach, bucket capacity, recent servicing, attachments included..."
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
                 </div>
@@ -659,17 +620,17 @@ const RegisterEquipmentPage = () => {
             {/* STEP 2: Pricing & Operator */}
             {step === 2 && (
               <div className="space-y-6">
-                <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
+                <h2 className="text-lg font-bold text-[#222428] border-b border-[#34373C]/10 pb-3">
                   Step 2: Rental Rates & Terms
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Daily Rate (₹) *
                     </label>
                     <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
                       <input
                         type="number"
                         required
@@ -677,87 +638,87 @@ const RegisterEquipmentPage = () => {
                         placeholder="e.g. 8500"
                         value={formData.dailyRate}
                         onChange={(e) => handleInputChange('dailyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Hourly Rate (₹) (Optional)
                     </label>
                     <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
                       <input
                         type="number"
                         min="0"
                         placeholder="e.g. 1200"
                         value={formData.hourlyRate}
                         onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Monthly Rate (₹) (Optional)
                     </label>
                     <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
                       <input
                         type="number"
                         min="0"
                         placeholder="e.g. 180000"
                         value={formData.monthlyRate}
                         onChange={(e) => handleInputChange('monthlyRate', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Security Deposit (₹)
                     </label>
                     <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
                       <input
                         type="number"
                         min="0"
                         placeholder="e.g. 20000"
                         value={formData.securityDeposit}
                         onChange={(e) => handleInputChange('securityDeposit', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Transport / Delivery Charges (₹)
                     </label>
                     <div className="relative">
-                      <IndianRupee className="h-4 w-4 text-slate-400 absolute left-3 top-3" />
+                      <IndianRupee className="h-4 w-4 text-[#34373C]/40 absolute left-3 top-3" />
                       <input
                         type="number"
                         min="0"
-                        placeholder="e.g. 3500 (or 0 if pickup)"
+                        placeholder="e.g. 3500 (or 0 if site pickup)"
                         value={formData.deliveryCharges}
                         onChange={(e) => handleInputChange('deliveryCharges', e.target.value)}
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Operator Option *
                     </label>
                     <select
                       value={formData.operatorOption}
                       onChange={(e) => handleInputChange('operatorOption', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-medium"
                     >
                       <option value="included">Operator Included in Rate</option>
                       <option value="optional">Operator Available at Extra Cost</option>
@@ -771,12 +732,12 @@ const RegisterEquipmentPage = () => {
             {/* STEP 3: Location & Coordinates */}
             {step === 3 && (
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#34373C]/10 gap-2">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900">
+                    <h2 className="text-lg font-bold text-[#222428]">
                       Step 3: Yard Location & Geospatial Radar
                     </h2>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[#34373C]/70">
                       Used for MongoDB 2dsphere proximity search so nearby contractors find your machine.
                     </p>
                   </div>
@@ -785,7 +746,7 @@ const RegisterEquipmentPage = () => {
                       type="button"
                       onClick={handleResetLocationDefaults}
                       title="Reset to recommended default yard values"
-                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition"
+                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 text-[#222428] text-xs font-semibold hover:bg-slate-200 transition"
                     >
                       <RotateCcw className="h-3.5 w-3.5" />
                       <span>Reset Defaults</span>
@@ -794,10 +755,10 @@ const RegisterEquipmentPage = () => {
                       type="button"
                       onClick={handleGetCurrentLocation}
                       disabled={locating}
-                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-brand-50 border border-brand-300 text-brand-800 text-xs font-bold uppercase tracking-wider hover:bg-brand-100 transition shadow-sm"
+                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-[#222428] text-[#FCC837] text-xs font-bold uppercase tracking-wider hover:bg-[#34373C] transition shadow-sm border border-[#34373C]"
                     >
                       <Navigation className={`h-3.5 w-3.5 ${locating ? 'animate-spin' : ''}`} />
-                      <span>{locating ? 'Detecting GPS...' : 'Use Current Device GPS'}</span>
+                      <span>{locating ? 'Detecting GPS...' : 'Use Device GPS'}</span>
                     </button>
                   </div>
                 </div>
@@ -817,7 +778,7 @@ const RegisterEquipmentPage = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Yard / Plot Street Address
                     </label>
                     <input
@@ -825,12 +786,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="e.g. Plot 42, Sector 37 Industrial Area, Pace City"
                       value={formData.address.street}
                       onChange={(e) => handleAddressChange('street', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Area / Industrial Zone
                     </label>
                     <input
@@ -838,12 +799,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="Sector 37 Industrial Corridor"
                       value={formData.address.area}
                       onChange={(e) => handleAddressChange('area', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Landmark / Nearby Hub
                     </label>
                     <input
@@ -851,12 +812,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="Near Hero Honda Chowk Yard"
                       value={formData.address.landmark}
                       onChange={(e) => handleAddressChange('landmark', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       City *
                     </label>
                     <input
@@ -865,12 +826,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="Gurugram"
                       value={formData.address.city}
                       onChange={(e) => handleAddressChange('city', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       State *
                     </label>
                     <input
@@ -879,12 +840,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="Haryana"
                       value={formData.address.state}
                       onChange={(e) => handleAddressChange('state', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Postal Code / PIN *
                     </label>
                     <input
@@ -893,12 +854,12 @@ const RegisterEquipmentPage = () => {
                       placeholder="122002"
                       value={formData.address.pincode}
                       onChange={(e) => handleAddressChange('pincode', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                       Delivery Radius (km)
                     </label>
                     <input
@@ -906,14 +867,14 @@ const RegisterEquipmentPage = () => {
                       min="1"
                       value={formData.deliveryRadiusKm}
                       onChange={(e) => handleInputChange('deliveryRadiusKm', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                     />
                   </div>
 
                   {/* Manual Coordinates Tuning */}
-                  <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200">
+                  <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 bg-[#F8F9FA] rounded-xl border border-[#34373C]/15">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                         Latitude (° N)
                       </label>
                       <input
@@ -921,11 +882,11 @@ const RegisterEquipmentPage = () => {
                         step="0.0001"
                         value={formData.coordinates[1]}
                         onChange={(e) => handleCoordinateChange(1, e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white font-mono"
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-mono"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                         Longitude (° E)
                       </label>
                       <input
@@ -933,18 +894,18 @@ const RegisterEquipmentPage = () => {
                         step="0.0001"
                         value={formData.coordinates[0]}
                         onChange={(e) => handleCoordinateChange(0, e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none bg-white font-mono"
+                        className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none bg-white font-mono"
                       />
                     </div>
 
-                    <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 pt-2 border-t border-slate-200/60">
-                      <div className="flex items-center space-x-2 text-slate-600">
-                        <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+                    <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 pt-2 border-t border-[#34373C]/10">
+                      <div className="flex items-center space-x-2 text-[#34373C]">
+                        <MapPin className="h-4 w-4 text-[#222428] shrink-0" />
                         <span>
                           GeoJSON Index: <strong>[{formData.coordinates[0]}, {formData.coordinates[1]}]</strong> [lng, lat]
                         </span>
                       </div>
-                      <span className="text-[11px] font-bold text-[#222428] bg-[#FCC837]/20 px-2.5 py-0.5 rounded border border-[#FCC837]/40 self-start sm:self-auto">
+                      <span className="text-[11px] font-bold text-[#222428] bg-[#FCC837]/25 px-2.5 py-0.5 rounded border border-[#FCC837]/40 self-start sm:self-auto">
                         2dsphere Proximity Radar Ready
                       </span>
                     </div>
@@ -953,15 +914,19 @@ const RegisterEquipmentPage = () => {
               </div>
             )}
 
-            {/* STEP 4: Photos, Serial & Review */}
+            {/* STEP 4: Photos, Serial & Final Review with 3D Cartoon Illustrations */}
             {step === 4 && (
               <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h2 className="text-lg font-bold text-slate-900">
+                <div className="border-b border-[#34373C]/10 pb-3">
+                  <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#FCC837]/20 border border-[#FCC837]/40 text-[#222428] text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                    <Sparkles className="h-3 w-3 text-[#222428]" />
+                    <span>STORENT 3D Cartoon Illustrations Active</span>
+                  </div>
+                  <h2 className="text-lg font-bold text-[#222428]">
                     Step 4: Machine Photos & Final Review
                   </h2>
-                  <p className="text-xs text-slate-500">
-                    Choose from comprehensive machinery photo presets or provide a custom image URL.
+                  <p className="text-xs text-[#34373C]/70">
+                    Pick from official 3D cartoon illustrations or provide your own custom image URL.
                   </p>
                 </div>
 
@@ -969,11 +934,11 @@ const RegisterEquipmentPage = () => {
                   {/* Gallery Header & Navigation Controls */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
-                        Select Machinery Preset ({filteredPhotos.length} Available)
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#222428]">
+                        Select 3D Cartoon Preset ({filteredPhotos.length} Available)
                       </label>
-                      <p className="text-[11px] text-slate-500">
-                        Scroll horizontally to browse all machinery types (JCB, Excavators, Cranes, Rollers, Trucks, DG Sets).
+                      <p className="text-[11px] text-[#34373C]/70">
+                        Choose a 3D cartoon model matching your machinery (JCB, Excavators, Cranes, Rollers, Trucks, DG Sets).
                       </p>
                     </div>
 
@@ -982,7 +947,7 @@ const RegisterEquipmentPage = () => {
                       <button
                         type="button"
                         onClick={() => scrollGallery('left')}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs flex items-center justify-center hover:border-slate-300"
+                        className="p-1.5 rounded-lg border border-[#34373C]/20 bg-white hover:bg-[#F8F9FA] text-[#222428] transition flex items-center justify-center hover:border-[#FCC837]"
                         title="Scroll Left"
                       >
                         <ChevronLeft className="h-4 w-4" />
@@ -990,7 +955,7 @@ const RegisterEquipmentPage = () => {
                       <button
                         type="button"
                         onClick={() => scrollGallery('right')}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition shadow-xs flex items-center justify-center hover:border-slate-300"
+                        className="p-1.5 rounded-lg border border-[#34373C]/20 bg-white hover:bg-[#F8F9FA] text-[#222428] transition flex items-center justify-center hover:border-[#FCC837]"
                         title="Scroll Right"
                       >
                         <ChevronRight className="h-4 w-4" />
@@ -1007,8 +972,8 @@ const RegisterEquipmentPage = () => {
                         onClick={() => setPhotoCategoryFilter(cat)}
                         className={`text-xs px-3 py-1 rounded-full whitespace-nowrap font-medium transition ${
                           photoCategoryFilter === cat
-                            ? 'bg-brand-600 text-white shadow-xs font-semibold'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            ? 'bg-[#222428] text-[#FCC837] border border-[#34373C] font-black shadow-sm'
+                            : 'bg-slate-100 text-[#34373C] hover:bg-slate-200'
                         }`}
                       >
                         {cat}
@@ -1016,7 +981,7 @@ const RegisterEquipmentPage = () => {
                     ))}
                   </div>
 
-                  {/* Horizontally Scrollable Machinery Strip */}
+                  {/* Horizontally Scrollable 3D Cartoon Machinery Strip */}
                   <div
                     ref={scrollGalleryRef}
                     className="flex space-x-3.5 overflow-x-auto pb-3 pt-1 scroll-smooth snap-x snap-mandatory focus:outline-none"
@@ -1028,43 +993,43 @@ const RegisterEquipmentPage = () => {
                         <div
                           key={photo.id}
                           onClick={() => handleInputChange('photos', [photo.url])}
-                          className={`group cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-200 snap-start shrink-0 w-60 sm:w-64 bg-white flex flex-col ${
+                          className={`group cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-300 snap-start shrink-0 w-60 sm:w-64 bg-white flex flex-col ${
                             isSelected
-                              ? 'border-brand-600 ring-2 ring-brand-500/30 shadow-md scale-[1.01]'
-                              : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                              ? 'border-[#FCC837] ring-2 ring-[#FCC837]/30 shadow-lg scale-[1.02]'
+                              : 'border-[#34373C]/15 hover:border-[#FCC837] hover:shadow-md'
                           }`}
                         >
-                          <div className="relative h-32 sm:h-36 w-full bg-slate-100 overflow-hidden">
+                          <div className="relative h-36 sm:h-40 w-full bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] flex items-center justify-center p-3 overflow-hidden">
                             <img
                               src={photo.url}
                               alt={photo.name}
-                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                              className="h-full w-full object-contain transition duration-300 group-hover:scale-115 drop-shadow-md"
                               loading="lazy"
                             />
                             {/* Badges */}
-                            <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
-                              <span className="text-[10px] font-semibold bg-black/65 backdrop-blur-xs text-white px-2 py-0.5 rounded-full">
+                            <div className="absolute top-2 left-2 flex flex-col gap-1 items-start pointer-events-none">
+                              <span className="text-[10px] font-semibold bg-[#222428]/80 backdrop-blur text-white px-2 py-0.5 rounded-full">
                                 {photo.category}
                               </span>
                               {photo.badge && (
-                                <span className="text-[9px] font-bold bg-[#FCC837] text-[#222428] px-1.5 py-0.2 rounded">
+                                <span className="text-[9px] font-black bg-[#FCC837] text-[#222428] px-1.5 py-0.2 rounded border border-[#E6B01B]">
                                   {photo.badge}
                                 </span>
                               )}
                             </div>
 
                             {isSelected && (
-                              <div className="absolute top-2 right-2 bg-brand-600 text-white p-1 rounded-full shadow-md animate-in fade-in">
-                                <CheckCircle className="h-4 w-4 fill-white text-brand-600" />
+                              <div className="absolute top-2 right-2 bg-[#222428] text-[#FCC837] p-1 rounded-full shadow-md border border-[#34373C]">
+                                <CheckCircle className="h-4 w-4 fill-[#FCC837] text-[#222428]" />
                               </div>
                             )}
                           </div>
 
                           <div
-                            className={`p-2.5 text-xs text-center truncate ${
+                            className={`p-3 text-xs text-center truncate ${
                               isSelected
-                                ? 'bg-brand-50/80 text-brand-900 font-bold'
-                                : 'text-slate-800 font-semibold'
+                                ? 'bg-[#FCC837]/15 text-[#222428] font-black border-t border-[#FCC837]/40'
+                                : 'text-[#222428] font-bold border-t border-[#34373C]/10'
                             }`}
                           >
                             {photo.name}
@@ -1076,7 +1041,7 @@ const RegisterEquipmentPage = () => {
 
                   {/* Custom Photo URL Input */}
                   <div className="mt-3">
-                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                    <label className="block text-[11px] font-semibold text-[#34373C]/70 mb-1">
                       Or paste a custom machinery photo URL:
                     </label>
                     <input
@@ -1084,13 +1049,13 @@ const RegisterEquipmentPage = () => {
                       placeholder="https://example.com/my-machinery-image.jpg"
                       value={formData.photos[0]}
                       onChange={(e) => handleInputChange('photos', [e.target.value])}
-                      className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-xs focus:border-brand-500 outline-none"
+                      className="w-full px-3.5 py-2 rounded-lg border border-[#34373C]/30 text-xs focus:border-[#FCC837] outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
                     Chassis / Serial Number (Optional)
                   </label>
                   <input
@@ -1098,36 +1063,40 @@ const RegisterEquipmentPage = () => {
                     placeholder="e.g. JCB-IND-2023-88912"
                     value={formData.serialNumber}
                     onChange={(e) => handleInputChange('serialNumber', e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
                   />
                 </div>
 
-                {/* Summary Card with Image Preview */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
-                  <div className="font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200 flex items-center justify-between">
+                {/* Summary Card with 3D Cartoon Image Preview */}
+                <div className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#34373C]/15 text-xs space-y-3">
+                  <div className="font-bold text-[#222428] text-sm pb-1.5 border-b border-[#34373C]/10 flex items-center justify-between">
                     <span>Listing Summary & Verification</span>
-                    <span className="text-[11px] font-bold text-[#222428] bg-[#FCC837]/25 px-2.5 py-0.5 rounded-full border border-[#FCC837]/50">
+                    <span className="text-[11px] font-black text-[#222428] bg-[#FCC837] px-2.5 py-0.5 rounded-full border border-[#E6B01B] shadow-xs">
                       Ready to Publish
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* Selected Machinery Image Preview */}
-                    <div className="sm:col-span-1 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs">
-                      <div className="relative h-32 sm:h-full min-h-[120px] w-full bg-slate-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                    {/* Selected 3D Machinery Image Preview */}
+                    <div className="sm:col-span-1 rounded-2xl overflow-hidden border border-[#34373C]/15 bg-white shadow-xs">
+                      <div className="relative h-36 sm:h-44 w-full bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] flex items-center justify-center p-3">
                         <img
-                          src={formData.photos[0] || sampleMachineryPhotos[0].url}
+                          src={formData.photos[0] || getIllustrationForEquipment(formData)}
                           alt="Selected Machinery Preview"
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain drop-shadow-md"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = getIllustrationForEquipment(formData);
+                          }}
                         />
-                        <span className="absolute bottom-2 left-2 text-[9px] font-bold bg-black/70 backdrop-blur-xs text-white px-2 py-0.5 rounded-md">
-                          Selected Machinery
+                        <span className="absolute bottom-2 left-2 text-[9px] font-black bg-[#222428] text-[#FCC837] px-2 py-0.5 rounded-md border border-[#34373C]">
+                          Selected 3D Model
                         </span>
                       </div>
                     </div>
 
                     {/* Details list */}
-                    <div className="sm:col-span-2 grid grid-cols-2 gap-2.5 text-slate-600">
+                    <div className="sm:col-span-2 grid grid-cols-2 gap-2.5 text-[#34373C]">
                       <div>
                         <strong>Equipment:</strong> {formData.name || 'Unnamed Machine'}
                       </div>
@@ -1160,12 +1129,12 @@ const RegisterEquipmentPage = () => {
             )}
 
             {/* Step Navigation Buttons */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-8 pt-6 border-t border-[#34373C]/10 flex items-center justify-between">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={handlePrevStep}
-                  className="px-4 py-2.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center space-x-1.5"
+                  className="px-4 py-2.5 rounded-lg border border-[#34373C]/30 text-xs font-bold text-[#222428] hover:bg-slate-100 flex items-center space-x-1.5 transition"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span>Previous Step</span>
@@ -1177,7 +1146,7 @@ const RegisterEquipmentPage = () => {
               {step < 4 ? (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-slate-950 border border-[#E6B01B] shadow-sm flex items-center space-x-1.5"
+                  className="px-6 py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-[#222428] border border-[#E6B01B] shadow-sm flex items-center space-x-1.5 transition"
                 >
                   <span>Continue</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -1186,16 +1155,16 @@ const RegisterEquipmentPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-3 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-slate-950 border border-[#E6B01B] shadow-md flex items-center space-x-2 disabled:opacity-60"
+                  className="px-6 py-3 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-[#222428] border border-[#E6B01B] shadow-md flex items-center space-x-2 disabled:opacity-60 transition"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin text-[#222428]" />
                       <span>Publishing Listing...</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className="h-4 w-4 text-[#222428]" />
                       <span>Publish Equipment Listing</span>
                     </>
                   )}
@@ -1207,17 +1176,26 @@ const RegisterEquipmentPage = () => {
 
         {/* Success Modal */}
         {successData && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-slate-200">
-              <div className="h-14 w-14 rounded-full bg-[#FCC837] text-slate-950 flex items-center justify-center mx-auto mb-4 font-black">
+          <div className="fixed inset-0 z-50 bg-[#181A1D]/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-[#34373C]/20">
+              <div className="h-14 w-14 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center mx-auto mb-4 font-black shadow-md border border-[#E6B01B]">
                 <CheckCircle className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-black text-slate-900">Equipment Listed Successfully!</h3>
-              <p className="text-xs text-slate-600 mt-2">
-                Your <strong>{successData.name}</strong> is now live on the STORENT platform and ready to receive rental bookings from nearby contractors.
+              <h3 className="text-xl font-black text-[#222428]">Equipment Listed Successfully!</h3>
+              <p className="text-xs text-[#34373C]/80 mt-2">
+                Your <strong>{successData.name}</strong> is now live on the STORENT platform with 3D cartoon visuals and ready to receive rental bookings from nearby contractors.
               </p>
 
-              <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 text-left space-y-1">
+              {/* 3D Model Display in Success Modal */}
+              <div className="my-4 h-32 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 p-2 flex items-center justify-center">
+                <img
+                  src={successData.photos?.[0] || getIllustrationForEquipment(successData)}
+                  alt={successData.name}
+                  className="h-full w-full object-contain drop-shadow"
+                />
+              </div>
+
+              <div className="mt-4 p-3 rounded-xl bg-[#F8F9FA] border border-[#34373C]/10 text-xs text-[#34373C] text-left space-y-1">
                 <div>
                   <strong>Daily Rate:</strong> ₹{successData.dailyRate}
                 </div>
@@ -1235,13 +1213,13 @@ const RegisterEquipmentPage = () => {
               <div className="mt-6 flex flex-col space-y-2">
                 <Link
                   to="/dashboard"
-                  className="w-full py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] font-black text-xs uppercase tracking-wider text-slate-950 border border-[#E6B01B] transition"
+                  className="w-full py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] font-black text-xs uppercase tracking-wider text-[#222428] border border-[#E6B01B] transition shadow-sm text-center"
                 >
                   Manage in Dashboard
                 </Link>
                 <Link
                   to="/browse"
-                  className="w-full py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  className="w-full py-2.5 rounded-lg border border-[#34373C]/20 text-xs font-bold text-[#222428] hover:bg-[#F8F9FA] transition text-center"
                 >
                   View in Marketplace
                 </Link>
@@ -1255,4 +1233,3 @@ const RegisterEquipmentPage = () => {
 };
 
 export default RegisterEquipmentPage;
-

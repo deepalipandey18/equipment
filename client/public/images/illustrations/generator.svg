@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="genYellowTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE169"/>
+      <stop offset="100%" stop-color="#FCC837"/>
+    </linearGradient>
+    <linearGradient id="genYellowFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCC837"/>
+      <stop offset="100%" stop-color="#E5AA15"/>
+    </linearGradient>
+    <linearGradient id="genYellowSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5AA15"/>
+      <stop offset="100%" stop-color="#B88005"/>
+    </linearGradient>
+    <linearGradient id="genDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#464A50"/>
+      <stop offset="100%" stop-color="#222428"/>
+    </linearGradient>
+    <linearGradient id="genDeepDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#282A2E"/>
+      <stop offset="100%" stop-color="#121315"/>
+    </linearGradient>
+    <radialGradient id="genGroundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#181A1D" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#181A1D" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#181A1D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="genSoftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#181A1D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="200" cy="260" rx="155" ry="22" fill="url(#genGroundShadow)"/>
+
+  <g filter="url(#genSoftGlow)">
+    <!-- HEAVY BASE SKID & FORKLIFT POCKETS -->
+    <path d="M 60 215 L 340 195 L 345 240 L 55 245 Z" fill="url(#genDeepDark)"/>
+    <!-- Forklift Entry Holes in Base Frame -->
+    <rect x="135" y="228" width="35" height="12" rx="3" fill="#121315" stroke="#34373C" stroke-width="1.5"/>
+    <rect x="235" y="222" width="35" height="12" rx="3" fill="#121315" stroke="#34373C" stroke-width="1.5"/>
+
+    <!-- MAIN SOUNDPROOF ACOUSTIC CANOPY ENCLOSURE (Storent Yellow) -->
+    <!-- Top Face -->
+    <path d="M 75 95 L 325 80 L 305 60 L 60 72 Z" fill="url(#genYellowTop)"/>
+    <!-- Front/Side Isometric Faces -->
+    <path d="M 75 95 L 325 80 L 335 205 L 85 220 Z" fill="url(#genYellowFront)"/>
+    <path d="M 60 72 L 75 95 L 85 220 L 70 200 Z" fill="url(#genYellowSide)"/>
+
+    <!-- CANOPY ACCESS DOORS & SEAMS -->
+    <!-- Door 1 (Left Service Bay) -->
+    <rect x="95" y="105" width="60" height="95" rx="4" fill="#E5AA15" stroke="#B88005" stroke-width="1.5"/>
+    <circle cx="145" cy="150" r="3" fill="#222428"/> <!-- Door handle -->
+    <!-- Acoustic Air Intake Louvers/Vents -->
+    <g fill="#222428">
+      <rect x="105" y="115" width="40" height="4" rx="1.5"/>
+      <rect x="105" y="123" width="40" height="4" rx="1.5"/>
+      <rect x="105" y="131" width="40" height="4" rx="1.5"/>
+      <rect x="105" y="139" width="40" height="4" rx="1.5"/>
+    </g>
+
+    <!-- Door 2 (Center Engine Bay) -->
+    <rect x="165" y="100" width="75" height="98" rx="4" fill="#E5AA15" stroke="#B88005" stroke-width="1.5"/>
+    <circle cx="230" cy="148" r="3" fill="#222428"/>
+
+    <!-- DIGITAL SMART CONTROL PANEL (Window Box) -->
+    <rect x="175" y="110" width="55" height="40" rx="4" fill="#222428" stroke="#34373C" stroke-width="2"/>
+    <!-- LCD Screen (Greenish Glow) -->
+    <rect x="182" y="115" width="40" height="18" rx="2" fill="#1A3326"/>
+    <text x="202" y="128" font-family="monospace" font-weight="bold" font-size="7" fill="#4EFA87" text-anchor="middle">240V • 50Hz</text>
+    <!-- Status LEDs & Emergency Stop Push Button -->
+    <circle cx="187" cy="142" r="3" fill="#4EFA87"/> <!-- Run green -->
+    <circle cx="197" cy="142" r="3" fill="#FFE169"/> <!-- Warning yellow -->
+    <circle cx="218" cy="141" r="5" fill="#E53E3E"/> <!-- E-Stop big red button -->
+
+    <!-- Door 3 (Right Alternator / Exhaust Bay) -->
+    <rect x="250" y="95" width="65" height="98" rx="4" fill="#E5AA15" stroke="#B88005" stroke-width="1.5"/>
+    <!-- Large Cooling Air Outlet Grille -->
+    <g fill="#222428">
+      <rect x="258" y="105" width="48" height="4" rx="1.5"/>
+      <rect x="258" y="113" width="48" height="4" rx="1.5"/>
+      <rect x="258" y="121" width="48" height="4" rx="1.5"/>
+      <rect x="258" y="129" width="48" height="4" rx="1.5"/>
+      <rect x="258" y="137" width="48" height="4" rx="1.5"/>
+      <rect x="258" y="145" width="48" height="4" rx="1.5"/>
+    </g>
+
+    <!-- HEAVY LIFTING EYE HOOKS ON ROOF -->
+    <ellipse cx="140" cy="85" rx="6" ry="12" fill="none" stroke="#222428" stroke-width="4"/>
+    <ellipse cx="260" cy="78" rx="6" ry="12" fill="none" stroke="#222428" stroke-width="4"/>
+
+    <!-- EXHAUST SILENCER WITH RAIN CAP (Roof Top) -->
+    <rect x="280" y="35" width="10" height="35" rx="3" fill="url(#genDark)"/>
+    <polygon points="275,35 295,30 292,35" fill="#FCC837"/>
+
+    <!-- DIESEL FUEL FILLER NECK & GAUGE -->
+    <circle cx="95" cy="210" r="6" fill="#222428"/>
+    <circle cx="95" cy="210" r="3" fill="#FFE169"/>
+
+    <!-- STORENT BRANDING DECAL -->
+    <rect x="175" y="165" width="55" height="15" rx="3" fill="#222428"/>
+    <text x="202" y="176" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="8" fill="#FCC837" text-anchor="middle" letter-spacing="1">STORENT</text>
+  </g>
+</svg>
+

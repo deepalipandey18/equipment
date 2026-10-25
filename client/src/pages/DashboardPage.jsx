@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import InvoiceModal from '../components/common/InvoiceModal';
 import LiveEquipmentTrackerModal from '../components/common/LiveEquipmentTrackerModal';
 import {
@@ -536,9 +537,9 @@ const DashboardPage = () => {
                       className="border border-[#34373C]/15 rounded-xl p-4 flex flex-col sm:flex-row gap-4 hover:border-[#222428] transition bg-white"
                     >
                       <img
-                        src={item.photos?.[0] || 'https://via.placeholder.com/300x200'}
+                        src={item.photos?.[0] && !item.photos[0].includes('unsplash.com') && !item.photos[0].includes('placeholder') ? item.photos[0] : getIllustrationForEquipment(item)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(item); }}
                         alt={item.name}
-                        className="w-full sm:w-36 h-28 object-cover rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
+                        className="w-full sm:w-36 h-28 object-contain p-2 rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
                       />
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
@@ -675,9 +676,9 @@ const DashboardPage = () => {
                       >
                         <div className="flex flex-col sm:flex-row gap-4">
                           <img
-                            src={booking.equipmentId?.photos?.[0] || 'https://via.placeholder.com/300x200'}
+                            src={booking.equipmentId?.photos?.[0] && !booking.equipmentId.photos[0].includes('unsplash.com') && !booking.equipmentId.photos[0].includes('placeholder') ? booking.equipmentId.photos[0] : getIllustrationForEquipment(booking.equipmentId)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(booking.equipmentId); }}
                             alt=""
-                            className="w-full sm:w-36 h-28 object-cover rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
+                            className="w-full sm:w-36 h-28 object-contain p-2 rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
                           />
                           <div>
                             <div className="flex items-center space-x-2">

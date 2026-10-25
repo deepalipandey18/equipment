@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/client';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import {
   Search,
   MapPin,
@@ -475,9 +476,9 @@ const BrowseEquipmentPage = () => {
                   className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-[#FCC837] hover:shadow-md transition flex flex-col md:flex-row gap-6"
                 >
                   <img
-                    src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
+                    src={item.photos?.[0] && !item.photos[0].includes('unsplash.com') && !item.photos[0].includes('placeholder') ? item.photos[0] : getIllustrationForEquipment(item)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(item); }}
                     alt={item.name}
-                    className="w-full md:w-56 h-44 object-cover rounded-xl bg-slate-100 shrink-0"
+                    className="w-full md:w-56 h-44 object-contain p-2 bg-[#F8F9FA] rounded-xl border border-slate-200 shrink-0"
                   />
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
@@ -565,9 +566,9 @@ const BrowseEquipmentPage = () => {
                     {/* Photo Container */}
                     <div className="relative h-48 w-full overflow-hidden bg-slate-100">
                       <img
-                        src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
+                        src={item.photos?.[0] && !item.photos[0].includes('unsplash.com') && !item.photos[0].includes('placeholder') ? item.photos[0] : getIllustrationForEquipment(item)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(item); }}
                         alt={item.name}
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="h-full w-full object-contain p-2 bg-[#F8F9FA] group-hover:scale-105 transition-transform duration-300"
                       />
                       <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-800 uppercase tracking-wider shadow-sm">
                         {item.categoryId?.name || 'Machinery'}

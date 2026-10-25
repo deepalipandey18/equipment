@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="forkYellowTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE169"/>
+      <stop offset="100%" stop-color="#FCC837"/>
+    </linearGradient>
+    <linearGradient id="forkYellowFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCC837"/>
+      <stop offset="100%" stop-color="#E5AA15"/>
+    </linearGradient>
+    <linearGradient id="forkYellowSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5AA15"/>
+      <stop offset="100%" stop-color="#B88005"/>
+    </linearGradient>
+    <linearGradient id="forkDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#464A50"/>
+      <stop offset="100%" stop-color="#222428"/>
+    </linearGradient>
+    <linearGradient id="forkDeepDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#282A2E"/>
+      <stop offset="100%" stop-color="#121315"/>
+    </linearGradient>
+    <radialGradient id="forkGroundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#181A1D" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#181A1D" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#181A1D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="forkSoftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#181A1D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="200" cy="255" rx="155" ry="22" fill="url(#forkGroundShadow)"/>
+
+  <g filter="url(#forkSoftGlow)">
+    <!-- BACK FAR WHEEL -->
+    <ellipse cx="295" cy="215" rx="20" ry="26" fill="url(#forkDeepDark)"/>
+
+    <!-- FORKLIFT BODY & REAR COUNTERWEIGHT (Storent Yellow) -->
+    <!-- Rear Counterweight (Curved heavy rear) -->
+    <path d="M 230 150 C 290 150, 320 180, 310 220 L 220 225 Z" fill="url(#forkYellowSide)"/>
+    <path d="M 230 150 C 290 150, 320 180, 310 220 L 300 220 C 305 185, 280 155, 225 155 Z" fill="url(#forkYellowFront)"/>
+    <path d="M 180 170 L 240 165 L 245 225 L 175 228 Z" fill="url(#forkYellowFront)"/>
+    <path d="M 180 170 L 240 165 L 230 155 L 170 160 Z" fill="url(#forkYellowTop)"/>
+
+    <!-- OPERATOR OVERHEAD ROLL CAGE (Dark Charcoal Tubular Steel) -->
+    <line x1="160" y1="210" x2="160" y2="90" stroke="#222428" stroke-width="7" stroke-linecap="round"/>
+    <line x1="240" y1="180" x2="235" y2="90" stroke="#222428" stroke-width="7" stroke-linecap="round"/>
+    <!-- Roof Top Grille Canopy -->
+    <path d="M 155 90 L 240 85 L 225 75 L 145 78 Z" fill="#222428"/>
+    <line x1="165" y1="88" x2="155" y2="80" stroke="#FCC837" stroke-width="2"/>
+    <line x1="185" y1="87" x2="175" y2="79" stroke="#FCC837" stroke-width="2"/>
+    <line x1="205" y1="86" x2="195" y2="78" stroke="#FCC837" stroke-width="2"/>
+    <line x1="225" y1="85" x2="215" y2="77" stroke="#FCC837" stroke-width="2"/>
+
+    <!-- Operator Seat & Steering Wheel -->
+    <rect x="200" y="150" width="22" height="28" rx="4" fill="#121315"/>
+    <line x1="175" y1="170" x2="185" y2="155" stroke="#222428" stroke-width="4"/>
+    <ellipse cx="185" cy="153" rx="7" ry="3" fill="#222428"/>
+
+    <!-- VERTICAL DUPLEX LIFT MAST (Steel Rails) -->
+    <rect x="110" y="55" width="12" height="175" rx="3" fill="url(#forkDark)"/>
+    <rect x="130" y="55" width="12" height="175" rx="3" fill="url(#forkDark)"/>
+    <!-- Cross Braces -->
+    <rect x="110" y="65" width="32" height="6" rx="2" fill="#FCC837"/>
+    <rect x="110" y="125" width="32" height="6" rx="2" fill="#FCC837"/>
+    <rect x="110" y="185" width="32" height="6" rx="2" fill="#FCC837"/>
+
+    <!-- Hydraulic Lift Cylinder in Center -->
+    <rect x="122" y="90" width="8" height="135" rx="3" fill="#FFFFFF"/>
+    <rect x="121" y="145" width="10" height="80" rx="3" fill="#222428"/>
+
+    <!-- CARRIAGE & FORK TINES -->
+    <rect x="95" y="160" width="45" height="30" rx="4" fill="url(#forkDark)"/>
+    <!-- Left Fork (L-Shape) -->
+    <path d="M 98 165 L 98 215 L 35 215 L 35 222 L 105 222 L 105 165 Z" fill="#222428"/>
+    <!-- Right Fork (L-Shape) -->
+    <path d="M 125 165 L 125 215 L 62 215 L 62 222 L 132 222 L 132 165 Z" fill="#222428"/>
+
+    <!-- CUTE WOODEN PALLET WITH CARGO BOX ON FORKS -->
+    <g transform="translate(35, 175)">
+      <!-- Cargo Cardboard Box in Storent Yellow / Tan -->
+      <polygon points="15,5 55,0 75,18 35,23" fill="#FFE169"/>
+      <polygon points="15,5 35,23 35,42 15,24" fill="#FCC837"/>
+      <polygon points="35,23 75,18 75,37 35,42" fill="#E5AA15"/>
+      <rect x="30" y="27" width="16" height="7" rx="1.5" fill="#222428"/>
+      <text x="38" y="32" font-family="monospace" font-size="4" fill="#FCC837" text-anchor="middle">UP ↑</text>
+      <!-- Wooden Pallet (3D Planks) -->
+      <polygon points="5,38 75,32 82,42 12,48" fill="#D49D42"/>
+      <polygon points="12,48 82,42 82,46 12,52" fill="#996E24"/>
+      <rect x="18" y="47" width="10" height="5" fill="#4A340E"/>
+      <rect x="45" y="45" width="10" height="5" fill="#4A340E"/>
+      <rect x="70" y="43" width="10" height="5" fill="#4A340E"/>
+    </g>
+
+    <!-- FRONT NEAR WHEEL (Heavy Drive Tire) -->
+    <ellipse cx="145" cy="225" rx="30" ry="38" fill="url(#forkDeepDark)"/>
+    <ellipse cx="145" cy="225" rx="18" ry="24" fill="url(#forkDark)"/>
+    <circle cx="145" cy="225" r="10" fill="url(#forkYellowFront)"/>
+    <circle cx="145" cy="225" r="4" fill="#222428"/>
+
+    <!-- REAR NEAR WHEEL (Steering Tire) -->
+    <ellipse cx="280" cy="225" rx="24" ry="32" fill="url(#forkDeepDark)"/>
+    <ellipse cx="280" cy="225" rx="14" ry="20" fill="url(#forkDark)"/>
+    <circle cx="280" cy="225" r="8" fill="url(#forkYellowFront)"/>
+    <circle cx="280" cy="225" r="3" fill="#222428"/>
+
+    <!-- STORENT Branding on Counterweight -->
+    <rect x="235" y="180" width="48" height="14" rx="3" fill="#222428"/>
+    <text x="259" y="190" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="8" fill="#FCC837" text-anchor="middle" letter-spacing="1">STORENT</text>
+  </g>
+</svg>
+

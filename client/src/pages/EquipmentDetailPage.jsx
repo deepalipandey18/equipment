@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import {
   Truck,
   MapPin,
@@ -236,9 +237,9 @@ const EquipmentDetailPage = () => {
             <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
               <div className="relative h-72 sm:h-96 w-full rounded-xl overflow-hidden bg-slate-100">
                 <img
-                  src={equipment.photos?.[activePhoto] || equipment.photos?.[0]}
+                  src={equipment.photos?.[activePhoto] && !equipment.photos[activePhoto].includes('unsplash.com') && !equipment.photos[activePhoto].includes('placeholder') ? equipment.photos[activePhoto] : getIllustrationForEquipment(equipment)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(equipment); }}
                   alt={equipment.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-4 bg-[#F8F9FA]"
                 />
                 <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   {equipment.categoryId?.name || 'Heavy Equipment'}
@@ -259,7 +260,7 @@ const EquipmentDetailPage = () => {
                         activePhoto === i ? 'border-[#FCC837] ring-2 ring-[#FCC837]/30' : 'border-slate-200'
                       }`}
                     >
-                      <img src={photo} alt="" className="w-full h-full object-cover" />
+                      <img src={photo} alt="" className="w-full h-full object-contain p-4 bg-[#F8F9FA]" />
                     </button>
                   ))}
                 </div>

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mixYellowTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE169"/>
+      <stop offset="100%" stop-color="#FCC837"/>
+    </linearGradient>
+    <linearGradient id="mixYellowFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCC837"/>
+      <stop offset="100%" stop-color="#E5AA15"/>
+    </linearGradient>
+    <linearGradient id="mixDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#464A50"/>
+      <stop offset="100%" stop-color="#222428"/>
+    </linearGradient>
+    <linearGradient id="mixDeepDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#282A2E"/>
+      <stop offset="100%" stop-color="#121315"/>
+    </linearGradient>
+    <linearGradient id="mixGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#80A5B8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#344855" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="mixGroundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#181A1D" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#181A1D" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#181A1D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="mixSoftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#181A1D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="205" cy="255" rx="165" ry="24" fill="url(#mixGroundShadow)"/>
+
+  <g filter="url(#mixSoftGlow)">
+    <!-- BACK FAR WHEELS -->
+    <ellipse cx="230" cy="210" rx="24" ry="32" fill="url(#mixDeepDark)"/>
+    <ellipse cx="280" cy="210" rx="24" ry="32" fill="url(#mixDeepDark)"/>
+
+    <!-- TRUCK CHASSIS BEAM -->
+    <path d="M 60 190 L 325 180 L 320 220 L 55 225 Z" fill="url(#mixDark)"/>
+
+    <!-- ROTATING CONCRETE MIXER DRUM (Isometric Spiral in Storent Yellow & Charcoal) -->
+    <!-- Drum Pedestal Frame -->
+    <polygon points="150,190 165,150 185,150 195,190" fill="url(#mixDark)"/>
+    <polygon points="280,185 290,140 310,140 315,185" fill="url(#mixDark)"/>
+
+    <!-- Drum Body (Rotated Ellipsoid / Conical Barrel) -->
+    <g transform="translate(230, 135) rotate(-18)">
+      <!-- Main Barrel -->
+      <ellipse cx="0" cy="0" rx="75" ry="46" fill="url(#mixYellowFront)"/>
+      <path d="M -75 0 C -75 -46, 0 -46, 75 0 C 75 46, 0 46, -75 0 Z" fill="url(#mixYellowTop)"/>
+      
+      <!-- Spiral Charcoal Mixing Stripe 1 -->
+      <path d="M -50 -32 C -20 -40, 20 -20, 50 15 C 40 25, 0 10, -35 -20 Z" fill="#222428"/>
+      <!-- Spiral Charcoal Mixing Stripe 2 -->
+      <path d="M -20 -15 C 10 -25, 45 -5, 68 25 C 55 35, 20 20, -5 -5 Z" fill="#222428"/>
+      <!-- Drum Center Ring Roller Band -->
+      <ellipse cx="0" cy="0" rx="77" ry="48" fill="none" stroke="#222428" stroke-width="5"/>
+    </g>
+
+    <!-- DISCHARGE CHUTE & HOPPER (Rear Funnel) -->
+    <path d="M 310 110 L 340 100 L 345 130 L 320 135 Z" fill="url(#mixDark)"/>
+    <path d="M 325 130 L 365 170 L 350 180 L 315 140 Z" fill="url(#mixYellowFront)"/>
+    <path d="M 315 140 L 350 180 L 342 185 L 310 145 Z" fill="url(#mixYellowTop)"/>
+
+    <!-- WATER TANK BEHIND CABIN -->
+    <rect x="135" y="105" width="22" height="70" rx="10" fill="url(#mixDark)"/>
+    <rect x="140" y="115" width="12" height="50" rx="4" fill="#80A5B8"/>
+
+    <!-- FRONT CABIN (Heavy Duty Commercial Haulage Cab) -->
+    <path d="M 60 120 L 135 116 L 140 215 L 55 218 Z" fill="url(#mixYellowFront)"/>
+    <path d="M 60 120 L 135 116 L 125 105 L 52 108 Z" fill="url(#mixYellowTop)"/>
+    <path d="M 52 108 L 60 120 L 55 218 L 47 205 Z" fill="url(#mixYellowSide)"/>
+
+    <!-- Cab Windshield & Windows -->
+    <path d="M 56 125 L 92 123 L 90 162 L 52 164 Z" fill="url(#mixGlass)"/>
+    <path d="M 96 123 L 130 121 L 133 160 L 94 161 Z" fill="url(#mixGlass)"/>
+    <polygon points="60,126 72,125 65,162 55,163" fill="#FFFFFF" opacity="0.45"/>
+
+    <!-- Grille & Bumper -->
+    <path d="M 48 168 L 88 166 L 85 208 L 46 208 Z" fill="url(#mixDeepDark)"/>
+    <line x1="52" y1="175" x2="84" y2="173" stroke="#FCC837" stroke-width="3" stroke-linecap="round"/>
+    <line x1="51" y1="185" x2="83" y2="183" stroke="#FCC837" stroke-width="3" stroke-linecap="round"/>
+    <line x1="50" y1="195" x2="82" y2="193" stroke="#FCC837" stroke-width="3" stroke-linecap="round"/>
+    <rect x="42" y="210" width="48" height="15" rx="4" fill="url(#mixDark)"/>
+
+    <!-- NEAR WHEELS -->
+    <!-- Front Wheel -->
+    <ellipse cx="90" cy="225" rx="26" ry="34" fill="url(#mixDeepDark)"/>
+    <ellipse cx="90" cy="225" rx="15" ry="20" fill="url(#mixDark)"/>
+    <circle cx="90" cy="225" r="8" fill="url(#mixYellowFront)"/>
+    <circle cx="90" cy="225" r="4" fill="#222428"/>
+
+    <!-- Rear Tandem Wheels -->
+    <ellipse cx="230" cy="225" rx="28" ry="36" fill="url(#mixDeepDark)"/>
+    <ellipse cx="230" cy="225" rx="16" ry="22" fill="url(#mixDark)"/>
+    <circle cx="230" cy="225" r="9" fill="url(#mixYellowFront)"/>
+
+    <ellipse cx="285" cy="225" rx="28" ry="36" fill="url(#mixDeepDark)"/>
+    <ellipse cx="285" cy="225" rx="16" ry="22" fill="url(#mixDark)"/>
+    <circle cx="285" cy="225" r="9" fill="url(#mixYellowFront)"/>
+
+    <!-- STORENT Branding -->
+    <rect x="94" y="172" width="40" height="14" rx="3" fill="#222428"/>
+    <text x="114" y="182" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="7" fill="#FCC837" text-anchor="middle" letter-spacing="0.5">STORENT</text>
+  </g>
+</svg>
+

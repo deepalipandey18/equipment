@@ -15,9 +15,7 @@ const sampleEquipment = [
     year: 2022,
     description: 'High performance backhoe loader with heavy duty bucket and standard breaker piping. Ideal for digging trenches, basement excavations, and material loading. Fuel-efficient EcoMax engine with certified experienced operator.',
     condition: 'excellent',
-    photos: [
-      'https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/jcb-excavator.svg'],
     hourlyRate: 1100,
     dailyRate: 8500,
     monthlyRate: 195000,
@@ -47,9 +45,7 @@ const sampleEquipment = [
     year: 2021,
     description: '20-ton class heavy crawler excavator for bulk earthmoving, rock breaking, and deep canal works. Regular dealer maintenance, 1.0 cu.m heavy bucket, air-conditioned cabin.',
     condition: 'excellent',
-    photos: [
-      'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/jcb-excavator.svg'],
     hourlyRate: 1800,
     dailyRate: 14000,
     monthlyRate: 320000,
@@ -72,6 +68,66 @@ const sampleEquipment = [
     listingStatus: 'active',
   },
   {
+    name: 'ACE 25X Mobile Telescopic Crane',
+    categorySlug: 'cranes-lifting',
+    brand: 'ACE',
+    model: '25X Mobile',
+    year: 2022,
+    description: '25-ton hydraulic telescopic boom crane with 34.5m hook reach and 4-fall heavy wire hoist. Load chart certified with experienced licensed rigger operator.',
+    condition: 'excellent',
+    photos: ['/images/illustrations/crane.svg'],
+    hourlyRate: 1900,
+    dailyRate: 14500,
+    monthlyRate: 340000,
+    securityDeposit: 30000,
+    deliveryCharges: 5000,
+    operatorOption: 'included',
+    location: {
+      type: 'Point',
+      coordinates: [77.3178, 28.4089], // Faridabad
+    },
+    address: {
+      street: 'Sector 24 Heavy Industrial Area',
+      area: 'Mathura Road Corridor',
+      city: 'Faridabad',
+      state: 'Haryana',
+      pincode: '121005',
+    },
+    deliveryRadiusKm: 75,
+    approvalStatus: 'approved',
+    listingStatus: 'active',
+  },
+  {
+    name: 'BharatBenz 3528C Heavy Tipper Dump Truck',
+    categorySlug: 'dump-trucks',
+    brand: 'BharatBenz',
+    model: '3528C Mining',
+    year: 2023,
+    description: '28-ton multi-axle heavy duty tipper truck for bulk quarry, sand, aggregate, and demolition debris hauling. Certified heavy driver included.',
+    condition: 'excellent',
+    photos: ['/images/illustrations/dump-truck.svg'],
+    hourlyRate: 1200,
+    dailyRate: 9200,
+    monthlyRate: 210000,
+    securityDeposit: 25000,
+    deliveryCharges: 3000,
+    operatorOption: 'included',
+    location: {
+      type: 'Point',
+      coordinates: [77.0362, 28.4316], // Sohna Road Gurugram
+    },
+    address: {
+      street: 'Badshahpur Highway Crossing',
+      area: 'Sector 66',
+      city: 'Gurugram',
+      state: 'Haryana',
+      pincode: '122101',
+    },
+    deliveryRadiusKm: 90,
+    approvalStatus: 'approved',
+    listingStatus: 'active',
+  },
+  {
     name: 'Kirloskar 125 kVA Silent Diesel Generator Set',
     categorySlug: 'generators-power',
     brand: 'Kirloskar',
@@ -79,9 +135,7 @@ const sampleEquipment = [
     year: 2023,
     description: 'Soundproof CPCB-II compliant silent diesel DG set mounted on a robust base. Continuous prime power for construction sites, ready mix plants, and high-load installations. Low diesel consumption.',
     condition: 'excellent',
-    photos: [
-      'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/generator.svg'],
     hourlyRate: 600,
     dailyRate: 4200,
     monthlyRate: 85000,
@@ -111,9 +165,7 @@ const sampleEquipment = [
     year: 2020,
     description: '45 HP rugged multi-purpose tractor equipped with heavy-duty hydraulic tipping trailer/trolley. Ideal for site debris shifting, sand transport, leveling, and rural agricultural hauling.',
     condition: 'good',
-    photos: [
-      'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/tractor.svg'],
     hourlyRate: 450,
     dailyRate: 3200,
     monthlyRate: 70000,
@@ -143,9 +195,7 @@ const sampleEquipment = [
     year: 2022,
     description: '6 cubic meter transit concrete mixer mounted on Ashok Leyland Captain chassis. Optimized spiral blade drum ensuring homogenous concrete consistency without segregation. Slave engine driven.',
     condition: 'excellent',
-    photos: [
-      'https://images.unsplash.com/photo-1584467735815-f778f274e296?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/concrete-mixer.svg'],
     hourlyRate: 1400,
     dailyRate: 9800,
     monthlyRate: 230000,
@@ -175,9 +225,7 @@ const sampleEquipment = [
     year: 2021,
     description: '3,000 kg capacity industrial counterbalanced forklift with pneumatic tires and 4.5m duplex mast with side shifter. Excellent for heavy precast blocks, steel pallet loading, and warehouse staging.',
     condition: 'good',
-    photos: [
-      'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
-    ],
+    photos: ['/images/illustrations/forklift.svg'],
     hourlyRate: 500,
     dailyRate: 3500,
     monthlyRate: 75000,
@@ -196,6 +244,36 @@ const sampleEquipment = [
       pincode: '122051',
     },
     deliveryRadiusKm: 50,
+    approvalStatus: 'approved',
+    listingStatus: 'active',
+  },
+  {
+    name: 'L&T 1190 Heavy Soil Compactor Road Roller',
+    categorySlug: 'tools-compaction',
+    brand: 'L&T',
+    model: '1190 Vibratory',
+    year: 2022,
+    description: '11-ton heavy vibratory soil compactor and asphalt road roller with smooth steel drum. Excellent high-amplitude compaction for road sub-base and foundation preparation.',
+    condition: 'excellent',
+    photos: ['/images/illustrations/road-roller.svg'],
+    hourlyRate: 1100,
+    dailyRate: 7800,
+    monthlyRate: 175000,
+    securityDeposit: 20000,
+    deliveryCharges: 3500,
+    operatorOption: 'included',
+    location: {
+      type: 'Point',
+      coordinates: [77.1025, 28.7041], // North Delhi
+    },
+    address: {
+      street: 'GT Karnal Road Industrial Zone',
+      area: 'Alipur Bypass',
+      city: 'Delhi',
+      state: 'Delhi',
+      pincode: '110036',
+    },
+    deliveryRadiusKm: 65,
     approvalStatus: 'approved',
     listingStatus: 'active',
   },
@@ -238,7 +316,7 @@ const seedEquipment = async () => {
       );
     }
 
-    console.log(`[Seed Equipment] Successfully seeded ${sampleEquipment.length} sample heavy machines with 2dsphere coordinates.`);
+    console.log(`[Seed Equipment] Successfully seeded ${sampleEquipment.length} sample heavy machines with 3D cartoon illustrations and 2dsphere coordinates.`);
     await mongoose.disconnect();
     process.exit(0);
   } catch (error) {
@@ -248,4 +326,3 @@ const seedEquipment = async () => {
 };
 
 seedEquipment();
-

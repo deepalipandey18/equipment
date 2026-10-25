@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="craneYellowTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE169"/>
+      <stop offset="100%" stop-color="#FCC837"/>
+    </linearGradient>
+    <linearGradient id="craneYellowFront" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCC837"/>
+      <stop offset="100%" stop-color="#E5AA15"/>
+    </linearGradient>
+    <linearGradient id="craneYellowSide" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5AA15"/>
+      <stop offset="100%" stop-color="#B88005"/>
+    </linearGradient>
+    <linearGradient id="craneDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#464A50"/>
+      <stop offset="100%" stop-color="#222428"/>
+    </linearGradient>
+    <linearGradient id="craneDeepDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#282A2E"/>
+      <stop offset="100%" stop-color="#121315"/>
+    </linearGradient>
+    <linearGradient id="craneGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#80A5B8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#344855" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="craneGroundShadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#181A1D" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#181A1D" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#181A1D" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="craneSoftGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#181A1D" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="205" cy="255" rx="165" ry="24" fill="url(#craneGroundShadow)"/>
+
+  <g filter="url(#craneSoftGlow)">
+    <!-- BACK FAR WHEELS -->
+    <ellipse cx="140" cy="225" rx="20" ry="26" fill="url(#craneDeepDark)"/>
+    <ellipse cx="185" cy="225" rx="20" ry="26" fill="url(#craneDeepDark)"/>
+    <ellipse cx="230" cy="225" rx="20" ry="26" fill="url(#craneDeepDark)"/>
+
+    <!-- TRUCK CARRIER CHASSIS BASE -->
+    <path d="M 60 190 L 310 178 L 315 220 L 55 225 Z" fill="url(#craneDark)"/>
+    
+    <!-- OUTRIGGER STABILIZER LEGS -->
+    <path d="M 85 210 L 70 245 L 85 245 L 95 210 Z" fill="url(#craneYellowFront)"/>
+    <rect x="65" y="243" width="25" height="6" rx="2" fill="#222428"/>
+    <path d="M 285 205 L 295 242 L 310 242 L 295 205 Z" fill="url(#craneYellowFront)"/>
+    <rect x="290" y="240" width="25" height="6" rx="2" fill="#222428"/>
+
+    <!-- FRONT DRIVER CABIN -->
+    <path d="M 55 140 L 115 138 L 120 215 L 50 218 Z" fill="url(#craneYellowFront)"/>
+    <path d="M 55 140 L 115 138 L 105 125 L 48 128 Z" fill="url(#craneYellowTop)"/>
+    <path d="M 48 128 L 55 140 L 50 218 L 44 205 Z" fill="url(#craneYellowSide)"/>
+    <!-- Cab Windshield & Side Window -->
+    <path d="M 52 144 L 80 143 L 78 180 L 48 182 Z" fill="url(#craneGlass)"/>
+    <path d="M 83 143 L 112 142 L 114 178 L 82 179 Z" fill="url(#craneGlass)"/>
+    <polygon points="56,145 66,144 60,180 50,181" fill="#FFFFFF" opacity="0.4"/>
+    <polygon points="87,144 95,143 92,176 84,177" fill="#FFFFFF" opacity="0.3"/>
+    <!-- Headlights & Bumper -->
+    <rect x="42" y="195" width="8" height="18" rx="3" fill="#FFE169"/>
+    <rect x="40" y="210" width="16" height="12" rx="3" fill="#222428"/>
+
+    <!-- CRANE SLEWING TURRET (Rotating Upper Platform) -->
+    <rect x="180" y="150" width="85" height="35" rx="6" fill="url(#craneDark)"/>
+    <!-- Counterweight -->
+    <path d="M 245 140 L 290 140 L 285 180 L 245 180 Z" fill="url(#craneDeepDark)"/>
+    <rect x="250" y="145" width="35" height="10" rx="2" fill="#FCC837"/>
+
+    <!-- OPERATOR CRANE CABIN (High View) -->
+    <path d="M 175 125 L 210 125 L 212 165 L 173 165 Z" fill="url(#craneYellowFront)"/>
+    <path d="M 175 125 L 210 125 L 205 115 L 172 116 Z" fill="url(#craneYellowTop)"/>
+    <path d="M 177 128 L 207 128 L 209 158 L 175 158 Z" fill="url(#craneGlass)"/>
+
+    <!-- TELESCOPIC CRANE BOOM (Angled high in 3D) -->
+    <!-- Base Boom Pivot Cylinder -->
+    <circle cx="215" cy="145" r="14" fill="#222428"/>
+    <!-- Hydraulic Boom Lift Cylinder -->
+    <line x1="205" y1="165" x2="165" y2="120" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+    <line x1="205" y1="165" x2="185" y2="140" stroke="#222428" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- Stage 1 Main Boom (Chunky Yellow) -->
+    <path d="M 215 145 L 85 45 L 105 25 L 235 125 Z" fill="url(#craneYellowFront)"/>
+    <path d="M 85 45 L 105 25 L 95 18 L 75 38 Z" fill="url(#craneYellowTop)"/>
+    <path d="M 75 38 L 85 45 L 215 145 L 205 138 Z" fill="url(#craneYellowSide)"/>
+    <!-- Stage 2 Telescopic Extension Boom (Dark Steel) -->
+    <path d="M 80 40 L 40 10 L 52 -2 L 92 28 Z" fill="url(#craneDark)"/>
+    <!-- Pulleys & Sheave Head -->
+    <circle cx="44" cy="4" r="8" fill="#FCC837"/>
+    <circle cx="44" cy="4" r="4" fill="#222428"/>
+
+    <!-- HOIST CABLE & 3D HOOK -->
+    <line x1="44" y1="12" x2="44" y2="95" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3,2"/>
+    <!-- Hoist Hook Block -->
+    <rect x="36" y="95" width="16" height="20" rx="4" fill="#FCC837"/>
+    <circle cx="44" cy="105" r="3" fill="#222428"/>
+    <!-- Heavy Steel Crane Hook -->
+    <path d="M 44 115 C 44 130, 56 138, 56 128 C 56 122, 50 120, 48 124" stroke="#222428" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+    <!-- NEAR WHEELS (6 Heavy All-Terrain Tires) -->
+    <!-- Wheel 1 (Front Steering) -->
+    <ellipse cx="80" cy="225" rx="24" ry="32" fill="url(#craneDeepDark)"/>
+    <ellipse cx="80" cy="225" rx="14" ry="20" fill="url(#craneDark)"/>
+    <circle cx="80" cy="225" r="8" fill="url(#craneYellowFront)"/>
+    <circle cx="80" cy="225" r="3" fill="#222428"/>
+
+    <!-- Wheel 2 (Front Middle) -->
+    <ellipse cx="145" cy="225" rx="24" ry="32" fill="url(#craneDeepDark)"/>
+    <ellipse cx="145" cy="225" rx="14" ry="20" fill="url(#craneDark)"/>
+    <circle cx="145" cy="225" r="8" fill="url(#craneYellowFront)"/>
+    <circle cx="145" cy="225" r="3" fill="#222428"/>
+
+    <!-- Wheel 3 (Rear Drive 1) -->
+    <ellipse cx="230" cy="225" rx="24" ry="32" fill="url(#craneDeepDark)"/>
+    <ellipse cx="230" cy="225" rx="14" ry="20" fill="url(#craneDark)"/>
+    <circle cx="230" cy="225" r="8" fill="url(#craneYellowFront)"/>
+    <circle cx="230" cy="225" r="3" fill="#222428"/>
+
+    <!-- Wheel 4 (Rear Drive 2) -->
+    <ellipse cx="280" cy="225" rx="24" ry="32" fill="url(#craneDeepDark)"/>
+    <ellipse cx="280" cy="225" rx="14" ry="20" fill="url(#craneDark)"/>
+    <circle cx="280" cy="225" r="8" fill="url(#craneYellowFront)"/>
+    <circle cx="280" cy="225" r="3" fill="#222428"/>
+
+    <!-- STORENT Branding on Boom -->
+    <g transform="translate(145, 92) rotate(-38)">
+      <rect x="0" y="0" width="55" height="14" rx="3" fill="#222428"/>
+      <text x="27" y="10" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="8" fill="#FCC837" text-anchor="middle" letter-spacing="1">STORENT</text>
+    </g>
+  </g>
+</svg>
+

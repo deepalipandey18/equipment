@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import StorentLogo from '../components/common/StorentLogo';
 import {
   ShieldCheck,
@@ -375,9 +376,9 @@ const AdminDashboardPage = () => {
                     >
                       <div className="flex items-center space-x-3.5">
                         <img
-                          src={item.photos?.[0] || 'https://via.placeholder.com/80'}
+                          src={item.photos?.[0] && !item.photos[0].includes('unsplash.com') && !item.photos[0].includes('placeholder') ? item.photos[0] : getIllustrationForEquipment(item)} onError={(e) => { e.target.onerror = null; e.target.src = getIllustrationForEquipment(item); }}
                           alt=""
-                          className="h-14 w-18 object-cover rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
+                          className="h-14 w-18 object-contain p-1 rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
                         />
                         <div>
                           <div className="flex items-center space-x-2">

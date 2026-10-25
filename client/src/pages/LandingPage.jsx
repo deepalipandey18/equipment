@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 import StorentLogo from '../components/common/StorentLogo';
+import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import {
   Search,
   PlusCircle,
@@ -34,6 +35,7 @@ const categoryIcons = {
   'dump-trucks': Truck,
 };
 
+// 3D Cartoon Illustrations Showcase Items (100% matched to their equipment names)
 const showcaseItems = [
   {
     id: 'excavator',
@@ -42,8 +44,7 @@ const showcaseItems = [
     rate: '₹8,500/day',
     location: 'Gurugram, Haryana',
     distance: '2.4 km away',
-    image:
-      'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=1200&auto=format&fit=crop&q=80',
+    image: '/images/illustrations/jcb-excavator.svg',
     specs: 'Bucket: 1.0 m³ • Certified Operator • CPCB Compliant',
     tag: 'Highest Demand',
   },
@@ -54,8 +55,7 @@ const showcaseItems = [
     rate: '₹14,000/day',
     location: 'Noida, Uttar Pradesh',
     distance: '5.1 km away',
-    image:
-      'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=900&auto=format&fit=crop&q=80',
+    image: '/images/illustrations/crane.svg',
     specs: 'Boom Length: 38m • Capacity: 25-50 Ton • Load Chart Verified',
     tag: 'Infrastructure Verified',
   },
@@ -66,8 +66,7 @@ const showcaseItems = [
     rate: '₹4,200/day',
     location: 'Saket, New Delhi',
     distance: '3.8 km away',
-    image:
-      'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=900&auto=format&fit=crop&q=80',
+    image: '/images/illustrations/generator.svg',
     specs: 'Prime Power: 125 kVA • Acoustic Enclosure • Low Fuel Burn',
     tag: 'Instant Dispatch',
   },
@@ -82,6 +81,7 @@ const HERO_SCENES = [
     badge: 'Mining & Aggregate Transport',
     name: 'BharatBenz 3528C Heavy Tipper',
     category: 'Mining & Road Construction • 28 Ton Heavy Dump Truck',
+    illustration: '/images/illustrations/dump-truck.svg',
     bgImage: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=2400&auto=format&fit=crop&q=80',
     videoSources: [
       '/videos/truck-driving.mp4',
@@ -107,6 +107,7 @@ const HERO_SCENES = [
     badge: 'Heavy Earthmoving Active',
     name: 'JCB 3DX Super EcoXcellence',
     category: 'Heavy Earthmoving • Hydraulic Backhoe Loader',
+    illustration: '/images/illustrations/jcb-excavator.svg',
     bgImage: 'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=2400&auto=format&fit=crop&q=80',
     videoSources: [
       '/videos/jcb.mp4',
@@ -132,6 +133,7 @@ const HERO_SCENES = [
     badge: 'Infrastructure Heavy Lifting',
     name: 'ACE 25X Mobile Telescopic Crane',
     category: 'Heavy Lifting & Aerial • 25 Ton Telescopic Boom',
+    illustration: '/images/illustrations/crane.svg',
     bgImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=2400&auto=format&fit=crop&q=80',
     videoSources: [
       '/videos/crane-working.mp4',
@@ -150,10 +152,21 @@ const HERO_SCENES = [
   },
 ];
 
+const DEFAULT_CATEGORIES = [
+  { name: 'JCB & Excavators', slug: 'jcb-excavators', description: 'Backhoe loaders, mini excavators, and crawler excavators for earthmoving and digging.' },
+  { name: 'Cranes & Lifting', slug: 'cranes-lifting', description: 'Hydraulic mobile cranes, tower cranes, and aerial lift boom trucks.' },
+  { name: 'Generators & Power', slug: 'generators-power', description: 'Diesel silent generator sets (15 kVA to 500+ kVA) for construction and event power.' },
+  { name: 'Tractors & Farm Machinery', slug: 'tractors-farm', description: 'Heavy duty tractors, rotavators, and agricultural earth preparation equipment.' },
+  { name: 'Concrete Mixers', slug: 'concrete-mixers', description: 'Transit mixers, portable batching mixers, and concrete vibrators.' },
+  { name: 'Forklifts & Material Handling', slug: 'forklifts-handling', description: 'Diesel, LPG, and electric forklifts, pallet trucks, and reach stackers.' },
+  { name: 'Construction Tools & Compaction', slug: 'tools-compaction', description: 'Plate compactors, road rollers, jackhammers, and dewatering pumps.' },
+  { name: 'Dump Trucks & Haulage', slug: 'dump-trucks', description: 'Tipper dump trucks and multi-axle heavy trailers for material transport.' },
+];
+
 const LandingPage = () => {
   const { user, hasActiveSubscription } = useAuth();
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Scroll position state for dynamic scroll-driven animation
@@ -215,7 +228,7 @@ const LandingPage = () => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/categories');
-        if (res.data?.success) {
+        if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
           setCategories(res.data.data);
         }
       } catch (err) {
@@ -433,10 +446,10 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right: Translucent Glassmorphism Live Machine Radar & Telemetry HUD */}
+            {/* Right: Translucent Glassmorphism Live Machine Radar & 3D Cartoon Model HUD */}
             <div className="lg:col-span-5 relative perspective-1000 mt-6 lg:mt-0 animate-hero-zoom-in">
               <div
-                className="relative rounded-3xl p-6 sm:p-7 bg-[#222428]/70 backdrop-blur-xl border border-[#34373C] shadow-2xl transition-transform duration-300 ease-out preserve-3d"
+                className="relative rounded-3xl p-6 sm:p-7 bg-[#222428]/80 backdrop-blur-xl border border-[#34373C] shadow-2xl transition-transform duration-300 ease-out preserve-3d"
                 style={{
                   transform: `perspective(1000px) rotateX(${heroTilt}deg) rotateY(-${heroTilt * 0.6}deg) translateY(${heroTranslateY}px) scale(${heroScale})`,
                 }}
@@ -447,19 +460,28 @@ const LandingPage = () => {
                     <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837] animate-pulse" />
                     <span>{currentScene.badge}</span>
                   </div>
-                  <span className="text-[11px] font-semibold text-white/60">NCR Fleet Radar</span>
+                  <span className="text-[11px] font-semibold text-white/60">3D Fleet Telemetry</span>
                 </div>
 
-                {/* Machine Details with Gentle Fade & Settle */}
+                {/* Machine Details with 3D Cartoon Illustration Preview */}
                 <div className={`transition-all duration-500 ease-out ${hudFading ? 'opacity-20 translate-y-1' : 'opacity-100 translate-y-0'}`}>
-                  {/* Machine Name & Class */}
-                  <div className="mt-4">
-                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                      {currentScene.name}
-                    </h3>
-                    <p className="text-xs text-white/70 mt-0.5">
-                      {currentScene.category}
-                    </p>
+                  {/* 3D Model Image Box & Title */}
+                  <div className="mt-4 flex items-center gap-4">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#181A1D] border border-[#FCC837]/30 p-2 flex items-center justify-center shrink-0 shadow-inner group">
+                      <img
+                        src={currentScene.illustration}
+                        alt={currentScene.name}
+                        className="w-full h-full object-contain transition-transform duration-500 hover:scale-110 drop-shadow-md"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tight line-clamp-1">
+                        {currentScene.name}
+                      </h3>
+                      <p className="text-xs text-white/70 mt-0.5 line-clamp-1">
+                        {currentScene.category}
+                      </p>
+                    </div>
                   </div>
 
                   {/* 3-Col Quick Technical Specs */}
@@ -580,14 +602,14 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* DEDICATED SCROLL ANIMATION SHOWCASE: "Fleet in Motion" */}
+      {/* DEDICATED SCROLL ANIMATION SHOWCASE: "Fleet in Motion" with 3D Cartoon Illustrations */}
       <section className="py-20 bg-[#181A1D] text-white relative overflow-hidden border-b border-[#34373C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FCC837]/20 text-[#FCC837] border border-[#FCC837]/40 text-xs font-bold uppercase tracking-wider mb-3">
                 <Activity className="h-3.5 w-3.5" />
-                <span>Heavy Machinery in Motion</span>
+                <span>3D Heavy Machinery Fleet</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
                 Scroll Through Our Active Construction Fleet
@@ -621,14 +643,13 @@ const LandingPage = () => {
                     transform: `translateY(${cardOffset}px) scale(${cardScale})`,
                   }}
                 >
-                  {/* Photo Container */}
-                  <div className="relative h-60 w-full overflow-hidden bg-[#181A1D]">
+                  {/* 3D Cartoon Illustration Container */}
+                  <div className="relative h-64 w-full overflow-hidden bg-gradient-to-b from-[#181A1D] to-[#222428] flex items-center justify-center p-6">
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#222428] via-transparent to-transparent opacity-80" />
 
                     {/* Tag Badge */}
                     <div className="absolute top-4 left-4 bg-[#FCC837] text-[#222428] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border border-[#E6B01B]">
@@ -679,15 +700,18 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Category Explorer */}
+      {/* Category Explorer with 3D Cartoon Illustrations */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
           <div>
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]/40 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Machinery Categories</span>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#222428]">
               Browse Machinery Categories
             </h2>
             <p className="text-sm text-[#34373C]/70 mt-1">
-              Earthmoving, lifting, generation, and heavy construction fleets available for rent.
+              Select any category to explore verified machines with real GPS radar proximity.
             </p>
           </div>
           <Link
@@ -699,20 +723,27 @@ const LandingPage = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 8 Category Cards with 3D Cartoon Illustrations */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((cat) => {
-            const Icon = categoryIcons[cat.slug] || Wrench;
+            const illustrationSrc = getIllustrationForEquipment(cat.name, cat.slug);
             return (
               <Link
                 key={cat._id || cat.slug}
                 to={`/browse?category=${cat.slug}`}
-                className="group p-5 bg-white rounded-xl border border-[#34373C]/15 hover:border-[#FCC837] hover:shadow-md transition-all flex flex-col justify-between"
+                className="group p-5 bg-white rounded-2xl border border-[#34373C]/15 hover:border-[#FCC837] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  <div className="h-11 w-11 rounded-lg bg-[#FCC837]/20 text-[#222428] flex items-center justify-center mb-4 group-hover:bg-[#FCC837] transition border border-[#FCC837]/30">
-                    <Icon className="h-6 w-6" />
+                  {/* 3D Cartoon Illustration Frame */}
+                  <div className="h-36 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 mb-4 p-3 flex items-center justify-center group-hover:border-[#FCC837] group-hover:bg-[#FCC837]/10 transition-all duration-300 overflow-hidden">
+                    <img
+                      src={cat.imageUrl || illustrationSrc}
+                      alt={cat.name}
+                      className="h-28 w-28 object-contain group-hover:scale-115 transition-transform duration-300 drop-shadow-md"
+                      loading="lazy"
+                    />
                   </div>
-                  <h3 className="font-bold text-[#222428] transition">
+                  <h3 className="font-bold text-base text-[#222428] group-hover:text-black transition">
                     {cat.name}
                   </h3>
                   <p className="text-xs text-[#34373C]/70 mt-1.5 line-clamp-2 leading-relaxed">
@@ -800,7 +831,7 @@ const LandingPage = () => {
                   </li>
                 </ul>
               </div>
-              
+
               <button
                 onClick={handleRegisterClick}
                 className="w-full py-2.5 px-4 text-center rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-sm transition-all duration-300 shadow-md shadow-[#FCC837]/25 border border-[#E6B01B]"
