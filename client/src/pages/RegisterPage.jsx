@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Truck, User, Mail, Phone, Lock, AlertCircle, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Mail, Phone, Lock, AlertCircle, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 import AuthBackgroundLayout from '../components/auth/AuthBackgroundLayout';
+import StorentLogo from '../components/common/StorentLogo';
 
 const RegisterPage = () => {
   const { register } = useAuth();
@@ -63,13 +64,13 @@ const RegisterPage = () => {
       badgeText="One Unified Account for Heavy Machinery"
       maxWidth="max-w-2xl sm:max-w-3xl"
     >
-      <div className="space-y-4 bg-slate-900/85 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-white/15 shadow-2xl shadow-black/80">
+      <div className="space-y-4 bg-[#222428]/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-[#34373C] shadow-2xl shadow-black/80">
         <div className="text-center">
-          <div className="mx-auto h-11 w-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-brand-500 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/25 mb-2.5">
-            <Truck className="h-5 w-5 stroke-[2.3]" />
-          </div>
+          <Link to="/" className="inline-block mb-3">
+            {/* <StorentLogo variant="banner" className="h-12 w-auto shadow-md" /> */}
+          </Link>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Create Your Account
+            Create Your <span className="text-[#FCC837]">STORENT</span> Account
           </h2>
           <p className="mt-0.5 text-xs text-slate-300">
             One unified account to rent machinery and list your equipment
@@ -77,10 +78,10 @@ const RegisterPage = () => {
         </div>
 
         {/* Dual Capability Badge */}
-        <div className="py-2 px-3 bg-amber-500/10 rounded-xl border border-amber-500/25 flex items-center space-x-2 text-xs text-amber-200">
-          <ShieldCheck className="h-4 w-4 text-amber-400 shrink-0" />
+        <div className="py-2.5 px-3.5 bg-[#FCC837]/15 rounded-xl border border-[#FCC837]/40 flex items-center space-x-2 text-xs text-white">
+          <ShieldCheck className="h-4 w-4 text-[#FCC837] shrink-0" />
           <span>
-            <strong>Dual Access:</strong> Rent machines and register your own equipment simultaneously with zero extra paperwork.
+            <strong className="text-[#FCC837]">Dual Access:</strong> Rent machines and register your own equipment simultaneously with zero extra paperwork.
           </span>
         </div>
 
@@ -107,7 +108,7 @@ const RegisterPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Ramesh Sharma"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-white placeholder-slate-500 text-sm focus:border-[#FCC837] focus:ring-2 focus:ring-[#FCC837]/20 outline-none transition"
                 />
               </div>
             </div>
@@ -125,7 +126,7 @@ const RegisterPage = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+91 98765 43210"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-white placeholder-slate-500 text-sm focus:border-[#FCC837] focus:ring-2 focus:ring-[#FCC837]/20 outline-none transition"
                 />
               </div>
             </div>
@@ -144,7 +145,7 @@ const RegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="ramesh@infraprojects.com"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-white placeholder-slate-500 text-sm focus:border-[#FCC837] focus:ring-2 focus:ring-[#FCC837]/20 outline-none transition"
                 />
               </div>
             </div>
@@ -163,7 +164,7 @@ const RegisterPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-white placeholder-slate-500 text-sm focus:border-[#FCC837] focus:ring-2 focus:ring-[#FCC837]/20 outline-none transition"
                 />
               </div>
             </div>
@@ -182,7 +183,7 @@ const RegisterPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 outline-none transition"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-white placeholder-slate-500 text-sm focus:border-[#FCC837] focus:ring-2 focus:ring-[#FCC837]/20 outline-none transition"
                 />
               </div>
             </div>
@@ -191,7 +192,7 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full mt-3 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-brand-500 hover:from-amber-600 hover:to-brand-600 text-slate-950 font-black text-sm transition shadow-lg shadow-amber-500/25 flex items-center justify-center space-x-2 disabled:opacity-70"
+            className="w-full mt-3 py-3 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-sm transition shadow-lg shadow-[#FCC837]/25 flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-70"
           >
             {submitting ? (
               <>
@@ -207,9 +208,9 @@ const RegisterPage = () => {
           </button>
         </form>
 
-        <div className="text-center text-xs text-slate-400 pt-2.5 border-t border-white/10">
+        <div className="text-center text-xs text-slate-400 pt-2.5 border-t border-[#34373C]">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-amber-400 hover:text-amber-300 transition">
+          <Link to="/login" className="font-bold text-[#FCC837] hover:text-[#F0BA28] transition">
             Log in here
           </Link>
         </div>
@@ -219,4 +220,3 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-

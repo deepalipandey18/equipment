@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import StorentLogo from '../components/common/StorentLogo';
 import {
   Search,
   PlusCircle,
@@ -334,16 +335,16 @@ const LandingPage = () => {
             {/* Left Content (7 cols) */}
             <div className="lg:col-span-7">
               {/* Badge */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold uppercase tracking-wider mb-6 shadow-sm animate-hero-fade-in">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping mr-1" />
-                <span>Bharat's Trusted Heavy Machinery Network</span>
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-slate-950 text-xs font-black uppercase tracking-wider mb-6 shadow-lg shadow-[#FCC837]/20 animate-hero-fade-in">
+                <span className="h-2 w-2 rounded-full bg-[#222428] animate-ping mr-1" />
+                <span>STORENT • Heavy Machinery Rental Platform</span>
               </div>
 
               {/* Heading: Smooth Fade-in on load */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none animate-hero-fade-in-delay-1 drop-shadow-lg">
-                Rent or List Heavy Equipment <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-brand-400 to-amber-500">
-                  With One Single Account.
+                Find the right Equipments <br />
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500">
+                  for your next PROJECT.
                 </span>
               </h1>
 
@@ -370,7 +371,7 @@ const LandingPage = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-6 py-3.5 bg-brand-500 hover:bg-brand-600 font-bold text-sm rounded-xl text-white shadow-lg shadow-brand-500/30 transition flex items-center justify-center space-x-2 shrink-0"
+                  className="px-6 py-3.5 bg-[#FCC837] hover:bg-[#F0BA28] font-black text-sm rounded-xl text-slate-950 border border-[#E6B01B] shadow-lg shadow-[#FCC837]/30 transition flex items-center justify-center space-x-2 shrink-0"
                 >
                   <span>Find Machinery</span>
                   <ArrowRight className="h-4 w-4" />
@@ -387,13 +388,15 @@ const LandingPage = () => {
                   <span>Rent Equipment</span>
                 </Link>
 
-                <button
-                  onClick={handleRegisterClick}
-                  className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm transition shadow-xl shadow-amber-500/25"
-                >
-                  <PlusCircle className="h-4 w-4 text-slate-950" />
-                  <span>List Your Equipment</span>
-                </button>
+             
+<button
+  onClick={handleRegisterClick}
+  className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-yellow-500 via-amber-400 to-yellow-600 hover:from-yellow-400 hover:via-amber-300 hover:to-yellow-500 text-slate-950 font-black text-sm transition-all duration-300 shadow-xl shadow-amber-500/30"
+>
+  <PlusCircle className="h-4 w-4 text-slate-950" />
+  <span>List Your Equipment</span>
+</button>
+
 
                 <Link
                   to="/plans"
@@ -801,12 +804,14 @@ const LandingPage = () => {
                   </li>
                 </ul>
               </div>
-              <button
-                onClick={handleRegisterClick}
-                className="w-full py-2.5 px-4 text-center rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-sm"
-              >
-                Subscribe & List Equipment
-              </button>
+             
+<button
+  onClick={handleRegisterClick}
+  className="w-full py-2.5 px-4 text-center rounded-lg bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 hover:from-yellow-400 hover:via-amber-300 hover:to-yellow-500 text-slate-950 font-semibold text-sm transition-all duration-300 shadow-md shadow-amber-500/25"
+>
+  Subscribe & List Equipment
+</button>
+
             </div>
           </div>
         </div>

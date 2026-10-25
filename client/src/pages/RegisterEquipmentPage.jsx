@@ -458,7 +458,7 @@ const RegisterEquipmentPage = () => {
   if (checkingQuota) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-900" />
         <p className="text-sm text-slate-500 font-medium">Verifying subscription listing quota...</p>
       </div>
     );
@@ -483,12 +483,12 @@ const RegisterEquipmentPage = () => {
                 Register Equipment for Rent
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                List your machinery on India's network with verified rates and GPS discovery.
+                List your machinery on STORENT platform with verified rates and GPS discovery.
               </p>
             </div>
 
             {quotaInfo && (
-              <div className="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-lg text-emerald-800 text-xs font-medium self-start sm:self-auto">
+              <div className="flex items-center space-x-2 bg-[#FCC837]/20 border border-[#FCC837]/50 px-3.5 py-1.5 rounded-lg text-slate-950 text-xs font-bold self-start sm:self-auto">
                 <Crown className="h-4 w-4 text-amber-500" />
                 <span>
                   Quota: <strong>{quotaInfo.remaining}</strong> listings remaining on {quotaInfo.planName}
@@ -515,9 +515,9 @@ const RegisterEquipmentPage = () => {
                   key={s.num}
                   className={`flex items-center justify-center space-x-1.5 py-2 px-1 rounded-lg transition ${
                     isCurrent
-                      ? 'bg-brand-50 text-brand-700 border border-brand-200'
+                      ? 'bg-[#FCC837] text-slate-950 font-black border border-[#E6B01B]'
                       : isPassed
-                      ? 'text-emerald-700 bg-emerald-50'
+                      ? 'text-slate-950 bg-[#FCC837]/20 font-bold'
                       : 'text-slate-400'
                   }`}
                 >
@@ -803,14 +803,14 @@ const RegisterEquipmentPage = () => {
                 </div>
 
                 {/* Auto-filled Notification Banner */}
-                <div className="flex items-start sm:items-center justify-between p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-900 gap-3">
+                <div className="flex items-start sm:items-center justify-between p-3.5 bg-[#FCC837]/15 border border-[#FCC837]/40 rounded-xl text-xs text-[#222428] gap-3">
                   <div className="flex items-center space-x-2.5">
-                    <Sparkles className="h-4 w-4 text-amber-600 shrink-0" />
+                    <Sparkles className="h-4 w-4 text-[#222428] shrink-0" />
                     <span>
                       <strong>All location and GPS fields are pre-filled automatically!</strong> You can proceed directly or edit any field below.
                     </span>
                   </div>
-                  <span className="hidden sm:inline-block shrink-0 px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-semibold text-[11px] rounded-full border border-emerald-300">
+                  <span className="hidden sm:inline-block shrink-0 px-2.5 py-0.5 bg-[#222428] text-[#FCC837] font-bold text-[11px] rounded-full border border-[#34373C]">
                     Ready to Next
                   </span>
                 </div>
@@ -944,7 +944,7 @@ const RegisterEquipmentPage = () => {
                           GeoJSON Index: <strong>[{formData.coordinates[0]}, {formData.coordinates[1]}]</strong> [lng, lat]
                         </span>
                       </div>
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200 self-start sm:self-auto">
+                      <span className="text-[11px] font-bold text-[#222428] bg-[#FCC837]/20 px-2.5 py-0.5 rounded border border-[#FCC837]/40 self-start sm:self-auto">
                         2dsphere Proximity Radar Ready
                       </span>
                     </div>
@@ -1047,7 +1047,7 @@ const RegisterEquipmentPage = () => {
                                 {photo.category}
                               </span>
                               {photo.badge && (
-                                <span className="text-[9px] font-bold bg-amber-500/90 text-white px-1.5 py-0.2 rounded">
+                                <span className="text-[9px] font-bold bg-[#FCC837] text-[#222428] px-1.5 py-0.2 rounded">
                                   {photo.badge}
                                 </span>
                               )}
@@ -1106,7 +1106,7 @@ const RegisterEquipmentPage = () => {
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
                   <div className="font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200 flex items-center justify-between">
                     <span>Listing Summary & Verification</span>
-                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    <span className="text-[11px] font-bold text-[#222428] bg-[#FCC837]/25 px-2.5 py-0.5 rounded-full border border-[#FCC837]/50">
                       Ready to Publish
                     </span>
                   </div>
@@ -1177,7 +1177,7 @@ const RegisterEquipmentPage = () => {
               {step < 4 ? (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-xs font-bold uppercase tracking-wider text-white shadow-sm flex items-center space-x-1.5"
+                  className="px-6 py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-slate-950 border border-[#E6B01B] shadow-sm flex items-center space-x-1.5"
                 >
                   <span>Continue</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -1186,7 +1186,7 @@ const RegisterEquipmentPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-600/30 flex items-center space-x-2 disabled:opacity-60"
+                  className="px-6 py-3 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-slate-950 border border-[#E6B01B] shadow-md flex items-center space-x-2 disabled:opacity-60"
                 >
                   {submitting ? (
                     <>
@@ -1209,12 +1209,12 @@ const RegisterEquipmentPage = () => {
         {successData && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-slate-200">
-              <div className="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <div className="h-14 w-14 rounded-full bg-[#FCC837] text-slate-950 flex items-center justify-center mx-auto mb-4 font-black">
                 <CheckCircle className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-black text-slate-900">Equipment Listed Successfully!</h3>
               <p className="text-xs text-slate-600 mt-2">
-                Your <strong>{successData.name}</strong> is now live on the EquipmentHub network and ready to receive rental bookings from nearby contractors.
+                Your <strong>{successData.name}</strong> is now live on the STORENT platform and ready to receive rental bookings from nearby contractors.
               </p>
 
               <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 text-left space-y-1">
@@ -1226,7 +1226,7 @@ const RegisterEquipmentPage = () => {
                 </div>
                 <div>
                   <strong>Status:</strong>{' '}
-                  <span className="text-emerald-700 font-bold uppercase">
+                  <span className="text-[#222428] font-black uppercase">
                     {successData.approvalStatus}
                   </span>
                 </div>
@@ -1235,7 +1235,7 @@ const RegisterEquipmentPage = () => {
               <div className="mt-6 flex flex-col space-y-2">
                 <Link
                   to="/dashboard"
-                  className="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 font-bold text-xs uppercase tracking-wider text-white transition"
+                  className="w-full py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] font-black text-xs uppercase tracking-wider text-slate-950 border border-[#E6B01B] transition"
                 >
                   Manage in Dashboard
                 </Link>

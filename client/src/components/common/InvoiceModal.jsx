@@ -1,5 +1,6 @@
 import React from 'react';
-import { Truck, ShieldCheck, Printer, X, CheckCircle, FileText } from 'lucide-react';
+import StorentLogo from './StorentLogo';
+import { ShieldCheck, Printer, X, FileText } from 'lucide-react';
 
 const InvoiceModal = ({ booking, onClose }) => {
   if (!booking) return null;
@@ -20,8 +21,8 @@ const InvoiceModal = ({ booking, onClose }) => {
         {/* Top Actions */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 print:hidden">
           <div className="flex items-center space-x-2 text-slate-900">
-            <FileText className="h-5 w-5 text-brand-600" />
-            <span className="font-bold text-sm">Official Rental Invoice</span>
+            <FileText className="h-5 w-5 text-slate-900" />
+            <span className="font-bold text-sm">Official Rental Tax Invoice</span>
           </div>
           <div className="flex items-center space-x-2">
             <button
@@ -45,15 +46,8 @@ const InvoiceModal = ({ booking, onClose }) => {
           {/* Header */}
           <div className="flex justify-between items-start">
             <div>
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold">
-                  <Truck className="h-5 w-5" />
-                </div>
-                <span className="text-xl font-black text-slate-900">
-                  Equipment<span className="text-brand-600">Hub</span>
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <StorentLogo variant="banner" className="h-10 w-auto" />
+              <p className="text-[11px] text-slate-500 mt-1.5 font-medium">
                 Heavy Machinery Rental & Escrow Platform
               </p>
             </div>
@@ -65,7 +59,7 @@ const InvoiceModal = ({ booking, onClose }) => {
               <div className="text-[11px] text-slate-500 mt-0.5">
                 Date: {new Date(booking.updatedAt || booking.createdAt).toLocaleDateString()}
               </div>
-              <span className="inline-block mt-1 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+              <span className="inline-block mt-1 px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-[#FCC837] text-slate-950 border border-[#E6B01B]">
                 {booking.paymentStatus === 'paid' ? 'Payment Verified (PAID)' : 'Payment Pending'}
               </span>
             </div>
@@ -159,7 +153,7 @@ const InvoiceModal = ({ booking, onClose }) => {
                   <td colSpan="2" className="py-3 px-4 text-slate-900 text-sm">
                     Total Amount Paid
                   </td>
-                  <td className="py-3 px-4 text-right text-brand-600 text-base">
+                  <td className="py-3 px-4 text-right text-slate-950 font-black text-base">
                     ₹{totalRupees.toLocaleString('en-IN')}
                   </td>
                 </tr>
@@ -170,8 +164,8 @@ const InvoiceModal = ({ booking, onClose }) => {
           {/* Verification Details */}
           <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400">
             <div className="flex items-center space-x-1.5">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              <span>Razorpay Escrow Payment Reference: {booking.razorpayPaymentId || 'VERIFIED'}</span>
+              <ShieldCheck className="h-4 w-4 text-slate-900" />
+              <span>STORENT Escrow Reference: {booking.razorpayPaymentId || 'VERIFIED'}</span>
             </div>
             <span>Status: {booking.bookingStatus}</span>
           </div>
@@ -181,7 +175,7 @@ const InvoiceModal = ({ booking, onClose }) => {
         <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end print:hidden">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-lg bg-slate-900 text-white font-bold text-xs uppercase tracking-wider"
+            className="px-5 py-2 rounded-lg bg-[#222428] hover:bg-black text-[#FCC837] font-bold text-xs uppercase tracking-wider border border-[#34373C]"
           >
             Close Invoice
           </button>
@@ -192,4 +186,3 @@ const InvoiceModal = ({ booking, onClose }) => {
 };
 
 export default InvoiceModal;
-

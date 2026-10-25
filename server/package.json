@@ -1,7 +1,7 @@
 {
-  "name": "equipment-hub-server",
+  "name": "storent-server",
   "version": "1.0.0",
-  "description": "EquipmentHub REST API & Business Logic Server",
+  "description": "STORENT REST API & Business Logic Server",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

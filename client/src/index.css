@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-[#F8F9FA] text-[#222428];
   }
 }
 
@@ -14,14 +14,14 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #222428;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #34373C;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #FCC837;
 }
 
 /* Scroll & Floating Animations */

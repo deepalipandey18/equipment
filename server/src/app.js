@@ -89,7 +89,7 @@ app.get('/api/health', (req, res) => {
     status: 'online',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    service: 'EquipmentHub API',
+    service: 'STORENT API',
   });
 });
 

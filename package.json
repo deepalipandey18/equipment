@@ -1,7 +1,7 @@
 {
-  "name": "equipment-hub",
+  "name": "storent",
   "version": "1.0.0",
-  "description": "Equipment Rental Marketplace with Subscription System",
+  "description": "STORENT - Construction & Heavy Machinery Rental Marketplace with Subscription System",
   "private": true,
   "workspaces": [
     "server",

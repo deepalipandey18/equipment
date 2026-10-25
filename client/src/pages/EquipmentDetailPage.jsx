@@ -186,7 +186,7 @@ const EquipmentDetailPage = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-900" />
         <p className="text-sm text-slate-500 font-medium">Loading machinery specifications...</p>
       </div>
     );
@@ -243,7 +243,7 @@ const EquipmentDetailPage = () => {
                 <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   {equipment.categoryId?.name || 'Heavy Equipment'}
                 </div>
-                <div className="absolute top-4 right-4 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <div className="absolute top-4 right-4 bg-[#FCC837] text-slate-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   {equipment.condition} Condition
                 </div>
               </div>
@@ -256,7 +256,7 @@ const EquipmentDetailPage = () => {
                       key={i}
                       onClick={() => setActivePhoto(i)}
                       className={`h-16 w-20 rounded-lg overflow-hidden border-2 shrink-0 transition ${
-                        activePhoto === i ? 'border-brand-600 ring-2 ring-brand-500/20' : 'border-slate-200'
+                        activePhoto === i ? 'border-[#FCC837] ring-2 ring-[#FCC837]/30' : 'border-slate-200'
                       }`}
                     >
                       <img src={photo} alt="" className="w-full h-full object-cover" />
@@ -269,7 +269,7 @@ const EquipmentDetailPage = () => {
             {/* Title & Technical Specs */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
               <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-brand-600">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-900">
                   {equipment.brand} • {equipment.model}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
@@ -278,7 +278,7 @@ const EquipmentDetailPage = () => {
                 <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-slate-500">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center space-x-1 text-slate-700 font-semibold">
-                      <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+                      <MapPin className="h-4 w-4 text-slate-900 shrink-0" />
                       <span>
                         {equipment.address?.city}, {equipment.address?.state} (Pincode: {equipment.address?.pincode})
                       </span>
@@ -286,8 +286,8 @@ const EquipmentDetailPage = () => {
 
                     {/* Distance Badge next to address */}
                     {distanceKm !== null ? (
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
-                        <Navigation className="h-3 w-3 text-emerald-600 fill-emerald-600 rotate-45" />
+                      <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#FCC837]/20 text-slate-950 font-bold text-xs border border-[#FCC837]/50">
+                        <Navigation className="h-3 w-3 text-slate-950 fill-slate-950 rotate-45" />
                         <span>{distanceKm} km from your location</span>
                       </span>
                     ) : (
@@ -353,7 +353,7 @@ const EquipmentDetailPage = () => {
 
               {/* Operator Terms */}
               <div className="pt-4 border-t border-slate-100 flex items-center space-x-3 text-xs text-slate-700">
-                <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+                <ShieldCheck className="h-5 w-5 text-slate-900 shrink-0" />
                 <div>
                   <strong>Operator Status:</strong>{' '}
                   <span className="capitalize">
@@ -376,19 +376,19 @@ const EquipmentDetailPage = () => {
                 <div>
                   <div className="flex items-center space-x-2">
                     <h4 className="font-bold text-slate-900 text-base">{equipment.ownerId?.name || 'Machine Owner'}</h4>
-                    <span className="px-2 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span className="px-2 py-0.2 rounded text-[10px] font-bold bg-[#FCC837] text-slate-950">
                       Verified Owner
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    EquipmentHub Network Member • Fast response on rental requests
+                    STORENT Verified Fleet Partner • Fast response on rental requests
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3 text-xs text-slate-600">
                 <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center space-x-1.5">
-                  <Phone className="h-3.5 w-3.5 text-brand-600" />
+                  <Phone className="h-3.5 w-3.5 text-slate-900" />
                   <span>{equipment.ownerId?.phone || '+91 Verified'}</span>
                 </div>
               </div>
@@ -427,7 +427,7 @@ const EquipmentDetailPage = () => {
                     min={today}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:border-[#FCC837] outline-none"
                   />
                 </div>
 
@@ -441,7 +441,7 @@ const EquipmentDetailPage = () => {
                     min={startDate}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:border-brand-500 outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:border-[#FCC837] outline-none"
                   />
                 </div>
 
@@ -480,14 +480,14 @@ const EquipmentDetailPage = () => {
                   )}
                   <div className="pt-2 border-t border-slate-200 flex justify-between font-black text-slate-900 text-sm">
                     <span>Total Payable:</span>
-                    <span className="text-brand-600">₹{estimatedTotal.toLocaleString('en-IN')}</span>
+                    <span className="text-slate-900 font-black">₹{estimatedTotal.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={submittingBooking}
-                  className="w-full py-3.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-brand-600/30 transition flex items-center justify-center space-x-2 disabled:opacity-60"
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-60"
                 >
                   {submittingBooking ? (
                     <>
@@ -514,7 +514,7 @@ const EquipmentDetailPage = () => {
         {bookingSuccess && (
           <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-slate-200">
-              <div className="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <div className="h-14 w-14 rounded-full bg-[#FCC837] text-slate-950 flex items-center justify-center mx-auto mb-4 font-black">
                 <CheckCircle className="h-8 w-8" />
               </div>
               <h3 className="text-xl font-black text-slate-900">Rental Request Submitted!</h3>
@@ -534,7 +534,7 @@ const EquipmentDetailPage = () => {
                 </div>
                 <div>
                   <strong>Status:</strong>{' '}
-                  <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                  <span className="font-bold text-[#222428] bg-[#FCC837]/20 border border-[#FCC837]/40 px-2 py-0.5 rounded">
                     {bookingSuccess.bookingStatus} (Awaiting Owner Review)
                   </span>
                 </div>
@@ -543,7 +543,7 @@ const EquipmentDetailPage = () => {
               <div className="mt-6 flex flex-col space-y-2">
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition"
+                  className="w-full py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-xs uppercase tracking-wider transition border border-[#E6B01B]"
                 >
                   Track in My Bookings
                 </button>

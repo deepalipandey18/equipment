@@ -29,7 +29,7 @@ connectDB().then(async () => {
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`[EquipmentHub Server] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  console.log(`[STORENT Server] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
 // Handle unhandled promise rejections

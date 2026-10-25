@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
+import StorentLogo from '../components/common/StorentLogo';
 import {
   ShieldCheck,
   Users,
@@ -168,7 +169,7 @@ const AdminDashboardPage = () => {
     try {
       const res = await api.patch(`/admin/users/${targetUser._id}/status`, {
         status: nextStatus,
-        reason: 'Administrative action via Admin Console',
+        reason: 'Administrative action via STORENT Admin Console',
       });
       if (res.data?.success) {
         setUsersList((prev) =>
@@ -185,7 +186,7 @@ const AdminDashboardPage = () => {
     try {
       const res = await api.patch(`/admin/equipment/${item._id}/review`, {
         approvalStatus,
-        adminNotes: `Reviewed and set to ${approvalStatus} by admin`,
+        adminNotes: `Reviewed and set to ${approvalStatus} by STORENT admin`,
       });
       if (res.data?.success) {
         setEquipmentList((prev) =>
@@ -199,23 +200,23 @@ const AdminDashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F8F9FA] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Top Admin Header */}
-        <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+        <div className="bg-[#222428] text-white rounded-2xl p-6 sm:p-8 shadow-xl border border-[#34373C]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5">
-              <div className="h-12 w-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-600/30">
+              <div className="h-12 w-12 rounded-xl bg-[#FCC837] text-[#222428] flex items-center justify-center font-bold shadow-md shadow-[#FCC837]/20">
                 <ShieldCheck className="h-7 w-7" />
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h1 className="text-2xl font-black tracking-tight">Platform Administration</h1>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  <h1 className="text-2xl font-black tracking-tight text-white">STORENT Administration</h1>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FCC837]/20 text-[#FCC837] border border-[#FCC837]/30">
                     SuperAdmin
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-white/60 mt-1">
                   Protected RBAC Console • Managing users, machinery approvals, subscriptions, and escrow
                 </p>
               </div>
@@ -230,7 +231,7 @@ const AdminDashboardPage = () => {
                 if (activeTab === 'bookings') fetchBookings();
                 if (activeTab === 'logs') fetchLogs();
               }}
-              className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center space-x-1.5 self-start sm:self-auto transition"
+              className="px-3.5 py-2 rounded-lg bg-[#34373C] hover:bg-[#34373C]/80 text-xs font-bold uppercase tracking-wider text-[#FCC837] border border-[#34373C] flex items-center space-x-1.5 self-start sm:self-auto transition"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Refresh Metrics</span>
@@ -238,28 +239,28 @@ const AdminDashboardPage = () => {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#34373C]">
             <div>
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Total Users</span>
+              <span className="text-[11px] font-semibold uppercase text-white/60">Total Users</span>
               <div className="text-2xl font-black text-white mt-0.5">
                 {stats?.totalUsers ?? '...'}
               </div>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Machinery Units</span>
-              <div className="text-2xl font-black text-brand-400 mt-0.5">
+              <span className="text-[11px] font-semibold uppercase text-white/60">Machinery Units</span>
+              <div className="text-2xl font-black text-[#FCC837] mt-0.5">
                 {stats?.totalEquipment ?? '...'}
               </div>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Active Subscriptions</span>
-              <div className="text-2xl font-black text-amber-400 mt-0.5">
+              <span className="text-[11px] font-semibold uppercase text-white/60">Active Subscriptions</span>
+              <div className="text-2xl font-black text-[#FCC837] mt-0.5">
                 {stats?.activeSubscriptionsCount ?? '...'}
               </div>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Total Platform Escrow</span>
-              <div className="text-2xl font-black text-emerald-400 mt-0.5">
+              <span className="text-[11px] font-semibold uppercase text-white/60">Total Platform Escrow</span>
+              <div className="text-2xl font-black text-white mt-0.5">
                 ₹{(stats?.totalRevenueRupees ?? 0).toLocaleString('en-IN')}
               </div>
             </div>
@@ -267,7 +268,7 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Administration Navigation Tabs */}
-        <div className="flex border-b border-slate-200 overflow-x-auto space-x-2">
+        <div className="flex border-b border-[#34373C]/20 overflow-x-auto space-x-2">
           {[
             { id: 'overview', label: 'Overview', icon: Activity },
             { id: 'equipment', label: `Fleet Approvals (${equipmentList.length || stats?.totalEquipment || 0})`, icon: Truck },
@@ -284,8 +285,8 @@ const AdminDashboardPage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 py-3 px-4 text-xs font-bold whitespace-nowrap border-b-2 transition ${
                   isActive
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+                    ? 'border-[#222428] text-[#222428]'
+                    : 'border-transparent text-[#34373C]/70 hover:text-[#222428] hover:border-[#34373C]/30'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -296,44 +297,44 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Tab Contents */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm min-h-[400px]">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#34373C]/10 shadow-sm min-h-[400px]">
           {/* 1. OVERVIEW */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-bold text-slate-900">Platform Operations Overview</h2>
+              <h2 className="text-lg font-bold text-[#222428]">Platform Operations Overview</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-5 rounded-xl border border-slate-200 bg-slate-50">
-                  <div className="text-xs font-semibold uppercase text-slate-500">Fleet Health</div>
-                  <div className="text-xl font-black text-slate-900 mt-1">
+                <div className="p-5 rounded-xl border border-[#34373C]/15 bg-[#F8F9FA]">
+                  <div className="text-xs font-semibold uppercase text-[#34373C]/70">Fleet Health</div>
+                  <div className="text-xl font-black text-[#222428] mt-1">
                     {stats?.totalEquipment || 0} Registered Units
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-[#34373C]/70 mt-1">
                     Pending Review: <strong>{stats?.pendingEquipmentCount || 0}</strong>
                   </p>
                 </div>
 
-                <div className="p-5 rounded-xl border border-slate-200 bg-slate-50">
-                  <div className="text-xs font-semibold uppercase text-slate-500">Rental Bookings</div>
-                  <div className="text-xl font-black text-slate-900 mt-1">
+                <div className="p-5 rounded-xl border border-[#34373C]/15 bg-[#F8F9FA]">
+                  <div className="text-xs font-semibold uppercase text-[#34373C]/70">Rental Bookings</div>
+                  <div className="text-xl font-black text-[#222428] mt-1">
                     {stats?.totalBookings || 0} Total Requests
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-[#34373C]/70 mt-1">
                     Confirmed / Active: <strong>{stats?.confirmedBookingsCount || 0}</strong>
                   </p>
                 </div>
 
-                <div className="p-5 rounded-xl border border-slate-200 bg-slate-50">
-                  <div className="text-xs font-semibold uppercase text-slate-500">Membership Revenue</div>
-                  <div className="text-xl font-black text-emerald-600 mt-1">
+                <div className="p-5 rounded-xl border border-[#34373C]/15 bg-[#F8F9FA]">
+                  <div className="text-xs font-semibold uppercase text-[#34373C]/70">Membership Revenue</div>
+                  <div className="text-xl font-black text-[#222428] mt-1">
                     {stats?.activeSubscriptionsCount || 0} Active Fleet Subscriptions
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Gating active equipment creation</p>
+                  <p className="text-xs text-[#34373C]/70 mt-1">Gating active equipment creation</p>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed">
-                <strong>Backend RBAC Protection:</strong> Hiding pages in React is not sufficient; all administrative endpoints mounted under <code>/api/admin/*</code> are protected on the server using <code>authorizeRoles('admin')</code> middleware and JWT cookie verification.
+              <div className="p-4 rounded-xl bg-[#FCC837]/10 border border-[#FCC837]/30 text-xs text-[#222428] leading-relaxed">
+                <strong>STORENT RBAC Protection:</strong> All administrative endpoints mounted under <code>/api/admin/*</code> are protected on the server using <code>authorizeRoles('admin')</code> middleware and verified JWT session tokens.
               </div>
             </div>
           )}
@@ -341,13 +342,13 @@ const AdminDashboardPage = () => {
           {/* 2. FLEET APPROVALS */}
           {activeTab === 'equipment' && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-900">Machinery Approvals & Review</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#34373C]/10">
+                <h3 className="text-base font-bold text-[#222428]">Machinery Approvals & Review</h3>
                 <div className="flex items-center space-x-2">
                   <select
                     value={equipmentFilter}
                     onChange={(e) => setEquipmentFilter(e.target.value)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white outline-none"
+                    className="px-3 py-1.5 rounded-lg border border-[#34373C]/20 text-xs font-semibold bg-white text-[#222428] outline-none focus:border-[#222428]"
                   >
                     <option value="">All Statuses</option>
                     <option value="pending">Pending Review</option>
@@ -359,14 +360,14 @@ const AdminDashboardPage = () => {
 
               {loadingEquipment ? (
                 <div className="py-12 flex justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
               ) : equipmentList.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs font-medium">
+                <div className="text-center py-12 text-[#34373C]/60 text-xs font-medium">
                   No machinery listings found matching filter.
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-[#34373C]/10">
                   {equipmentList.map((item) => (
                     <div
                       key={item._id}
@@ -376,24 +377,24 @@ const AdminDashboardPage = () => {
                         <img
                           src={item.photos?.[0] || 'https://via.placeholder.com/80'}
                           alt=""
-                          className="h-14 w-18 object-cover rounded-lg bg-slate-100 shrink-0"
+                          className="h-14 w-18 object-cover rounded-lg bg-[#F8F9FA] border border-[#34373C]/10 shrink-0"
                         />
                         <div>
                           <div className="flex items-center space-x-2">
-                            <h4 className="font-bold text-sm text-slate-900">{item.name}</h4>
+                            <h4 className="font-bold text-sm text-[#222428]">{item.name}</h4>
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                                 item.approvalStatus === 'approved'
-                                  ? 'bg-emerald-100 text-emerald-800'
+                                  ? 'bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]'
                                   : item.approvalStatus === 'pending'
-                                  ? 'bg-amber-100 text-amber-900'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-[#34373C]/10 text-[#34373C] border border-[#34373C]/20'
+                                  : 'bg-[#222428] text-white border border-[#34373C]'
                               }`}
                             >
                               {item.approvalStatus}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-xs text-[#34373C]/70 mt-0.5">
                             Owner: <strong>{item.ownerId?.name || 'Owner'}</strong> ({item.ownerId?.phone}) • Daily: ₹{item.dailyRate?.toLocaleString('en-IN')}
                           </p>
                         </div>
@@ -403,7 +404,7 @@ const AdminDashboardPage = () => {
                         <Link
                           to={`/equipment/${item._id}`}
                           target="_blank"
-                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center space-x-1"
+                          className="px-2.5 py-1.5 rounded-lg border border-[#34373C]/20 text-[#222428] hover:bg-[#F8F9FA] text-xs font-semibold flex items-center space-x-1"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                           <span>View Public Page</span>
@@ -412,7 +413,7 @@ const AdminDashboardPage = () => {
                         {item.approvalStatus !== 'approved' && (
                           <button
                             onClick={() => handleReviewEquipment(item, 'approved')}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center space-x-1"
+                            className="px-3 py-1.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] text-xs font-bold uppercase tracking-wider flex items-center space-x-1 shadow-sm transition"
                           >
                             <CheckCircle className="h-3.5 w-3.5" />
                             <span>Approve</span>
@@ -422,7 +423,7 @@ const AdminDashboardPage = () => {
                         {item.approvalStatus !== 'rejected' && (
                           <button
                             onClick={() => handleReviewEquipment(item, 'rejected')}
-                            className="px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 text-xs font-bold uppercase tracking-wider flex items-center space-x-1"
+                            className="px-3 py-1.5 rounded-lg border border-[#34373C] text-[#34373C] hover:bg-[#222428] hover:text-white text-xs font-bold uppercase tracking-wider flex items-center space-x-1 transition"
                           >
                             <XCircle className="h-3.5 w-3.5" />
                             <span>Reject</span>
@@ -439,29 +440,29 @@ const AdminDashboardPage = () => {
           {/* 3. USER ACCOUNTS */}
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-900">User Accounts Directory</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#34373C]/10">
+                <h3 className="text-base font-bold text-[#222428]">User Accounts Directory</h3>
                 <div className="relative">
-                  <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-2.5" />
+                  <Search className="h-3.5 w-3.5 text-[#34373C]/40 absolute left-3 top-2.5" />
                   <input
                     type="text"
                     placeholder="Search by name or email..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
-                    className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs outline-none focus:border-blue-600 w-56"
+                    className="pl-8 pr-3 py-1.5 rounded-lg border border-[#34373C]/20 text-xs text-[#222428] outline-none focus:border-[#222428] w-56 bg-white"
                   />
                 </div>
               </div>
 
               {loadingUsers ? (
                 <div className="py-12 flex justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
               ) : (
                 <div className="overflow-x-auto text-xs">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+                    <thead className="bg-[#F8F9FA] text-[#34373C] uppercase text-[10px] font-bold">
                       <tr>
                         <th className="py-3 px-4">Name & Email</th>
                         <th className="py-3 px-4">Role</th>
@@ -470,12 +471,12 @@ const AdminDashboardPage = () => {
                         <th className="py-3 px-4 text-right">Moderation Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tbody className="divide-y divide-[#34373C]/10 text-[#222428]">
                       {usersList.map((u) => (
-                        <tr key={u._id} className="hover:bg-slate-50/50">
+                        <tr key={u._id} className="hover:bg-[#F8F9FA]/70">
                           <td className="py-3 px-4">
-                            <span className="font-bold text-slate-900 block">{u.name}</span>
-                            <span className="text-slate-400 text-[11px]">{u.email}</span>
+                            <span className="font-bold text-[#222428] block">{u.name}</span>
+                            <span className="text-[#34373C]/60 text-[11px]">{u.email}</span>
                           </td>
                           <td className="py-3 px-4 uppercase font-semibold text-[11px]">
                             {u.role}
@@ -484,14 +485,14 @@ const AdminDashboardPage = () => {
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                                 u.accountStatus === 'active'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]'
+                                  : 'bg-[#222428] text-white'
                               }`}
                             >
                               {u.accountStatus}
                             </span>
                           </td>
-                          <td className="py-3 px-4 capitalize text-slate-500">
+                          <td className="py-3 px-4 capitalize text-[#34373C]/70">
                             {u.verificationStatus || 'unverified'}
                           </td>
                           <td className="py-3 px-4 text-right">
@@ -500,14 +501,14 @@ const AdminDashboardPage = () => {
                                 onClick={() => handleToggleUserStatus(u)}
                                 className={`px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider transition ${
                                   u.accountStatus === 'active'
-                                    ? 'border border-red-300 text-red-600 hover:bg-red-50'
-                                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    ? 'border border-[#34373C] text-[#34373C] hover:bg-[#222428] hover:text-white'
+                                    : 'bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428]'
                                 }`}
                               >
                                 {u.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}
                               </button>
                             ) : (
-                              <span className="text-[11px] text-slate-400 italic">Self (Admin)</span>
+                              <span className="text-[11px] text-[#34373C]/50 italic">Self (Admin)</span>
                             )}
                           </td>
                         </tr>
@@ -522,22 +523,22 @@ const AdminDashboardPage = () => {
           {/* 4. SUBSCRIPTIONS */}
           {activeTab === 'subscriptions' && (
             <div className="space-y-4">
-              <h3 className="text-base font-bold text-slate-900 pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-[#222428] pb-3 border-b border-[#34373C]/10">
                 Active Member Subscriptions
               </h3>
 
               {loadingSubs ? (
                 <div className="py-12 flex justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
               ) : subscriptionsList.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs">
+                <div className="text-center py-12 text-[#34373C]/60 text-xs">
                   No active member subscriptions recorded yet.
                 </div>
               ) : (
                 <div className="overflow-x-auto text-xs">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+                    <thead className="bg-[#F8F9FA] text-[#34373C] uppercase text-[10px] font-bold">
                       <tr>
                         <th className="py-3 px-4">Member Name</th>
                         <th className="py-3 px-4">Plan Tier</th>
@@ -546,24 +547,24 @@ const AdminDashboardPage = () => {
                         <th className="py-3 px-4">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tbody className="divide-y divide-[#34373C]/10 text-[#222428]">
                       {subscriptionsList.map((sub) => (
                         <tr key={sub._id}>
                           <td className="py-3 px-4">
-                            <span className="font-bold text-slate-900 block">{sub.userId?.name}</span>
-                            <span className="text-slate-400 text-[11px]">{sub.userId?.email}</span>
+                            <span className="font-bold text-[#222428] block">{sub.userId?.name}</span>
+                            <span className="text-[#34373C]/60 text-[11px]">{sub.userId?.email}</span>
                           </td>
-                          <td className="py-3 px-4 font-semibold text-slate-900">
+                          <td className="py-3 px-4 font-semibold text-[#222428]">
                             {sub.planId?.name}
                           </td>
                           <td className="py-3 px-4">
                             Up to {sub.planId?.listingLimit} machines
                           </td>
-                          <td className="py-3 px-4 text-slate-600">
+                          <td className="py-3 px-4 text-[#34373C]">
                             {new Date(sub.endDate).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]/40">
                               {sub.status}
                             </span>
                           </td>
@@ -579,22 +580,22 @@ const AdminDashboardPage = () => {
           {/* 5. PLATFORM BOOKINGS */}
           {activeTab === 'bookings' && (
             <div className="space-y-4">
-              <h3 className="text-base font-bold text-slate-900 pb-3 border-b border-slate-100">
-                All Platform Rental Bookings
+              <h3 className="text-base font-bold text-[#222428] pb-3 border-b border-[#34373C]/10">
+                All STORENT Rental Bookings
               </h3>
 
               {loadingBookings ? (
                 <div className="py-12 flex justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
               ) : bookingsList.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs">
+                <div className="text-center py-12 text-[#34373C]/60 text-xs">
                   No rental bookings recorded yet.
                 </div>
               ) : (
                 <div className="overflow-x-auto text-xs">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
+                    <thead className="bg-[#F8F9FA] text-[#34373C] uppercase text-[10px] font-bold">
                       <tr>
                         <th className="py-3 px-4">Invoice #</th>
                         <th className="py-3 px-4">Machinery</th>
@@ -604,22 +605,22 @@ const AdminDashboardPage = () => {
                         <th className="py-3 px-4">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tbody className="divide-y divide-[#34373C]/10 text-[#222428]">
                       {bookingsList.map((b) => (
                         <tr key={b._id}>
-                          <td className="py-3 px-4 font-mono font-bold text-slate-800">
+                          <td className="py-3 px-4 font-mono font-bold text-[#222428]">
                             {b.invoiceNumber || b._id.slice(-6).toUpperCase()}
                           </td>
-                          <td className="py-3 px-4 font-semibold text-slate-900">
+                          <td className="py-3 px-4 font-semibold text-[#222428]">
                             {b.equipmentId?.name}
                           </td>
-                          <td className="py-3 px-4 text-slate-600">{b.renterId?.name}</td>
-                          <td className="py-3 px-4 text-slate-600">{b.ownerId?.name}</td>
-                          <td className="py-3 px-4 font-bold text-brand-600">
+                          <td className="py-3 px-4 text-[#34373C]">{b.renterId?.name}</td>
+                          <td className="py-3 px-4 text-[#34373C]">{b.ownerId?.name}</td>
+                          <td className="py-3 px-4 font-bold text-[#222428]">
                             ₹{((b.pricingBreakdown?.totalAmountPaise || 0) / 100).toLocaleString('en-IN')}
                           </td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-800">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#34373C]/10 text-[#222428]">
                               {b.bookingStatus}
                             </span>
                           </td>
@@ -635,32 +636,32 @@ const AdminDashboardPage = () => {
           {/* 6. AUDIT TRAIL */}
           {activeTab === 'logs' && (
             <div className="space-y-4">
-              <h3 className="text-base font-bold text-slate-900 pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-[#222428] pb-3 border-b border-[#34373C]/10">
                 Administrative Audit Log History
               </h3>
 
               {loadingLogs ? (
                 <div className="py-12 flex justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#222428]" />
                 </div>
               ) : auditLogs.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 text-xs">
+                <div className="text-center py-12 text-[#34373C]/60 text-xs">
                   No administrative operations recorded yet.
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 text-xs">
+                <div className="divide-y divide-[#34373C]/10 text-xs">
                   {auditLogs.map((log) => (
                     <div key={log._id} className="py-3 flex justify-between items-start gap-4">
                       <div>
                         <div className="flex items-center space-x-2">
-                          <span className="font-mono font-bold text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">
+                          <span className="font-mono font-bold text-[11px] bg-[#34373C]/10 px-2 py-0.5 rounded text-[#222428]">
                             {log.action}
                           </span>
-                          <span className="text-slate-500">on {log.targetResource}</span>
+                          <span className="text-[#34373C]/70">on {log.targetResource}</span>
                         </div>
-                        <p className="text-slate-700 mt-1">{log.details}</p>
+                        <p className="text-[#222428] mt-1">{log.details}</p>
                       </div>
-                      <div className="text-right text-[11px] text-slate-400 shrink-0">
+                      <div className="text-right text-[11px] text-[#34373C]/60 shrink-0">
                         <div>Admin: {log.adminId?.name || 'Admin'}</div>
                         <div>{new Date(log.createdAt).toLocaleString()}</div>
                       </div>
@@ -677,4 +678,3 @@ const AdminDashboardPage = () => {
 };
 
 export default AdminDashboardPage;
-

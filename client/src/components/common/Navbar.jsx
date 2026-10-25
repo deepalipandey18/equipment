@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import StorentLogo from './StorentLogo';
 import {
-  Truck,
   ShieldCheck,
   User,
   LogOut,
@@ -38,26 +38,16 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2.5">
-            <div className="h-10 w-10 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-sm shadow-brand-500/30">
-              <Truck className="h-6 w-6 stroke-[2.2]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">
-                Equipment<span className="text-brand-600">Hub</span>
-              </span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-slate-500 mt-0.5">
-                Heavy Machinery Marketplace
-              </span>
-            </div>
+          {/* STORENT Logo */}
+          <Link to="/" className="flex items-center">
+            <StorentLogo variant="default" className="h-9 w-auto" showSubtitle={true} />
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-700">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-700">
             <Link
               to="/browse"
-              className="flex items-center space-x-1.5 hover:text-brand-600 transition-colors"
+              className="flex items-center space-x-1.5 hover:text-slate-950 transition-colors"
             >
               <Search className="h-4 w-4 text-slate-500" />
               <span>Browse Equipment</span>
@@ -65,16 +55,16 @@ const Navbar = () => {
 
             <Link
               to="/plans"
-              className="flex items-center space-x-1.5 hover:text-brand-600 transition-colors"
+              className="flex items-center space-x-1.5 hover:text-slate-950 transition-colors"
             >
-              <Crown className="h-4 w-4 text-amber-500" />
+              <Crown className="h-4 w-4 text-[#FCC837]" />
               <span>Subscription Plans</span>
             </Link>
 
             {user && (
               <Link
                 to="/dashboard"
-                className="flex items-center space-x-1.5 hover:text-brand-600 transition-colors"
+                className="flex items-center space-x-1.5 hover:text-slate-950 transition-colors"
               >
                 <LayoutDashboard className="h-4 w-4 text-slate-500" />
                 <span>Dashboard</span>
@@ -84,9 +74,9 @@ const Navbar = () => {
             {isAdmin && (
               <Link
                 to="/admin"
-                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-semibold hover:bg-slate-200 transition"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-[#222428] text-[#FCC837] border border-[#34373C] text-xs font-bold hover:bg-black transition"
               >
-                <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                <ShieldCheck className="h-3.5 w-3.5 text-[#FCC837]" />
                 <span>Admin Panel</span>
               </Link>
             )}
@@ -97,17 +87,17 @@ const Navbar = () => {
             {/* Register Equipment CTA Button */}
             <button
               onClick={handleRegisterEquipmentClick}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-sm font-semibold rounded-lg bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition shadow-sm"
+              className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-sm font-bold rounded-lg bg-[#FCC837] text-slate-950 border border-[#E6B01B] hover:bg-[#F0BA28] transition shadow-sm"
               title={
                 hasActiveSubscription
                   ? 'List your equipment'
                   : 'Subscription plan required to list equipment'
               }
             >
-              <PlusCircle className="h-4 w-4 text-brand-600" />
+              <PlusCircle className="h-4 w-4 text-slate-950" />
               <span>Register Equipment</span>
               {hasActiveSubscription && (
-                <span className="ml-1 inline-flex items-center px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">
+                <span className="ml-1 inline-flex items-center px-1.5 py-0.2 text-[10px] font-black rounded-full bg-[#222428] text-[#FCC837]">
                   Subscribed
                 </span>
               )}
@@ -119,16 +109,16 @@ const Navbar = () => {
                   to="/dashboard"
                   className="flex items-center space-x-2 text-sm text-slate-700 hover:text-slate-900"
                 >
-                  <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-semibold text-xs border border-slate-300">
+                  <div className="h-8 w-8 rounded-full bg-[#222428] flex items-center justify-center text-[#FCC837] font-black text-xs border border-[#34373C]">
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
-                  <span className="font-medium max-w-[120px] truncate">{user.name}</span>
+                  <span className="font-bold max-w-[120px] truncate">{user.name}</span>
                 </Link>
 
                 <button
                   onClick={handleLogout}
                   title="Log out"
-                  className="p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
+                  className="p-1.5 rounded-md text-slate-500 hover:text-slate-950 hover:bg-slate-100 transition"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -137,13 +127,13 @@ const Navbar = () => {
               <div className="flex items-center space-x-2">
                 <Link
                   to="/login"
-                  className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-brand-600 transition"
+                  className="px-3.5 py-2 text-sm font-bold text-slate-800 hover:text-black transition"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm shadow-brand-600/30 transition"
+                  className="px-4 py-2 text-sm font-black text-slate-950 bg-[#FCC837] hover:bg-[#F0BA28] rounded-lg border border-[#E6B01B] shadow-sm transition"
                 >
                   Sign Up Free
                 </Link>
@@ -169,14 +159,14 @@ const Navbar = () => {
           <Link
             to="/browse"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-base font-medium text-slate-700 hover:text-brand-600"
+            className="block py-2 text-base font-bold text-slate-700 hover:text-slate-950"
           >
             Browse Equipment
           </Link>
           <Link
             to="/plans"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-base font-medium text-slate-700 hover:text-brand-600"
+            className="block py-2 text-base font-bold text-slate-700 hover:text-slate-950"
           >
             Subscription Plans
           </Link>
@@ -184,7 +174,7 @@ const Navbar = () => {
             <Link
               to="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-medium text-slate-700 hover:text-brand-600"
+              className="block py-2 text-base font-bold text-slate-700 hover:text-slate-950"
             >
               Dashboard
             </Link>
@@ -193,7 +183,7 @@ const Navbar = () => {
             <Link
               to="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-medium text-blue-700 hover:text-blue-900"
+              className="block py-2 text-base font-bold text-[#FCC837] bg-[#222428] px-3 py-1.5 rounded-lg"
             >
               Admin Panel
             </Link>
@@ -205,7 +195,7 @@ const Navbar = () => {
                 setMobileMenuOpen(false);
                 handleRegisterEquipmentClick();
               }}
-              className="w-full text-center py-2.5 px-4 font-semibold text-sm rounded-lg bg-amber-100 text-amber-900"
+              className="w-full text-center py-2.5 px-4 font-bold text-sm rounded-lg bg-[#FCC837] text-slate-950 border border-[#E6B01B]"
             >
               + Register Equipment
             </button>
@@ -216,7 +206,7 @@ const Navbar = () => {
                   setMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="w-full text-center py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded"
+                className="w-full text-center py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 rounded"
               >
                 Log Out ({user.email})
               </button>
@@ -225,14 +215,14 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg"
+                  className="text-center py-2 text-sm font-bold text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-50"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-center py-2 text-sm font-semibold text-white bg-brand-600 rounded-lg"
+                  className="text-center py-2 text-sm font-black text-slate-950 bg-[#FCC837] border border-[#E6B01B] rounded-lg"
                 >
                   Sign Up
                 </Link>
@@ -246,4 +236,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

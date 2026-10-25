@@ -202,7 +202,7 @@ const BrowseEquipmentPage = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Machinery Rental Marketplace
+              STORENT Machinery Marketplace
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Find verified JCBs, excavators, cranes, generators, and tractors for your job site.
@@ -316,8 +316,8 @@ const BrowseEquipmentPage = () => {
                 disabled={locating}
                 className={`px-3.5 py-1.5 rounded-lg font-bold uppercase tracking-wider flex items-center space-x-1.5 transition ${
                   userLocation
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-brand-50 text-brand-900 border border-brand-300 hover:bg-brand-100'
+                    ? 'bg-[#222428] text-[#FCC837] border border-[#34373C]'
+                    : 'bg-[#FCC837] text-slate-950 border border-[#E6B01B] hover:bg-[#F0BA28]'
                 }`}
               >
                 <Navigation className={`h-3.5 w-3.5 ${locating ? 'animate-spin' : ''}`} />
@@ -365,8 +365,8 @@ const BrowseEquipmentPage = () => {
 
           {/* Location notification banner */}
           {userLocation && (
-            <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-800 text-xs flex items-center space-x-2">
-              <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
+            <div className="p-2.5 bg-[#FCC837]/15 rounded-lg border border-[#FCC837]/40 text-slate-900 text-xs flex items-center space-x-2">
+              <MapPin className="h-4 w-4 text-slate-900 shrink-0" />
               <span>
                 <strong>GPS Coordinates Active:</strong> [{userLocation.lat}, {userLocation.lng}].
                 Distances calculated as straight-line proximity via MongoDB 2dsphere index.
@@ -385,7 +385,7 @@ const BrowseEquipmentPage = () => {
         {/* Content Display: Grid / List / Map */}
         {loading ? (
           <div className="py-24 flex flex-col items-center justify-center space-y-3 bg-white rounded-2xl border border-slate-200">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-slate-900" />
             <p className="text-sm text-slate-500 font-medium">Scanning equipment fleet...</p>
           </div>
         ) : equipmentList.length === 0 ? (
@@ -472,7 +472,7 @@ const BrowseEquipmentPage = () => {
               return (
                 <div
                   key={item._id}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand-500 hover:shadow-md transition flex flex-col md:flex-row gap-6"
+                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-[#FCC837] hover:shadow-md transition flex flex-col md:flex-row gap-6"
                 >
                   <img
                     src={item.photos?.[0] || 'https://via.placeholder.com/400x300'}
@@ -483,7 +483,7 @@ const BrowseEquipmentPage = () => {
                     <div>
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-950 bg-[#FCC837] px-2 py-0.5 rounded">
                             {item.categoryId?.name || 'Heavy Equipment'}
                           </span>
                           <h3 className="text-lg font-bold text-slate-900 mt-1">{item.name}</h3>
@@ -508,14 +508,14 @@ const BrowseEquipmentPage = () => {
                     <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
                       <div className="flex flex-wrap items-center gap-2 text-slate-600">
                         <div className="flex items-center space-x-1 font-semibold text-slate-800">
-                          <MapPin className="h-3.5 w-3.5 text-brand-600" />
+                          <MapPin className="h-3.5 w-3.5 text-slate-900" />
                           <span>{item.address?.city || 'Local Site'}{item.address?.state ? `, ${item.address.state}` : ''}</span>
                         </div>
 
                         {/* Distance Badge RIGHT NEXT to Address */}
                         {dist !== null ? (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
-                            <Navigation className="h-2.5 w-2.5 text-emerald-600 fill-emerald-600 rotate-45" />
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#FCC837]/20 text-slate-950 font-bold text-[11px] border border-[#FCC837]/50">
+                            <Navigation className="h-2.5 w-2.5 text-slate-950 fill-slate-950 rotate-45" />
                             <span>{dist} km away</span>
                           </span>
                         ) : (
@@ -541,7 +541,7 @@ const BrowseEquipmentPage = () => {
 
                       <Link
                         to={`/equipment/${item._id}`}
-                        className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs uppercase tracking-wider transition"
+                        className="px-4 py-2 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-bold text-xs uppercase tracking-wider transition border border-[#E6B01B]"
                       >
                         View Details & Rent
                       </Link>
@@ -559,7 +559,7 @@ const BrowseEquipmentPage = () => {
               return (
                 <div
                   key={item._id}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:border-brand-500 hover:shadow-lg transition-all flex flex-col justify-between group"
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:border-[#FCC837] hover:shadow-lg transition-all flex flex-col justify-between group"
                 >
                   <div>
                     {/* Photo Container */}
@@ -574,8 +574,8 @@ const BrowseEquipmentPage = () => {
                       </div>
 
                       {dist !== null && (
-                        <div className="absolute bottom-3 left-3 bg-emerald-600/95 backdrop-blur text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center space-x-1">
-                          <Navigation className="h-3 w-3 fill-white rotate-45" />
+                        <div className="absolute bottom-3 left-3 bg-[#222428]/95 backdrop-blur text-[#FCC837] border border-[#FCC837]/40 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center space-x-1">
+                          <Navigation className="h-3 w-3 fill-[#FCC837] rotate-45" />
                           <span>{dist} km from you</span>
                         </div>
                       )}
@@ -586,7 +586,7 @@ const BrowseEquipmentPage = () => {
                       <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
                         {item.brand} • {item.model}
                       </div>
-                      <h3 className="font-bold text-base text-slate-900 mt-1 line-clamp-1 group-hover:text-brand-600 transition">
+                      <h3 className="font-bold text-base text-slate-900 mt-1 line-clamp-1 group-hover:text-black transition">
                         {item.name}
                       </h3>
 
@@ -598,7 +598,7 @@ const BrowseEquipmentPage = () => {
                       <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
                         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                           <div className="flex items-center space-x-1 font-semibold text-slate-800 shrink-0">
-                            <MapPin className="h-3.5 w-3.5 text-brand-600 shrink-0" />
+                            <MapPin className="h-3.5 w-3.5 text-slate-900 shrink-0" />
                             <span>
                               {item.address?.city || 'Local Site'}
                               {item.address?.state ? `, ${item.address.state}` : ''}
@@ -607,8 +607,8 @@ const BrowseEquipmentPage = () => {
 
                           {/* Distance Badge RIGHT NEXT to Address */}
                           {dist !== null ? (
-                            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200 shrink-0">
-                              <Navigation className="h-2.5 w-2.5 text-emerald-600 fill-emerald-600 rotate-45" />
+                            <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-[#FCC837]/20 text-slate-950 font-bold text-[11px] border border-[#FCC837]/50 shrink-0">
+                              <Navigation className="h-2.5 w-2.5 text-slate-950 fill-slate-950 rotate-45" />
                               <span>{dist} km away</span>
                             </span>
                           ) : (
@@ -646,7 +646,7 @@ const BrowseEquipmentPage = () => {
 
                     <Link
                       to={`/equipment/${item._id}`}
-                      className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-brand-600 text-white font-bold text-xs uppercase tracking-wider transition"
+                      className="px-4 py-2 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-xs uppercase tracking-wider transition border border-[#E6B01B]"
                     >
                       Details & Rent
                     </Link>
