@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 import StorentLogo from '../components/common/StorentLogo';
+import Cartoon3DHeroStage from '../components/common/Cartoon3DHeroStage';
 import { getIllustrationForEquipment } from '../components/common/EquipmentIllustration';
 import {
   Search,
@@ -78,17 +79,10 @@ const HERO_SCENES = [
     title: 'Heavy Haulage Tipper',
     shortLabel: 'Dump Truck',
     icon: Truck,
-    badge: 'Mining & Aggregate Transport',
+    badge: 'Mining & Haulage 3D Stream',
     name: 'BharatBenz 3528C Heavy Tipper',
     category: 'Mining & Road Construction • 28 Ton Heavy Dump Truck',
     illustration: '/images/illustrations/dump-truck.svg',
-    bgImage: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=2400&auto=format&fit=crop&q=80',
-    videoSources: [
-      '/videos/truck-driving.mp4',
-      '/videos/truck.mp4',
-      '/videos/tipper.mp4',
-      'https://raw.githubusercontent.com/AarohiSingla/Speed-detection-of-vehicles/main/highway_mini.mp4',
-    ],
     specs: [
       { label: 'Engine', value: '280 HP Turbo' },
       { label: 'Box Volume', value: '18 m³ HD Box' },
@@ -104,17 +98,10 @@ const HERO_SCENES = [
     title: 'JCB 3DX Excavator',
     shortLabel: 'JCB Backhoe',
     icon: Wrench,
-    badge: 'Heavy Earthmoving Active',
+    badge: 'Heavy Earthmoving 3D Digging',
     name: 'JCB 3DX Super EcoXcellence',
     category: 'Heavy Earthmoving • Hydraulic Backhoe Loader',
     illustration: '/images/illustrations/jcb-excavator.svg',
-    bgImage: 'https://images.unsplash.com/photo-1503708928676-1cb796a0891e?w=2400&auto=format&fit=crop&q=80',
-    videoSources: [
-      '/videos/jcb.mp4',
-      '/videos/jcb-working.mp4',
-      '/videos/jcb-3dx.mp4',
-      '/videos/excavator.mp4',
-    ],
     specs: [
       { label: 'Engine', value: '76 HP Turbo' },
       { label: 'Bucket', value: '1.1 m³ HD' },
@@ -130,16 +117,10 @@ const HERO_SCENES = [
     title: 'Hydraulic Mobile Crane',
     shortLabel: '25T Crane',
     icon: Container,
-    badge: 'Infrastructure Heavy Lifting',
+    badge: 'Heavy Lifting 3D Slewing',
     name: 'ACE 25X Mobile Telescopic Crane',
     category: 'Heavy Lifting & Aerial • 25 Ton Telescopic Boom',
     illustration: '/images/illustrations/crane.svg',
-    bgImage: 'https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=2400&auto=format&fit=crop&q=80',
-    videoSources: [
-      '/videos/crane-working.mp4',
-      '/videos/crane.mp4',
-      '/videos/crane-lifting.mp4',
-    ],
     specs: [
       { label: 'Boom Reach', value: '34.5 m Reach' },
       { label: 'Capacity', value: '25 Ton Safe Load' },
@@ -174,34 +155,16 @@ const LandingPage = () => {
 
   // Multi-machine sequential showcase (Truck ➔ JCB ➔ Crane ➔ Loop)
   const [activeSceneIndex, setActiveSceneIndex] = useState(0);
-  const [hudFading, setHudFading] = useState(false);
-  const [playingVideos, setPlayingVideos] = useState({});
-
-  const handleVideoPlaying = (sceneId) => {
-    setPlayingVideos((prev) => ({ ...prev, [sceneId]: true }));
-  };
-
-  const handleVideoError = (sceneId) => {
-    setPlayingVideos((prev) => ({ ...prev, [sceneId]: false }));
-  };
 
   const changeScene = (nextIdx) => {
     if (nextIdx === activeSceneIndex) return;
-    setHudFading(true);
-    setTimeout(() => {
-      setActiveSceneIndex(nextIdx);
-      setTimeout(() => setHudFading(false), 50);
-    }, 450);
+    setActiveSceneIndex(nextIdx);
   };
 
   // Relaxed 8.5-second timer with smooth crossfade
   useEffect(() => {
     const timer = setInterval(() => {
-      setHudFading(true);
-      setTimeout(() => {
-        setActiveSceneIndex((prev) => (prev + 1) % HERO_SCENES.length);
-        setTimeout(() => setHudFading(false), 50);
-      }, 450);
+      setActiveSceneIndex((prev) => (prev + 1) % HERO_SCENES.length);
     }, 8500);
     return () => clearInterval(timer);
   }, []);
@@ -257,97 +220,36 @@ const LandingPage = () => {
     }
   };
 
-  // Dynamic parallax calculation
-  const heroTilt = Math.min(12, Math.max(0, scrollY * 0.04));
-  const heroTranslateY = Math.min(80, scrollY * 0.18);
-  const heroScale = Math.min(1.04, 1 + scrollY * 0.0002);
-
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col overflow-x-hidden">
-      {/* Hero Section with Multi-Machine Cinematic Video Showcase (Truck ➔ JCB ➔ Crane) */}
+      {/* Hero Section: Left Content + Right Aesthetic 3D Cartoon Video Arena */}
       <section className="relative bg-[#181A1D] text-white overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-32 border-b border-[#34373C]">
-        {/* Full-bleed Stable Multi-Scene Background Container */}
-        <div
-          className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden"
-          style={{
-            transform: `translate3d(0, ${scrollY * 0.16}px, 0)`,
-          }}
-        >
-          {HERO_SCENES.map((scene, idx) => {
-            const isCurrent = activeSceneIndex === idx;
-            const isVideoPlaying = !!playingVideos[scene.id];
-
-            return (
-              <div
-                key={scene.id}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-[2200ms] ease-in-out ${
-                  isCurrent ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
-                }`}
-                style={{
-                  willChange: 'opacity',
-                }}
-              >
-                {/* High-Resolution Stable Machinery Background Image */}
-                <div
-                  className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-[8500ms] ease-out"
-                  style={{
-                    backgroundImage: `url('${scene.bgImage}')`,
-                    backgroundPosition: 'center 48%',
-                    transform: isCurrent ? 'scale(1.04)' : 'scale(1)',
-                    filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
-                  }}
-                />
-
-                {/* Local Video / Stream for this machine */}
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  ref={(el) => {
-                    if (el && isCurrent && el.paused) {
-                      el.play().catch(() => {});
-                    }
-                  }}
-                  onPlaying={() => handleVideoPlaying(scene.id)}
-                  onError={() => handleVideoError(scene.id)}
-                  className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-1000 ease-in-out ${
-                    isVideoPlaying ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  style={{
-                    filter: 'brightness(0.95) contrast(1.1) saturate(1.05)',
-                  }}
-                >
-                  {scene.videoSources.map((vSrc, vIdx) => (
-                    <source
-                      key={vIdx}
-                      src={vSrc}
-                      type={vSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4'}
-                    />
-                  ))}
-                  <source src="/videos/hero-sequence.mp4" type="video/mp4" />
-                </video>
-              </div>
-            );
-          })}
+        {/* Ambient Dark Charcoal Background with Isometric Floor & Glow */}
+        <div className="absolute inset-0 bg-[#141619] pointer-events-none overflow-hidden">
+          {/* Isometric Perspective Grid */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/2 opacity-15"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #FCC837 1px, transparent 1px),
+                linear-gradient(to bottom, #FCC837 1px, transparent 1px)
+              `,
+              backgroundSize: '48px 48px',
+              transform: 'perspective(600px) rotateX(65deg) scale(2)',
+              transformOrigin: 'center bottom',
+            }}
+          />
+          {/* Ambient Golden Glow Orbs */}
+          <div className="absolute -top-32 -right-32 w-[35rem] h-[35rem] rounded-full bg-[#FCC837]/10 blur-3xl" />
+          <div className="absolute -bottom-40 left-1/4 w-[30rem] h-[30rem] rounded-full bg-[#FCC837]/10 blur-3xl" />
         </div>
 
-        {/* Directional Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#181A1D]/90 via-[#181A1D]/50 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#181A1D] via-[#181A1D]/40 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#181A1D]/60 to-transparent pointer-events-none" />
-
-        {/* Ambient Yellow Glow Orbs */}
-        <div className="absolute -top-32 -right-32 w-[35rem] h-[35rem] rounded-full bg-[#FCC837]/15 blur-3xl pointer-events-none animate-pulse-glow" />
-        <div className="absolute -bottom-40 left-1/4 w-[30rem] h-[30rem] rounded-full bg-[#FCC837]/10 blur-3xl pointer-events-none" />
-
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content (7 cols) */}
-            <div className="lg:col-span-7">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+            {/* Left Content (6 cols): Badge, Headings, Search, CTAs, Machine Tabs */}
+            <div className="lg:col-span-6 xl:col-span-6 z-10 flex flex-col justify-center">
               {/* Badge */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-[#222428] text-xs font-black uppercase tracking-wider mb-6 shadow-lg shadow-[#FCC837]/20 animate-hero-fade-in">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-[#222428] text-xs font-black uppercase tracking-wider mb-6 shadow-lg shadow-[#FCC837]/20 self-start animate-hero-fade-in">
                 <span className="h-2 w-2 rounded-full bg-[#222428] animate-ping mr-1" />
                 <span>STORENT • Heavy Machinery Rental Platform</span>
               </div>
@@ -361,7 +263,7 @@ const LandingPage = () => {
               </h1>
 
               {/* Subheading */}
-              <p className="mt-5 text-base sm:text-lg text-white/80 leading-relaxed font-normal max-w-2xl animate-hero-fade-in-delay-2 drop-shadow">
+              <p className="mt-5 text-base sm:text-lg text-white/80 leading-relaxed font-normal max-w-xl animate-hero-fade-in-delay-2 drop-shadow">
                 Find JCBs, crawler excavators, cranes, silent generators, and tractors with GPS radar.
                 Or list your machines, enforce subscription limits, and collect rental revenue through secure escrow.
               </p>
@@ -369,7 +271,7 @@ const LandingPage = () => {
               {/* Quick Search Bar */}
               <form
                 onSubmit={handleSearchSubmit}
-                className="mt-8 flex flex-col sm:flex-row items-stretch gap-2.5 max-w-2xl bg-[#222428]/80 p-2 rounded-2xl backdrop-blur-md border border-[#34373C] shadow-2xl animate-hero-fade-in-delay-2"
+                className="mt-8 flex flex-col sm:flex-row items-stretch gap-2.5 max-w-xl bg-[#222428]/80 p-2 rounded-2xl backdrop-blur-md border border-[#34373C] shadow-2xl animate-hero-fade-in-delay-2"
               >
                 <div className="flex-1 flex items-center bg-white rounded-xl px-3.5 py-2.5">
                   <Search className="h-5 w-5 text-[#34373C]/60 mr-2.5 shrink-0" />
@@ -446,131 +348,64 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right: Translucent Glassmorphism Live Machine Radar & 3D Cartoon Model HUD */}
-            <div className="lg:col-span-5 relative perspective-1000 mt-6 lg:mt-0 animate-hero-zoom-in">
-              <div
-                className="relative rounded-3xl p-6 sm:p-7 bg-[#222428]/80 backdrop-blur-xl border border-[#34373C] shadow-2xl transition-transform duration-300 ease-out preserve-3d"
-                style={{
-                  transform: `perspective(1000px) rotateX(${heroTilt}deg) rotateY(-${heroTilt * 0.6}deg) translateY(${heroTranslateY}px) scale(${heroScale})`,
-                }}
-              >
-                {/* HUD Header */}
-                <div className="flex items-center justify-between border-b border-[#34373C] pb-4">
-                  <div className={`inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#FCC837]/20 border border-[#FCC837]/40 text-[#FCC837] text-[10px] font-bold uppercase tracking-wider transition-opacity duration-500 ${hudFading ? 'opacity-30' : 'opacity-100'}`}>
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837] animate-pulse" />
-                    <span>{currentScene.badge}</span>
-                  </div>
-                  <span className="text-[11px] font-semibold text-white/60">3D Fleet Telemetry</span>
-                </div>
+            {/* Right Column (6 cols): Aesthetic 3D Cartoon Video Showcase Arena */}
+            <div className="lg:col-span-6 xl:col-span-6 relative mt-6 lg:mt-0 flex items-center justify-center">
+              {/* Glowing Halo Backdrop */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#FCC837]/20 via-[#FCC837]/5 to-[#FCC837]/20 rounded-[2.5rem] blur-2xl opacity-60 pointer-events-none animate-pulse-glow" />
 
-                {/* Machine Details with 3D Cartoon Illustration Preview */}
-                <div className={`transition-all duration-500 ease-out ${hudFading ? 'opacity-20 translate-y-1' : 'opacity-100 translate-y-0'}`}>
-                  {/* 3D Model Image Box & Title */}
-                  <div className="mt-4 flex items-center gap-4">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#181A1D] border border-[#FCC837]/30 p-2 flex items-center justify-center shrink-0 shadow-inner group">
-                      <img
-                        src={currentScene.illustration}
-                        alt={currentScene.name}
-                        className="w-full h-full object-contain transition-transform duration-500 hover:scale-110 drop-shadow-md"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white tracking-tight line-clamp-1">
-                        {currentScene.name}
-                      </h3>
-                      <p className="text-xs text-white/70 mt-0.5 line-clamp-1">
-                        {currentScene.category}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 3-Col Quick Technical Specs */}
-                  <div className="mt-5 grid grid-cols-3 gap-2.5">
-                    {currentScene.specs.map((sp, sIdx) => (
-                      <div key={sIdx} className="bg-[#181A1D]/80 backdrop-blur-md rounded-xl p-2.5 border border-[#34373C] text-center">
-                        <div className="text-[10px] uppercase font-bold text-white/60">{sp.label}</div>
-                        <div className="text-sm font-black text-[#FCC837] mt-0.5 truncate">{sp.value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Live Distance & Verification Row */}
-                  <div className="mt-5 p-3 rounded-2xl bg-[#FCC837]/10 border border-[#FCC837]/30 flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-[#FCC837] text-[#222428] flex items-center justify-center font-bold">
-                        <MapPin className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="h-2 w-2 rounded-full bg-[#FCC837] animate-ping" />
-                          <span className="text-xs font-black text-white">{currentScene.distance}</span>
-                        </div>
-                        <div className="text-[10px] text-[#FCC837] font-medium">
-                          MongoDB 2dsphere GPS Proximity
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-black text-white">{currentScene.rate}<span className="text-[10px] text-white/60 font-normal">{currentScene.unit}</span></div>
-                      <div className="text-[10px] text-white/60">Escrow Secured</div>
-                    </div>
-                  </div>
-
-                  {/* Direct Action Link */}
-                  <div className="mt-5 flex items-center justify-between pt-4 border-t border-[#34373C]">
-                    <span className="text-xs text-white/80 flex items-center space-x-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-[#FCC837]" />
-                      <span>{currentScene.operatorStatus}</span>
-                    </span>
-                    <Link
-                      to={`/browse?search=${encodeURIComponent(currentScene.shortLabel)}`}
-                      className="inline-flex items-center space-x-1 text-xs font-bold text-[#FCC837] hover:underline transition"
-                    >
-                      <span>View Machine</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Floating Parallax Badge 1: GPS Radar (Top-Left) */}
+              {/* Aesthetic 3D Stage Container */}
+              <div className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-3xl overflow-hidden bg-gradient-to-b from-[#1C1E22]/90 via-[#181A1D] to-[#121417] border border-[#FCC837]/30 shadow-[0_25px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(252,200,55,0.12)] group hover:border-[#FCC837]/60 transition-all duration-500">
+                {/* Internal Ground Perspective Grid */}
                 <div
-                  className="absolute -top-5 -left-5 bg-[#222428] text-white px-3.5 py-2.5 rounded-2xl shadow-xl border border-[#34373C] flex items-center space-x-2.5 animate-float-slow"
+                  className="absolute inset-x-0 bottom-0 h-3/5 opacity-25 pointer-events-none"
                   style={{
-                    transform: `translateY(${scrollY * -0.1}px)`,
+                    backgroundImage: `
+                      linear-gradient(to right, #FCC837 1px, transparent 1px),
+                      linear-gradient(to bottom, #FCC837 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
+                    transform: 'perspective(500px) rotateX(65deg) scale(2)',
+                    transformOrigin: 'center bottom',
                   }}
-                >
-                  <div className="h-8 w-8 rounded-xl bg-[#FCC837] text-[#222428] flex items-center justify-center font-bold">
-                    <MapPin className="h-4 w-4" />
+                />
+
+                {/* Center Golden Spotlight Aura */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#FCC837]/15 blur-[90px] pointer-events-none animate-pulse-glow" />
+
+                {/* 60 FPS Animated 3D Cartoon Stage */}
+                <Cartoon3DHeroStage activeSceneId={currentScene.id} showBackground={false} />
+
+                {/* Aesthetic Top Floating Badge */}
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-30">
+                  <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#181A1D]/90 border border-[#FCC837]/50 text-[#FCC837] text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-lg">
+                    <span className="h-2 w-2 rounded-full bg-[#FCC837] animate-ping" />
+                    <span>3D Dynamic Video • 60 FPS</span>
                   </div>
-                  <div>
-                    <div className="flex items-center space-x-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837] animate-ping" />
-                      <span className="text-xs font-black text-white">GPS Radar Active</span>
-                    </div>
-                    <div className="text-[10px] font-semibold text-white/60">
-                      Real Coordinates
-                    </div>
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#222428]/90 border border-[#34373C] text-white/80 text-[10px] font-bold backdrop-blur-md">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837]" />
+                    <span>STORENT Live Fleet</span>
                   </div>
                 </div>
 
-                {/* Floating Parallax Badge 2: Escrow Protection (Bottom-Right) */}
-                <div
-                  className="absolute -bottom-5 -right-5 bg-[#222428] text-white px-3.5 py-2.5 rounded-2xl shadow-2xl border border-[#34373C] flex items-center space-x-2.5 animate-float-reverse"
-                  style={{
-                    transform: `translateY(${scrollY * -0.07}px)`,
-                  }}
-                >
-                  <div className="h-8 w-8 rounded-xl bg-[#FCC837] text-[#222428] flex items-center justify-center shadow-md font-bold">
-                    <ShieldCheck className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
-                      STORENT Escrow
+                {/* Aesthetic Bottom Info Glass Bar */}
+                <div className="absolute bottom-4 left-4 right-4 bg-[#181A1D]/90 backdrop-blur-md p-3.5 rounded-2xl border border-[#34373C]/80 flex items-center justify-between z-30 shadow-2xl">
+                  <div className="truncate mr-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="h-2 w-2 rounded-full bg-[#FCC837]" />
+                      <h3 className="text-sm sm:text-base font-black text-white truncate">{currentScene.name}</h3>
                     </div>
-                    <div className="text-xs font-black text-[#FCC837]">
-                      100% Payment Shield
-                    </div>
+                    <p className="text-[11px] text-[#FCC837] font-semibold mt-0.5 truncate pl-4">
+                      {currentScene.category}
+                    </p>
                   </div>
+
+                  <Link
+                    to={`/browse?search=${encodeURIComponent(currentScene.shortLabel)}`}
+                    className="px-4 py-2 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs transition border border-[#E6B01B] shrink-0 shadow-lg flex items-center space-x-1.5"
+                  >
+                    <span>Check Dates</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -645,15 +480,28 @@ const LandingPage = () => {
                 >
                   {/* 3D Cartoon Illustration Container */}
                   <div className="relative h-64 w-full overflow-hidden bg-gradient-to-b from-[#181A1D] to-[#222428] flex items-center justify-center p-6">
+                    {/* Animated Grid Floor Lines */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 h-24 opacity-25 pointer-events-none"
+                      style={{
+                        backgroundImage: 'linear-gradient(to right, #FCC837 1px, transparent 1px), linear-gradient(to bottom, #FCC837 1px, transparent 1px)',
+                        backgroundSize: '24px 24px',
+                        transform: 'perspective(300px) rotateX(60deg)',
+                        transformOrigin: 'bottom center',
+                      }}
+                    />
+
+                    {/* 3D Cartoon SVG with smooth floating animation */}
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-2xl"
+                      className="w-full h-full object-contain group-hover:scale-115 group-hover:-translate-y-2 transition-all duration-500 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] group-hover:drop-shadow-[0_20px_35px_rgba(252,200,55,0.35)]"
                     />
 
                     {/* Tag Badge */}
-                    <div className="absolute top-4 left-4 bg-[#FCC837] text-[#222428] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border border-[#E6B01B]">
-                      {item.tag}
+                    <div className="absolute top-4 left-4 bg-[#FCC837] text-[#222428] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border border-[#E6B01B] flex items-center space-x-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#222428] animate-pulse" />
+                      <span>{item.tag}</span>
                     </div>
 
                     {/* Distance Badge */}
@@ -662,11 +510,11 @@ const LandingPage = () => {
                       <span>{item.distance}</span>
                     </div>
 
-                    <div className="absolute bottom-3 left-4 right-4">
-                      <span className="text-[11px] font-semibold text-white/60 uppercase tracking-wider">
+                    <div className="absolute bottom-3 left-4 right-4 bg-[#181A1D]/85 backdrop-blur-sm p-2 rounded-xl border border-[#34373C]/60">
+                      <span className="text-[10px] font-bold text-[#FCC837] uppercase tracking-wider">
                         {item.category}
                       </span>
-                      <h3 className="text-lg font-black text-white mt-0.5 line-clamp-1">
+                      <h3 className="text-base font-black text-white mt-0.5 line-clamp-1">
                         {item.title}
                       </h3>
                     </div>
@@ -735,11 +583,11 @@ const LandingPage = () => {
               >
                 <div>
                   {/* 3D Cartoon Illustration Frame */}
-                  <div className="h-36 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 mb-4 p-3 flex items-center justify-center group-hover:border-[#FCC837] group-hover:bg-[#FCC837]/10 transition-all duration-300 overflow-hidden">
+                  <div className="h-36 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 mb-4 p-3 flex items-center justify-center group-hover:border-[#FCC837] group-hover:bg-[#FCC837]/10 transition-all duration-300 overflow-hidden relative">
                     <img
                       src={cat.imageUrl || illustrationSrc}
                       alt={cat.name}
-                      className="h-28 w-28 object-contain group-hover:scale-115 transition-transform duration-300 drop-shadow-md"
+                      className="h-28 w-28 object-contain group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-md group-hover:drop-shadow-[0_12px_20px_rgba(252,200,55,0.35)]"
                       loading="lazy"
                     />
                   </div>
