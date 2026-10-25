@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
@@ -24,25 +24,16 @@ import {
   Star,
   ExternalLink,
   Tag,
+  Scale,
+  Lock,
 } from 'lucide-react';
 
-const categoryIcons = {
-  'jcb-excavators': Truck,
-  'cranes-lifting': Container,
-  'generators-power': Zap,
-  'tractors-farm': Truck,
-  'concrete-mixers': RotateCw,
-  'forklifts-handling': Boxes,
-  'tools-compaction': Wrench,
-  'dump-trucks': Truck,
-};
-
-// 3D Cartoon Illustrations Showcase Items (100% matched to their equipment names)
+// 3D Cartoon Illustrations Showcase Items
 const showcaseItems = [
   {
     id: 'excavator',
     title: 'Caterpillar 320D & JCB 3DX Fleet',
-    category: 'Earthmoving & Digging',
+    category: 'Construction',
     rate: '₹8,500/day',
     location: 'Gurugram, Haryana',
     distance: '2.4 km away',
@@ -53,7 +44,7 @@ const showcaseItems = [
   {
     id: 'crane',
     title: 'Hydraulic Mobile Telescopic Cranes',
-    category: 'Heavy Lifting & Aerial',
+    category: 'Construction & Lifting',
     rate: '₹14,000/day',
     location: 'Noida, Uttar Pradesh',
     distance: '5.1 km away',
@@ -64,7 +55,7 @@ const showcaseItems = [
   {
     id: 'generator',
     title: 'Kirloskar Silent Diesel Generators',
-    category: 'Continuous Site Power',
+    category: 'Industrial Power',
     rate: '₹4,200/day',
     location: 'Saket, New Delhi',
     distance: '3.8 km away',
@@ -80,9 +71,9 @@ const HERO_SCENES = [
     title: 'Heavy Haulage Tipper',
     shortLabel: 'Dump Truck',
     icon: Truck,
-    badge: 'Mining & Haulage 3D Stream',
+    badge: 'Mining & Transport 3D Stream',
     name: 'BharatBenz 3528C Heavy Tipper',
-    category: 'Mining & Road Construction • 28 Ton Heavy Dump Truck',
+    category: 'Transport & Haulage • 28 Ton Heavy Dump Truck',
     illustration: '/images/illustrations/dump-truck.svg',
     specs: [
       { label: 'Engine', value: '280 HP Turbo' },
@@ -99,9 +90,9 @@ const HERO_SCENES = [
     title: 'JCB 3DX Excavator',
     shortLabel: 'JCB Backhoe',
     icon: Wrench,
-    badge: 'Heavy Earthmoving 3D Digging',
+    badge: 'Construction Earthmoving 3D Digging',
     name: 'JCB 3DX Super EcoXcellence',
-    category: 'Heavy Earthmoving • Hydraulic Backhoe Loader',
+    category: 'Construction • Hydraulic Backhoe Loader',
     illustration: '/images/illustrations/jcb-excavator.svg',
     specs: [
       { label: 'Engine', value: '76 HP Turbo' },
@@ -120,7 +111,7 @@ const HERO_SCENES = [
     icon: Container,
     badge: 'Heavy Lifting 3D Slewing',
     name: 'ACE 25X Mobile Telescopic Crane',
-    category: 'Heavy Lifting & Aerial • 25 Ton Telescopic Boom',
+    category: 'Construction & Aerial • 25 Ton Telescopic Boom',
     illustration: '/images/illustrations/crane.svg',
     specs: [
       { label: 'Boom Reach', value: '34.5 m Reach' },
@@ -134,15 +125,50 @@ const HERO_SCENES = [
   },
 ];
 
+// Exact 7 Primary Categories specified in STORENT guidelines
 const DEFAULT_CATEGORIES = [
-  { name: 'JCB & Excavators', slug: 'jcb-excavators', description: 'Backhoe loaders, mini excavators, and crawler excavators for earthmoving and digging.' },
-  { name: 'Cranes & Lifting', slug: 'cranes-lifting', description: 'Hydraulic mobile cranes, tower cranes, and aerial lift boom trucks.' },
-  { name: 'Generators & Power', slug: 'generators-power', description: 'Diesel silent generator sets (15 kVA to 500+ kVA) for construction and event power.' },
-  { name: 'Tractors & Farm Machinery', slug: 'tractors-farm', description: 'Heavy duty tractors, rotavators, and agricultural earth preparation equipment.' },
-  { name: 'Concrete Mixers', slug: 'concrete-mixers', description: 'Transit mixers, portable batching mixers, and concrete vibrators.' },
-  { name: 'Forklifts & Material Handling', slug: 'forklifts-handling', description: 'Diesel, LPG, and electric forklifts, pallet trucks, and reach stackers.' },
-  { name: 'Construction Tools & Compaction', slug: 'tools-compaction', description: 'Plate compactors, road rollers, jackhammers, and dewatering pumps.' },
-  { name: 'Dump Trucks & Haulage', slug: 'dump-trucks', description: 'Tipper dump trucks and multi-axle heavy trailers for material transport.' },
+  {
+    name: 'Construction',
+    slug: 'construction',
+    description: 'Backhoe loaders, crawler excavators, mobile cranes, and transit mixers for building sites.',
+    illustration: '/images/illustrations/jcb-excavator.svg',
+  },
+  {
+    name: 'Transport',
+    slug: 'transport',
+    description: 'Heavy tipper dump trucks, multi-axle trailers, and bulk material haulage vehicles.',
+    illustration: '/images/illustrations/dump-truck.svg',
+  },
+  {
+    name: 'Industrial',
+    slug: 'industrial',
+    description: 'Diesel silent generator sets (15 kVA to 500+ kVA), site compressors, and continuous power.',
+    illustration: '/images/illustrations/generator.svg',
+  },
+  {
+    name: 'Marine',
+    slug: 'marine',
+    description: 'Barges, winches, dredging pumps, and port material handling equipment.',
+    illustration: '/images/illustrations/crane.svg',
+  },
+  {
+    name: 'Road Works',
+    slug: 'road-works',
+    description: 'Vibratory road rollers, soil compactors, asphalt pavers, and motor graders for highways.',
+    illustration: '/images/illustrations/road-roller.svg',
+  },
+  {
+    name: 'Warehouse',
+    slug: 'warehouse',
+    description: 'Diesel and electric forklifts, reach stackers, pallet trucks, and order pickers.',
+    illustration: '/images/illustrations/forklift.svg',
+  },
+  {
+    name: 'Agriculture',
+    slug: 'agriculture',
+    description: 'High-torque farm tractors, rotavators, harvesters, and agricultural earth tillers.',
+    illustration: '/images/illustrations/tractor.svg',
+  },
 ];
 
 const LandingPage = () => {
@@ -150,6 +176,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
 
   // Scroll position state for dynamic scroll-driven animation
   const [scrollY, setScrollY] = useState(0);
@@ -193,6 +220,7 @@ const LandingPage = () => {
       try {
         const res = await api.get('/categories');
         if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          // If server categories have the 7 primary or legacy, merge smoothly
           setCategories(res.data.data);
         }
       } catch (err) {
@@ -204,11 +232,10 @@ const LandingPage = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/browse?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/browse');
-    }
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('search', searchQuery.trim());
+    if (locationQuery.trim()) params.set('location', locationQuery.trim());
+    navigate(`/browse?${params.toString()}`);
   };
 
   const handleRegisterClick = () => {
@@ -252,7 +279,7 @@ const LandingPage = () => {
               {/* Badge */}
               <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-[#222428] text-xs font-black uppercase tracking-wider mb-3.5 shadow-lg shadow-[#FCC837]/20 self-start animate-hero-fade-in">
                 <span className="h-2 w-2 rounded-full bg-[#222428] animate-ping mr-1" />
-                <span>STORENT • Heavy Machinery Rental Platform</span>
+                <span>STORENT.SI • Heavy Machinery Listing Directory</span>
               </div>
 
               {/* Heading */}
@@ -265,42 +292,57 @@ const LandingPage = () => {
 
               {/* Subheading */}
               <p className="mt-5 text-base sm:text-lg text-white/80 leading-relaxed font-normal max-w-xl animate-hero-fade-in-delay-2 drop-shadow">
-                Find JCBs, crawler excavators, cranes, silent generators, and tractors with GPS radar.
-                Or list your machines, enforce subscription limits, and collect rental revenue through secure escrow.
+                India&apos;s digital directory connecting contracting companies and equipment owners.
+                Search by keyword or city, verify mobile OTP, and unlock direct owner contacts.
               </p>
 
-              {/* Quick Search Bar */}
+              {/* Search Window with Custom Filters (Keyword + Location) */}
               <form
                 onSubmit={handleSearchSubmit}
-                className="mt-8 flex flex-col sm:flex-row items-stretch gap-2.5 max-w-xl bg-[#222428]/80 p-2 rounded-2xl backdrop-blur-md border border-[#34373C] shadow-2xl animate-hero-fade-in-delay-2"
+                className="mt-7 flex flex-col sm:flex-row items-stretch gap-2 max-w-xl bg-[#222428]/90 p-2.5 rounded-2xl backdrop-blur-md border border-[#34373C] shadow-2xl animate-hero-fade-in-delay-2"
               >
-                <div className="flex-1 flex items-center bg-white rounded-xl px-3.5 py-2.5">
-                  <Search className="h-5 w-5 text-[#34373C]/60 mr-2.5 shrink-0" />
+                {/* Keyword Filter */}
+                <div className="flex-1 flex items-center bg-white rounded-xl px-3 py-2.5 min-w-0">
+                  <Search className="h-4 w-4 text-[#34373C]/60 mr-2 shrink-0" />
                   <input
                     type="text"
-                    placeholder="Search JCB 3DX, 25 Ton Crane, 125 kVA Generator..."
+                    placeholder="JCB 3DX, Crane, Generator..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full text-[#222428] placeholder-[#34373C]/50 text-sm focus:outline-none"
+                    className="w-full text-[#222428] placeholder-[#34373C]/50 text-xs sm:text-sm focus:outline-none"
                   />
                 </div>
+
+                {/* Location Filter (City / State) */}
+                <div className="sm:w-44 flex items-center bg-white rounded-xl px-3 py-2.5 min-w-0">
+                  <MapPin className="h-4 w-4 text-[#FCC837] mr-1.5 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="City or State"
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
+                    className="w-full text-[#222428] placeholder-[#34373C]/50 text-xs sm:text-sm focus:outline-none"
+                  />
+                </div>
+
+                {/* Submit CTA */}
                 <button
                   type="submit"
-                  className="px-6 py-3.5 bg-[#FCC837] hover:bg-[#F0BA28] font-black text-sm rounded-xl text-[#222428] border border-[#E6B01B] shadow-lg shadow-[#FCC837]/30 transition flex items-center justify-center space-x-2 shrink-0"
+                  className="px-5 py-3 bg-[#FCC837] hover:bg-[#F0BA28] font-black text-xs sm:text-sm rounded-xl text-[#222428] border border-[#E6B01B] shadow-lg shadow-[#FCC837]/30 transition flex items-center justify-center space-x-1.5 shrink-0"
                 >
-                  <span>Find Machinery</span>
+                  <span>Search</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
 
-              {/* Dual CTAs & Action Buttons */}
-              <div className="mt-8 flex flex-wrap items-center gap-4 animate-hero-fade-in-delay-3">
+              {/* Dual Hero CTAs: "Rent equipment" and "List equipment" as required */}
+              <div className="mt-7 flex flex-wrap items-center gap-3.5 animate-hero-fade-in-delay-3">
                 <Link
-                  to="/browse"
-                  className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-[#222428] hover:bg-[#34373C] border border-[#34373C] text-sm font-bold text-[#FCC837] transition shadow-sm backdrop-blur-md"
+                  to="/browse?listingType=rent"
+                  className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-[#222428] hover:bg-[#34373C] border border-[#34373C] text-sm font-black text-[#FCC837] transition shadow-sm backdrop-blur-md"
                 >
                   <Search className="h-4 w-4 text-[#FCC837]" />
-                  <span>Rent Equipment</span>
+                  <span>Rent equipment</span>
                 </Link>
 
                 <button
@@ -308,15 +350,15 @@ const LandingPage = () => {
                   className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-sm border border-[#E6B01B] transition-all duration-300 shadow-xl shadow-[#FCC837]/25"
                 >
                   <PlusCircle className="h-4 w-4 text-[#222428]" />
-                  <span>List Your Equipment</span>
+                  <span>List equipment</span>
                 </button>
 
                 <Link
-                  to="/plans"
+                  to="/safe-harbor"
                   className="inline-flex items-center space-x-1.5 text-xs text-white/70 hover:text-[#FCC837] transition px-2 py-1"
                 >
-                  <span>Listing Plans from ₹499/mo</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <Scale className="h-3.5 w-3.5 text-[#FCC837]" />
+                  <span>Section 79 Safe Harbor</span>
                 </Link>
               </div>
 
@@ -351,7 +393,7 @@ const LandingPage = () => {
 
             {/* Right Column (6 cols): Borderless Ultra-Aesthetic 3D Showcase Arena (50% Equal Balance) */}
             <div className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center min-h-[460px] sm:min-h-[520px] lg:min-h-[580px]">
-              {/* Soft Ethereal Center Spotlight Aura (Seamless background glow, zero outlines) */}
+              {/* Soft Ethereal Center Spotlight Aura */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] sm:w-[32rem] sm:h-[32rem] rounded-full bg-[#FCC837]/15 blur-[120px] pointer-events-none animate-pulse-glow" />
 
               {/* Seamless Ground Perspective Grid with Soft Vignette Fade */}
@@ -370,7 +412,7 @@ const LandingPage = () => {
                 }}
               />
 
-              {/* Borderless 3D Animated Stage Canvas (Completely border-free, pure motion) */}
+              {/* Borderless 3D Animated Stage Canvas */}
               <div className="relative w-full h-[460px] sm:h-[520px] lg:h-[580px] flex items-center justify-center select-none">
                 <Cartoon3DHeroStage activeSceneId={currentScene.id} showBackground={false} />
               </div>
@@ -379,7 +421,7 @@ const LandingPage = () => {
               <div className="absolute top-3 right-4 flex items-center space-x-2 pointer-events-none z-20">
                 <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#181A1D]/80 backdrop-blur-md border border-[#FCC837]/30 text-[#FCC837] text-[10px] font-black uppercase tracking-wider shadow-lg">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837] animate-ping" />
-                  <span>3D Dynamic Simulation • 60 FPS</span>
+                  <span>3D Simulation Fleet</span>
                 </div>
               </div>
 
@@ -402,31 +444,92 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Trust & Stats Bar */}
+      {/* Trust & Stats Bar with Intermediary & OTP Highlights */}
       <section className="bg-white border-b border-[#34373C]/10 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="border-r border-[#34373C]/10 last:border-none">
               <div className="text-2xl font-black text-[#222428]">100%</div>
-              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Verified Machine Owners</div>
+              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Verified Machine Owners (RC Verified)</div>
             </div>
             <div className="border-r border-[#34373C]/10 last:border-none">
               <div className="text-2xl font-black text-[#222428]">2dsphere</div>
               <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">GPS Nearby Radar Search</div>
             </div>
             <div className="border-r border-[#34373C]/10 last:border-none">
-              <div className="text-2xl font-black text-[#222428]">Escrow</div>
-              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Secure Escrow Payments</div>
+              <div className="text-2xl font-black text-[#222428]">OTP Unlock</div>
+              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Verified Contact Exchange</div>
             </div>
             <div>
-              <div className="text-2xl font-black text-[#222428]">0%</div>
-              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Double-Booking Guarantee</div>
+              <div className="text-2xl font-black text-[#222428]">Section 79</div>
+              <div className="text-xs text-[#34373C]/70 font-medium mt-0.5">Safe Harbor Intermediary Platform</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* DEDICATED SCROLL ANIMATION SHOWCASE: "Fleet in Motion" with 3D Cartoon Illustrations */}
+      {/* Category Buttons Explorer - 7 Categories as explicitly mandated by guidelines */}
+      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
+          <div>
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]/40 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>Machinery Categories</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#222428]">
+              Browse by Industry Category
+            </h2>
+            <p className="text-sm text-[#34373C]/70 mt-1">
+              Select any of the 7 industry sectors to find available equipment near your site.
+            </p>
+          </div>
+          <Link
+            to="/browse"
+            className="mt-3 sm:mt-0 text-sm font-bold text-[#222428] hover:underline flex items-center space-x-1"
+          >
+            <span>View All Categories</span>
+            <ArrowRight className="h-4 w-4 text-[#FCC837]" />
+          </Link>
+        </div>
+
+        {/* 7 Category Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {DEFAULT_CATEGORIES.map((cat) => {
+            const illustrationSrc = cat.illustration || getIllustrationForEquipment(cat.name, cat.slug);
+            return (
+              <Link
+                key={cat.slug}
+                to={`/browse?category=${cat.slug}`}
+                className="group p-5 bg-white rounded-2xl border border-[#34373C]/15 hover:border-[#FCC837] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  {/* 3D Illustration Frame */}
+                  <div className="h-36 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 mb-4 p-3 flex items-center justify-center group-hover:border-[#FCC837] group-hover:bg-[#FCC837]/10 transition-all duration-300 overflow-hidden relative">
+                    <img
+                      src={illustrationSrc}
+                      alt={cat.name}
+                      className="h-28 w-28 object-contain group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-md group-hover:drop-shadow-[0_12px_20px_rgba(252,200,55,0.35)]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="font-bold text-base text-[#222428] group-hover:text-black transition flex items-center justify-between">
+                    <span>{cat.name}</span>
+                    <span className="text-[10px] font-bold text-[#34373C]/50 uppercase">Category</span>
+                  </h3>
+                  <p className="text-xs text-[#34373C]/70 mt-1.5 line-clamp-2 leading-relaxed">
+                    {cat.description}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#34373C]/10 flex items-center justify-between text-xs font-bold text-[#222428]">
+                  <span>Explore listings</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-[#FCC837] group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Dedicated Showcase Section: "Fleet in Motion" */}
       <section className="py-20 bg-[#181A1D] text-white relative overflow-hidden border-b border-[#34373C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
@@ -439,8 +542,8 @@ const LandingPage = () => {
                 Scroll Through Our Active Construction Fleet
               </h2>
               <p className="text-sm text-white/70 mt-2 max-w-2xl">
-                Real equipment available across major project corridors. Every machine is inspected,
-                CPCB certified, and backed by direct owner coordination.
+                Equipment available across major infrastructure corridors. Verified owners,
+                transparent specifications, and direct mobile OTP unlock.
               </p>
             </div>
 
@@ -448,7 +551,7 @@ const LandingPage = () => {
               to="/browse"
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] text-xs font-black uppercase tracking-wider transition self-start md:self-auto shadow-md border border-[#E6B01B]"
             >
-              <span>Explore All 8 Categories</span>
+              <span>Explore Marketplace</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -467,9 +570,7 @@ const LandingPage = () => {
                     transform: `translateY(${cardOffset}px) scale(${cardScale})`,
                   }}
                 >
-                  {/* 3D Cartoon Illustration Container */}
                   <div className="relative h-64 w-full overflow-hidden bg-gradient-to-b from-[#181A1D] to-[#222428] flex items-center justify-center p-6">
-                    {/* Animated Grid Floor Lines */}
                     <div
                       className="absolute inset-x-0 bottom-0 h-24 opacity-25 pointer-events-none"
                       style={{
@@ -480,20 +581,17 @@ const LandingPage = () => {
                       }}
                     />
 
-                    {/* 3D Cartoon SVG with smooth floating animation */}
                     <img
                       src={item.image}
                       alt={item.title}
                       className="w-full h-full object-contain group-hover:scale-115 group-hover:-translate-y-2 transition-all duration-500 drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] group-hover:drop-shadow-[0_20px_35px_rgba(252,200,55,0.35)]"
                     />
 
-                    {/* Tag Badge */}
                     <div className="absolute top-4 left-4 bg-[#FCC837] text-[#222428] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg border border-[#E6B01B] flex items-center space-x-1.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#222428] animate-pulse" />
                       <span>{item.tag}</span>
                     </div>
 
-                    {/* Distance Badge */}
                     <div className="absolute top-4 right-4 bg-[#222428]/90 backdrop-blur-md text-[#FCC837] text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#FCC837]/30 flex items-center space-x-1">
                       <MapPin className="h-3 w-3" />
                       <span>{item.distance}</span>
@@ -509,7 +607,6 @@ const LandingPage = () => {
                     </div>
                   </div>
 
-                  {/* Body Specs */}
                   <div className="p-6 space-y-4">
                     <p className="text-xs text-white/80 leading-relaxed font-medium">
                       {item.specs}
@@ -537,109 +634,49 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Category Explorer with 3D Cartoon Illustrations */}
-      <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
-          <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]/40 text-xs font-bold uppercase tracking-wider mb-2">
-              <span>Machinery Categories</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#222428]">
-              Browse Machinery Categories
-            </h2>
-            <p className="text-sm text-[#34373C]/70 mt-1">
-              Select any category to explore verified machines with real GPS radar proximity.
-            </p>
-          </div>
-          <Link
-            to="/browse"
-            className="mt-3 sm:mt-0 text-sm font-bold text-[#222428] hover:underline flex items-center space-x-1"
-          >
-            <span>View All Categories</span>
-            <ArrowRight className="h-4 w-4 text-[#FCC837]" />
-          </Link>
-        </div>
-
-        {/* 8 Category Cards with 3D Cartoon Illustrations */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {categories.map((cat) => {
-            const illustrationSrc = getIllustrationForEquipment(cat.name, cat.slug);
-            return (
-              <Link
-                key={cat._id || cat.slug}
-                to={`/browse?category=${cat.slug}`}
-                className="group p-5 bg-white rounded-2xl border border-[#34373C]/15 hover:border-[#FCC837] hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  {/* 3D Cartoon Illustration Frame */}
-                  <div className="h-36 w-full rounded-xl bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0] border border-[#34373C]/10 mb-4 p-3 flex items-center justify-center group-hover:border-[#FCC837] group-hover:bg-[#FCC837]/10 transition-all duration-300 overflow-hidden relative">
-                    <img
-                      src={cat.imageUrl || illustrationSrc}
-                      alt={cat.name}
-                      className="h-28 w-28 object-contain group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300 drop-shadow-md group-hover:drop-shadow-[0_12px_20px_rgba(252,200,55,0.35)]"
-                      loading="lazy"
-                    />
-                  </div>
-                  <h3 className="font-bold text-base text-[#222428] group-hover:text-black transition">
-                    {cat.name}
-                  </h3>
-                  <p className="text-xs text-[#34373C]/70 mt-1.5 line-clamp-2 leading-relaxed">
-                    {cat.description}
-                  </p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-[#34373C]/10 flex items-center justify-between text-xs font-bold text-[#222428]">
-                  <span>Explore listings</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-[#FCC837] group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Value Proposition: Dual-Role Model */}
+      {/* Value Proposition: Intermediary Model & Dual Options */}
       <section className="bg-[#F8F9FA] py-16 border-y border-[#34373C]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl font-extrabold text-[#222428]">
-              One Unified Account for Contractors & Fleet Owners
+              One Unified Account for Contractors &amp; Fleet Owners
             </h2>
             <p className="mt-3 text-[#34373C]/80 text-sm">
-              No need to switch between owner and customer profiles. Your single login gives you
-              full access to rent machines or accept booking requests on STORENT.
+              Single sign-on allows you to hire machines or advertise your fleet.
+              STORENT operates under Section 79 Safe Harbor as a pure digital directory.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Box 1: For Renters */}
+            {/* Box 1: For Hirers */}
             <div className="bg-white p-8 rounded-2xl border border-[#34373C]/15 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#222428] text-[#FCC837] mb-4">
-                  Option A: Rent Equipment
+                  For Hirers &amp; Contractors
                 </div>
                 <h3 className="text-xl font-bold text-[#222428] mb-3">
-                  Find Machines For Your Project Site
+                  Find &amp; Rent Heavy Machinery
                 </h3>
                 <ul className="space-y-3 text-sm text-[#34373C] mb-6">
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#FCC837] shrink-0 mt-0.5" />
-                    <span>Search by your GPS coordinates with real distance in km</span>
+                    <span>Search by GPS radius and location city/state</span>
                   </li>
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#FCC837] shrink-0 mt-0.5" />
-                    <span>Hourly, daily, and monthly rates with clear operator options</span>
+                    <span>Verify mobile OTP to unlock direct owner contact numbers</span>
                   </li>
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#FCC837] shrink-0 mt-0.5" />
-                    <span>Real-time availability calendar preventing double-bookings</span>
+                    <span>Independent inspection &amp; direct contractor negotiations</span>
                   </li>
                 </ul>
               </div>
               <Link
-                to="/browse"
+                to="/browse?listingType=rent"
                 className="w-full py-2.5 px-4 text-center rounded-lg bg-[#222428] hover:bg-[#34373C] text-[#FCC837] font-bold text-sm transition border border-[#34373C]"
               >
-                Browse Marketplace
+                Rent equipment
               </Link>
             </div>
 
@@ -648,23 +685,23 @@ const LandingPage = () => {
               <div className="absolute top-0 right-0 w-24 h-24 bg-[#FCC837]/10 rounded-bl-full pointer-events-none" />
               <div>
                 <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-[#FCC837] text-[#222428] mb-4">
-                  Option B: Register Equipment
+                  For Equipment Owners
                 </div>
                 <h3 className="text-xl font-bold text-[#222428] mb-3">
-                  Monetize Idle Machinery & Tools
+                  Advertise Equipment for Rent or Sale
                 </h3>
                 <ul className="space-y-3 text-sm text-[#34373C] mb-6">
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#222428] shrink-0 mt-0.5" />
-                    <span>Choose monthly tiers from ₹499/mo or Lifetime Unlimited VIP</span>
+                    <span>Subscription tiers with 18% GST inclusive tax invoices</span>
                   </li>
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#222428] shrink-0 mt-0.5" />
-                    <span>Receive direct booking requests and review renter profiles</span>
+                    <span>Instant SMS alert whenever a hirer unlocks your contact</span>
                   </li>
                   <li className="flex items-start space-x-2.5">
                     <CheckCircle2 className="h-5 w-5 text-[#222428] shrink-0 mt-0.5" />
-                    <span>Keep 100% of agreed rental earnings with automated invoices</span>
+                    <span>Upload RC book / purchase invoice to earn &quot;Verified Owner&quot; badge</span>
                   </li>
                 </ul>
               </div>
@@ -673,7 +710,7 @@ const LandingPage = () => {
                 onClick={handleRegisterClick}
                 className="w-full py-2.5 px-4 text-center rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-sm transition-all duration-300 shadow-md shadow-[#FCC837]/25 border border-[#E6B01B]"
               >
-                Subscribe & List Equipment
+                List equipment
               </button>
             </div>
           </div>

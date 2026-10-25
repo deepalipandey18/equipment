@@ -31,6 +31,9 @@ const createEquipmentSchema = z.object({
   sellerContactPhone: z.string().optional().default(''),
   sellerWhatsApp: z.string().optional().default(''),
 
+  // Document verification for Verified Owner badge
+  verificationDocumentUrl: z.string().optional().default(''),
+
   // Rates in rupees (for rental or both)
   hourlyRate: z.coerce.number().min(0).default(0),
   dailyRate: z.coerce.number().min(0).default(0),

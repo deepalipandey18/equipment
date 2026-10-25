@@ -15,6 +15,7 @@ import BrowseEquipmentPage from './pages/BrowseEquipmentPage';
 import RegisterEquipmentPage from './pages/RegisterEquipmentPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import SafeHarborPage from './pages/SafeHarborPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
               <Route path="/plans" element={<SubscriptionPlansPage />} />
               <Route path="/browse" element={<BrowseEquipmentPage />} />
               <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
+              <Route path="/safe-harbor" element={<SafeHarborPage />} />
 
               {/* Authenticated Routes */}
               <Route
@@ -72,4 +74,3 @@ function App() {
 }
 
 export default App;
-

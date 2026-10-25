@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, Lock, AlertCircle, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Mail, Phone, Lock, AlertCircle, Loader2, ArrowRight, ShieldCheck, Scale } from 'lucide-react';
 import AuthBackgroundLayout from '../components/auth/AuthBackgroundLayout';
 import StorentLogo from '../components/common/StorentLogo';
 
@@ -16,6 +16,7 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: '',
   });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,6 +28,11 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!termsAccepted) {
+      setError('You must agree to the Terms of Service & Intermediary Safe Harbor Disclaimer.');
+      return;
+    }
 
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields.');
@@ -67,7 +73,7 @@ const RegisterPage = () => {
       <div className="space-y-4 bg-[#222428]/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-[#34373C] shadow-2xl shadow-black/80">
         <div className="text-center">
           <Link to="/" className="inline-block mb-3">
-            {/* <StorentLogo variant="banner" className="h-12 w-auto shadow-md" /> */}
+            <StorentLogo variant="banner" className="h-10 w-auto shadow-md" />
           </Link>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             Create Your <span className="text-[#FCC837]">STORENT</span> Account
@@ -81,7 +87,7 @@ const RegisterPage = () => {
         <div className="py-2.5 px-3.5 bg-[#FCC837]/15 rounded-xl border border-[#FCC837]/40 flex items-center space-x-2 text-xs text-white">
           <ShieldCheck className="h-4 w-4 text-[#FCC837] shrink-0" />
           <span>
-            <strong className="text-[#FCC837]">Dual Access:</strong> Rent machines and register your own equipment simultaneously with zero extra paperwork.
+            <strong className="text-[#FCC837]">Intermediary Directory:</strong> Rent machines and register your own equipment directly under Section 79 Safe Harbor.
           </span>
         </div>
 
@@ -116,13 +122,14 @@ const RegisterPage = () => {
             {/* Phone Number */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
-                Phone Number (Optional)
+                Phone Number (Required for OTP) *
               </label>
               <div className="relative">
                 <Phone className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   type="tel"
                   name="phone"
+                  required
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+91 98765 43210"
@@ -131,7 +138,7 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Email Address (Span 2 cols on desktop) */}
+            {/* Email Address */}
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
                 Email Address *
@@ -189,10 +196,30 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {/* Mandatory Checkbox as required by PDF */}
+          <div className="p-3.5 rounded-xl bg-[#181A1D] border border-[#34373C] text-xs text-slate-300">
+            <label className="flex items-start space-x-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="h-4 w-4 mt-0.5 accent-[#FCC837] rounded shrink-0 cursor-pointer"
+              />
+              <span className="leading-relaxed">
+                I agree to the{' '}
+                <Link to="/safe-harbor" target="_blank" className="font-bold text-[#FCC837] hover:underline">
+                  Terms of Service, &quot;As-Is&quot; Disclaimer &amp; Intermediary Safe Harbor Policy
+                </Link>{' '}
+                under Section 79 of the Information Technology Act, 2000.
+              </span>
+            </label>
+          </div>
+
           <button
             type="submit"
-            disabled={submitting}
-            className="w-full mt-3 py-3 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-sm transition shadow-lg shadow-[#FCC837]/25 flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-70"
+            disabled={submitting || !termsAccepted}
+            className="w-full mt-3 py-3 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-slate-950 font-black text-sm transition shadow-lg shadow-[#FCC837]/25 flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-50"
           >
             {submitting ? (
               <>

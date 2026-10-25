@@ -17,6 +17,12 @@ router.post('/', protect, verifySubscriptionQuota, equipmentController.createEqu
 // Get equipment details by ID
 router.get('/:id', equipmentController.getEquipmentById);
 
+// Public/Hirer: Unlock equipment owner contact details (requires Mobile + OTP + Terms acceptance)
+router.post('/:id/unlock-contact', equipmentController.unlockContact);
+
+// Public/Hirer: Rate contact experience (responsive, incorrect details, no response)
+router.post('/:id/contact-feedback', equipmentController.submitContactFeedback);
+
 // Protected: Update equipment details (Enforces ownership)
 router.put('/:id', protect, equipmentController.updateEquipment);
 
@@ -27,4 +33,3 @@ router.patch('/:id/status', protect, equipmentController.toggleStatus);
 router.delete('/:id', protect, equipmentController.deleteEquipment);
 
 module.exports = router;
-

@@ -25,6 +25,13 @@ import {
   FileCheck,
   X,
   ExternalLink,
+  Lock,
+  Unlock,
+  CheckSquare,
+  Scale,
+  ThumbsUp,
+  AlertTriangle,
+  PhoneOff,
 } from 'lucide-react';
 
 const EquipmentDetailPage = () => {
@@ -39,10 +46,24 @@ const EquipmentDetailPage = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [locating, setLocating] = useState(false);
 
-  // For listings with both rent & sale, tab selection: 'rent' | 'buy'
-  const [activeActionTab, setActiveActionTab] = useState('rent');
+  // Hirer Mobile OTP Contact Unlock State
+  const [contactUnlocked, setContactUnlocked] = useState(false);
+  const [unlockModalOpen, setUnlockModalOpen] = useState(false);
+  const [hirerPhone, setHirerPhone] = useState(user?.phone || '');
+  const [hirerOtp, setHirerOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
+  const [unlockedOwnerData, setUnlockedOwnerData] = useState(null);
+  const [ownerAlertDispatched, setOwnerAlertDispatched] = useState(false);
 
-  // Make an Offer Modal State (OLX Buy mode)
+  // Hirer Review / Rating Prompt State
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [feedbackToast, setFeedbackToast] = useState('');
+
+  // Make an Offer Modal State (Buy mode)
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
   const [offerMessage, setOfferMessage] = useState('');
@@ -50,7 +71,34 @@ const EquipmentDetailPage = () => {
   const [buyerName, setBuyerName] = useState(user?.name || '');
   const [offerSent, setOfferSent] = useState(false);
 
-  // Auto-request current location on initial mount if available
+  // Booking Calculator State (Rent Mode)
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(tomorrow);
+  const [needOperator, setNeedOperator] = useState(true);
+  const [submittingBooking, setSubmittingBooking] = useState(false);
+  const [bookingError, setBookingError] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState(null);
+
+  // Check persisted unlocked status for this equipment
+  useEffect(() => {
+    if (id) {
+      const persisted = localStorage.getItem(`storent_unlocked_${id}`);
+      if (persisted) {
+        try {
+          const parsed = JSON.parse(persisted);
+          setContactUnlocked(true);
+          setUnlockedOwnerData(parsed);
+          setOwnerAlertDispatched(true);
+        } catch (e) {
+          // ignore corrupted localstorage
+        }
+      }
+    }
+  }, [id]);
+
+  // Geolocation
   useEffect(() => {
     if (navigator.geolocation && !userLocation) {
       navigator.geolocation.getCurrentPosition(
@@ -82,7 +130,6 @@ const EquipmentDetailPage = () => {
     );
   };
 
-  // Distance calculator
   const calculateDistance = () => {
     if (equipment?.distanceKm !== undefined && equipment?.distanceKm !== null) {
       return Number(equipment.distanceKm).toFixed(1);
@@ -97,7 +144,7 @@ const EquipmentDetailPage = () => {
 
     if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
 
-    const R = 6371; // Earth radius in km
+    const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
     const dLon = ((lon2 - lon1) * Math.PI) / 180;
     const a =
@@ -112,18 +159,6 @@ const EquipmentDetailPage = () => {
 
   const distanceKm = calculateDistance();
 
-  // Booking Calculator State (Rent Mode)
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(tomorrow);
-  const [needOperator, setNeedOperator] = useState(true);
-
-  // Submission state
-  const [submittingBooking, setSubmittingBooking] = useState(false);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState(null);
-
   useEffect(() => {
     const fetchEquipmentDetails = async () => {
       try {
@@ -132,13 +167,8 @@ const EquipmentDetailPage = () => {
         if (res.data?.success) {
           const eq = res.data.data;
           setEquipment(eq);
-          if (eq.listingType === 'sale') {
-            setActiveActionTab('buy');
-          } else {
-            setActiveActionTab('rent');
-          }
           if (eq.salePrice) {
-            setOfferAmount(Math.round(eq.salePrice * 0.95).toString()); // 5% below asking as default offer hint
+            setOfferAmount(Math.round(eq.salePrice * 0.95).toString());
           }
         } else {
           setError('Equipment listing not found.');
@@ -149,90 +179,141 @@ const EquipmentDetailPage = () => {
         setLoading(false);
       }
     };
-
-    fetchEquipmentDetails();
+    if (id) fetchEquipmentDetails();
   }, [id]);
 
-  // Pricing calculations
-  const calculateDays = () => {
+  // Handle OTP request simulation
+  const handleSendOtp = () => {
+    if (!hirerPhone || hirerPhone.trim().replace(/\D/g, '').length < 10) {
+      setUnlockError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    setUnlockError('');
+    setOtpSent(true);
+    setHirerOtp('123456'); // Pre-fill default demo OTP for effortless user verification
+    setOtpCountdown(30);
+  };
+
+  // OTP Countdown Timer
+  useEffect(() => {
+    let timer;
+    if (otpCountdown > 0) {
+      timer = setTimeout(() => setOtpCountdown(otpCountdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [otpCountdown]);
+
+  // Handle OTP verification and contact unlock
+  const handleVerifyOtpAndUnlock = async (e) => {
+    e.preventDefault();
+    setUnlockError('');
+
+    if (!termsAccepted) {
+      setUnlockError('You must agree to the Terms of Service & Intermediary Safe Harbor Disclaimer.');
+      return;
+    }
+
+    if (!hirerOtp || hirerOtp.length < 4) {
+      setUnlockError('Please enter the verification OTP sent to your phone.');
+      return;
+    }
+
+    try {
+      setUnlocking(true);
+      const res = await api.post(`/equipment/${id}/unlock-contact`, {
+        hirerPhone,
+        termsAccepted,
+        otp: hirerOtp,
+      });
+
+      if (res.data?.success) {
+        const ownerInfo = res.data.owner;
+        setContactUnlocked(true);
+        setUnlockedOwnerData(ownerInfo);
+        setOwnerAlertDispatched(true);
+        setUnlockModalOpen(false);
+
+        // Persist unlock status in local storage
+        localStorage.setItem(`storent_unlocked_${id}`, JSON.stringify(ownerInfo));
+      } else {
+        throw new Error(res.data?.message || 'Verification failed');
+      }
+    } catch (err) {
+      setUnlockError(err.response?.data?.message || err.message || 'OTP verification failed.');
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
+  // Handle Hirer Feedback on Owner
+  const handleRateOwner = async (ratingType) => {
+    try {
+      await api.post(`/equipment/${id}/contact-feedback`, {
+        ratingType,
+        hirerPhone,
+      });
+      setRatingSubmitted(true);
+      setFeedbackToast('Thank you! Your feedback helps keep STORENT listings verified & authentic.');
+      setTimeout(() => setFeedbackToast(''), 5000);
+    } catch (err) {
+      console.warn('Feedback submit error:', err);
+    }
+  };
+
+  // Rental estimate math
+  const calculateRentalDays = () => {
+    if (!startDate || !endDate) return 1;
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = end - start;
+    const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 1;
   };
 
-  const rentalDays = calculateDays();
+  const rentalDays = calculateRentalDays();
   const rentalBaseFee = (equipment?.dailyRate || 0) * rentalDays;
   const deliveryFee = equipment?.deliveryCharges || 0;
   const securityDeposit = equipment?.securityDeposit || 0;
   const estimatedTotal = rentalBaseFee + deliveryFee + securityDeposit;
 
-  const handleBookingSubmit = async (e) => {
-    e.preventDefault();
-    setBookingError('');
+  // Direct Communication Handlers
+  const effectivePhone =
+    unlockedOwnerData?.phone ||
+    equipment?.sellerContactPhone ||
+    equipment?.sellerWhatsApp ||
+    equipment?.ownerId?.phone ||
+    '+919876543210';
 
-    if (!user) {
-      navigate(`/login?redirect=/equipment/${id}`);
+  const effectiveWhatsApp =
+    unlockedOwnerData?.whatsapp ||
+    equipment?.sellerWhatsApp ||
+    effectivePhone;
+
+  const handleWhatsAppOwner = (customMsg = '') => {
+    if (!contactUnlocked) {
+      setUnlockModalOpen(true);
       return;
     }
-
-    if (equipment.ownerId?._id === user._id || equipment.ownerId === user._id) {
-      setBookingError('You are the registered owner of this machine. You cannot rent your own equipment.');
-      return;
-    }
-
-    setSubmittingBooking(true);
-
-    try {
-      const res = await api.post('/bookings', {
-        equipmentId: equipment._id,
-        startDate,
-        endDate,
-        operatorRequested: needOperator,
-        deliveryAddress: {
-          city: equipment.address?.city || '',
-          state: equipment.address?.state || '',
-        },
-      });
-
-      if (res.data?.success) {
-        setBookingSuccess(res.data.data);
-      } else {
-        throw new Error(res.data?.message || 'Booking submission failed.');
-      }
-    } catch (err) {
-      setBookingError(
-        err.userMessage || err.response?.data?.message || err.message || 'Booking request failed.'
-      );
-    } finally {
-      setSubmittingBooking(false);
-    }
-  };
-
-  // WhatsApp Seller Handler
-  const handleWhatsAppSeller = (customMsg = '') => {
-    const phone = (equipment?.sellerWhatsApp || equipment?.sellerContactPhone || equipment?.ownerId?.phone || '').replace(/[^0-9]/g, '');
-    const defaultMsg = `Hello! I saw your heavy machinery listing for "${equipment?.name}" on STORENT (${window.location.href}). I am interested in purchasing this equipment.`;
+    const cleanNum = effectiveWhatsApp.replace(/[^0-9]/g, '');
+    const defaultMsg = `Hello! I unlocked your contact details on STORENT for "${equipment?.name}". I am interested in hiring/buying this equipment for our project site.`;
     const text = encodeURIComponent(customMsg || defaultMsg);
-    const targetPhone = phone.startsWith('91') ? phone : `91${phone}`;
+    const targetPhone = cleanNum.startsWith('91') ? cleanNum : `91${cleanNum}`;
     window.open(`https://wa.me/${targetPhone}?text=${text}`, '_blank');
   };
 
-  const handleCallSeller = () => {
-    const phone = equipment?.sellerContactPhone || equipment?.sellerWhatsApp || equipment?.ownerId?.phone;
-    if (phone) {
-      window.location.href = `tel:${phone}`;
-    } else {
-      alert('Seller phone number is not available.');
+  const handleCallOwner = () => {
+    if (!contactUnlocked) {
+      setUnlockModalOpen(true);
+      return;
     }
+    window.location.href = `tel:${effectivePhone}`;
   };
 
   const handleSendOffer = (e) => {
     e.preventDefault();
     const formattedOffer = Number(offerAmount).toLocaleString('en-IN');
     const msg = `Hello! I would like to make an offer of ₹${formattedOffer} for your machinery "${equipment?.name}" on STORENT. Message: ${offerMessage || 'I am ready for immediate yard inspection.'} - Buyer: ${buyerName || 'Interested Contractor'} (${buyerPhone || 'Contact provided'})`;
-    handleWhatsAppSeller(msg);
+    handleWhatsAppOwner(msg);
     setOfferSent(true);
     setTimeout(() => {
       setOfferModalOpen(false);
@@ -268,7 +349,11 @@ const EquipmentDetailPage = () => {
   }
 
   const isSaleListing = equipment.listingType === 'sale';
-  const isRentListing = equipment.listingType !== 'sale';
+  const isVerifiedOwner = Boolean(
+    unlockedOwnerData?.isVerifiedOwner ||
+    equipment.rcAvailable ||
+    (equipment.verificationDocuments && equipment.verificationDocuments.length > 0)
+  );
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] py-8 px-4 sm:px-6 lg:px-8">
@@ -286,11 +371,17 @@ const EquipmentDetailPage = () => {
           <div className="flex items-center space-x-2">
             {isSaleListing ? (
               <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#222428] text-[#FCC837] border border-[#34373C]">
-                Sale Marketplace
+                Sale Listing
               </span>
             ) : (
               <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#FCC837] text-[#222428] border border-[#E6B01B]">
-                Available For Rent
+                For Rent
+              </span>
+            )}
+            {isVerifiedOwner && (
+              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#222428] text-[#FCC837] border border-[#FCC837]/40 flex items-center space-x-1">
+                <ShieldCheck className="h-3 w-3 text-[#FCC837]" />
+                <span>Verified Owner</span>
               </span>
             )}
             <span className="text-xs text-slate-400">
@@ -299,178 +390,124 @@ const EquipmentDetailPage = () => {
           </div>
         </div>
 
-        {/* Hero Machinery Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Photos & Details (8 cols) */}
+        {/* Feedback Toast Notification */}
+        {feedbackToast && (
+          <div className="mb-4 p-3 rounded-xl bg-[#222428] text-[#FCC837] border border-[#34373C] text-xs font-bold flex items-center justify-between shadow-lg">
+            <span>{feedbackToast}</span>
+            <button onClick={() => setFeedbackToast('')} className="text-white hover:text-[#FCC837]">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Visuals & Machinery Specs (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
-            {/* Photo Gallery Card */}
-            <div className="bg-white rounded-2xl p-4 border border-[#34373C]/15 shadow-sm space-y-3">
-              <div className="relative h-72 sm:h-96 w-full rounded-xl overflow-hidden bg-gradient-to-b from-[#F8F9FA] to-[#ECEEF0]">
+            {/* 3D Visual Gallery */}
+            <div className="bg-white rounded-3xl border border-[#34373C]/15 overflow-hidden shadow-sm">
+              <div className="relative h-72 sm:h-96 w-full bg-gradient-to-b from-[#181A1D] to-[#222428] flex items-center justify-center p-6">
+                <div
+                  className="absolute inset-x-0 bottom-0 h-32 opacity-25 pointer-events-none"
+                  style={{
+                    backgroundImage: 'linear-gradient(to right, #FCC837 1px, transparent 1px), linear-gradient(to bottom, #FCC837 1px, transparent 1px)',
+                    backgroundSize: '24px 24px',
+                    transform: 'perspective(300px) rotateX(60deg)',
+                    transformOrigin: 'bottom center',
+                  }}
+                />
+
                 <img
                   src={
-                    equipment.photos?.[activePhoto] &&
-                    !equipment.photos[activePhoto].includes('unsplash.com') &&
-                    !equipment.photos[activePhoto].includes('placeholder')
+                    equipment.photos && equipment.photos[activePhoto]
                       ? equipment.photos[activePhoto]
                       : getIllustrationForEquipment(equipment)
                   }
+                  alt={equipment.name}
+                  className="max-h-full max-w-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.7)]"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = getIllustrationForEquipment(equipment);
                   }}
-                  alt={equipment.name}
-                  className="w-full h-full object-contain p-4 drop-shadow-md"
                 />
-                <div className="absolute top-4 left-4 flex flex-col gap-1 items-start">
-                  <span className="bg-[#222428]/90 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    {equipment.categoryId?.name || 'Heavy Equipment'}
-                  </span>
-                  {isSaleListing && (
-                    <span className="bg-[#FCC837] text-[#222428] text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-[#E6B01B]">
-                      Verified for Sale
-                    </span>
-                  )}
+
+                <div className="absolute top-4 left-4 bg-[#FCC837] text-[#222428] text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-md border border-[#E6B01B]">
+                  {equipment.brand} • {equipment.model}
                 </div>
-                <div className="absolute top-4 right-4 bg-[#FCC837] text-[#222428] text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-[#E6B01B]">
-                  {equipment.condition} Condition
+
+                <div className="absolute top-4 right-4 bg-[#222428]/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-[#34373C]">
+                  {equipment.year ? `Year ${equipment.year}` : 'Active Fleet'}
                 </div>
               </div>
-
-              {/* Thumbnails */}
-              {equipment.photos?.length > 1 && (
-                <div className="flex space-x-2 overflow-x-auto pb-1">
-                  {equipment.photos.map((photo, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActivePhoto(i)}
-                      className={`h-16 w-20 rounded-lg overflow-hidden border-2 shrink-0 transition ${
-                        activePhoto === i ? 'border-[#FCC837] ring-2 ring-[#FCC837]/30' : 'border-slate-200'
-                      }`}
-                    >
-                      <img src={photo} alt="" className="w-full h-full object-contain p-2 bg-[#F8F9FA]" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Title & Technical Specs */}
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#34373C]/15 shadow-sm space-y-6">
+            {/* Machinery Specifications & Overview */}
+            <div className="bg-white rounded-2xl p-6 border border-[#34373C]/15 shadow-sm space-y-6">
               <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-[#34373C] flex items-center justify-between">
-                  <span>{equipment.brand} • {equipment.model}</span>
-                  {equipment.usageHours > 0 && (
-                    <span className="text-xs font-black text-[#222428] bg-slate-100 px-2 py-0.5 rounded">
-                      ⏱️ {equipment.usageHours} Operating Hours
-                    </span>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#FCC837] bg-[#222428] px-2.5 py-0.5 rounded-md">
+                    {equipment.categoryId?.name || 'Machinery'}
+                  </span>
+                  <span className="text-xs text-[#34373C]/60">•</span>
+                  <span className="text-xs font-semibold text-[#34373C]/80 capitalize">
+                    Condition: {equipment.condition?.replace('_', ' ') || 'Good'}
+                  </span>
+                  {distanceKm && (
+                    <>
+                      <span className="text-xs text-[#34373C]/60">•</span>
+                      <span className="text-xs font-bold text-[#222428] bg-[#FCC837]/20 border border-[#FCC837]/40 px-2 py-0.5 rounded-full flex items-center space-x-1">
+                        <MapPin className="h-3 w-3 text-[#222428]" />
+                        <span>{distanceKm} km from your project site</span>
+                      </span>
+                    </>
                   )}
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[#222428] mt-1">
+
+                <h1 className="text-2xl sm:text-3xl font-black text-[#222428] tracking-tight">
                   {equipment.name}
                 </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-[#34373C]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center space-x-1 text-[#222428] font-semibold">
-                      <MapPin className="h-4 w-4 text-[#222428] shrink-0" />
-                      <span>
-                        {equipment.address?.city}, {equipment.address?.state} (Pincode: {equipment.address?.pincode})
-                      </span>
-                    </div>
 
-                    {/* Distance Badge next to address */}
-                    {distanceKm !== null ? (
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#FCC837]/20 text-[#222428] font-bold text-xs border border-[#FCC837]/50">
-                        <Navigation className="h-3 w-3 text-[#222428] fill-[#222428] rotate-45" />
-                        <span>{distanceKm} km from your location</span>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={requestUserLocation}
-                        disabled={locating}
-                        className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-slate-100 hover:bg-[#FCC837]/20 text-[#34373C] text-xs font-semibold border border-slate-200 transition"
-                      >
-                        <Navigation className={`h-3 w-3 ${locating ? 'animate-spin' : ''}`} />
-                        <span>{locating ? 'Acquiring GPS...' : 'Check distance from you'}</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {equipment.year && <span>• Mfg Year: {equipment.year}</span>}
-                  <span>• Service / Delivery Radius: Within {equipment.deliveryRadiusKm || 50} km</span>
+                <div className="mt-2 flex items-center text-xs text-[#34373C] space-x-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-[#FCC837] shrink-0" />
+                  <span>
+                    Yard Location: {equipment.address?.area || equipment.address?.street}, {equipment.address?.city}, {equipment.address?.state} (Radius: {equipment.deliveryRadiusKm || 50} km)
+                  </span>
                 </div>
               </div>
 
-              {/* Machinery Sale Specifications Grid (Shown if sale) */}
-              {isSaleListing && (
-                <div className="p-5 bg-[#F8F9FA] rounded-2xl border border-[#34373C]/15 space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#34373C]/10">
-                    <div className="flex items-center space-x-2">
-                      <Tag className="h-4 w-4 text-[#222428]" />
-                      <h3 className="text-sm font-black text-[#222428] uppercase tracking-wider">
-                        Machinery Overview & Document Status
-                      </h3>
-                    </div>
-                    <span className="text-[10px] font-black uppercase bg-[#222428] text-[#FCC837] px-2 py-0.5 rounded">
-                      Direct Seller Deal
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                    <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
-                      <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Asking Price</span>
-                      <div className="text-base font-black text-[#222428] mt-0.5">
-                        ₹{equipment.salePrice ? Number(equipment.salePrice).toLocaleString('en-IN') : 'Contact'}
-                      </div>
-                      <span className="text-[10px] font-bold text-green-700">
-                        {equipment.isNegotiable ? 'Negotiable' : 'Fixed Price'}
-                      </span>
-                    </div>
-
-                    <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
-                      <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Operating Hours</span>
-                      <div className="text-base font-black text-[#222428] mt-0.5">
-                        {equipment.usageHours ? `${equipment.usageHours} hrs` : 'N/A'}
-                      </div>
-                      <span className="text-[10px] text-[#34373C]/70">Meter verified</span>
-                    </div>
-
-                    <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
-                      <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Ownership</span>
-                      <div className="text-base font-black text-[#222428] mt-0.5">
-                        {equipment.ownershipType === 'first_owner'
-                          ? '1st Owner'
-                          : equipment.ownershipType === 'second_owner'
-                          ? '2nd Owner'
-                          : '3rd+ Owner'}
-                      </div>
-                      <span className="text-[10px] text-[#34373C]/70">Registered</span>
-                    </div>
-
-                    <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
-                      <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">RC & Documents</span>
-                      <div className="text-sm font-black text-[#222428] mt-0.5">
-                        {equipment.rcAvailable ? 'RC Available' : 'RC Pending'}
-                      </div>
-                      <span className="text-[10px] font-bold text-green-700">
-                        {equipment.nocAvailable ? 'NOC Ready' : 'NOC on demand'}
-                      </span>
-                    </div>
+              {/* Machinery Key Specs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
+                  <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Make / Brand</span>
+                  <div className="text-sm font-black text-[#222428] mt-0.5">{equipment.brand}</div>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
+                  <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Model</span>
+                  <div className="text-sm font-black text-[#222428] mt-0.5">{equipment.model}</div>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
+                  <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">Operating Hours</span>
+                  <div className="text-sm font-black text-[#222428] mt-0.5">{equipment.usageHours || '0'} hrs</div>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-[#34373C]/10">
+                  <span className="text-[10px] font-bold text-[#34373C]/70 uppercase">RC &amp; Verification</span>
+                  <div className="text-sm font-black text-[#222428] mt-0.5">
+                    {equipment.rcAvailable ? 'RC Available' : 'Under Process'}
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* Description */}
+              {/* Capabilities & Description */}
               <div className="pt-4 border-t border-[#34373C]/10">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-[#222428] mb-2">
-                  Machinery Capabilities & Description
+                  Machinery Capabilities &amp; Description
                 </h3>
                 <p className="text-sm text-[#34373C] leading-relaxed whitespace-pre-line">
                   {equipment.description}
                 </p>
               </div>
 
-              {/* Rates Matrix (Shown if not pure sale) */}
+              {/* Rental Rates Matrix (If not pure sale) */}
               {!isSaleListing && (
                 <div className="pt-4 border-t border-[#34373C]/10">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-[#222428] mb-3">
@@ -504,71 +541,128 @@ const EquipmentDetailPage = () => {
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Operator Terms (For rental or both) */}
-              {!isSaleListing && (
-                <div className="pt-4 border-t border-[#34373C]/10 flex items-center space-x-3 text-xs text-[#34373C]">
-                  <ShieldCheck className="h-5 w-5 text-[#222428] shrink-0" />
+            {/* Equipment Owner Profile / Contact Unlock Card */}
+            <div className="bg-white rounded-2xl p-6 border border-[#34373C]/15 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-4">
+                  <div className="h-12 w-12 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center font-black border border-[#E6B01B] text-lg">
+                    {unlockedOwnerData?.name?.charAt(0) || equipment.ownerId?.name?.charAt(0) || 'O'}
+                  </div>
                   <div>
-                    <strong>Operator Status:</strong>{' '}
-                    <span className="capitalize">
-                      {equipment.operatorOption === 'included'
-                        ? 'Certified Operator Included in Rental Rate'
-                        : equipment.operatorOption === 'optional'
-                        ? 'Certified Operator Available Upon Request'
-                        : 'Dry Hire Only (Renter provides certified operator)'}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-bold text-[#222428] text-base">
+                        {contactUnlocked
+                          ? unlockedOwnerData?.name || equipment.ownerId?.name || 'STORENT Fleet Partner'
+                          : `${(equipment.ownerId?.name || 'Owner').slice(0, 2)}**** (Contact Locked)`}
+                      </h4>
+                      {isVerifiedOwner && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black bg-[#222428] text-[#FCC837] border border-[#34373C] flex items-center space-x-1">
+                          <ShieldCheck className="h-3 w-3 text-[#FCC837]" />
+                          <span>Verified Owner</span>
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[#34373C]/70 mt-0.5">
+                      STORENT Equipment Partner • Yard in {equipment.address?.city}, {equipment.address?.state}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contact Buttons (Unlocked vs Locked) */}
+                {contactUnlocked ? (
+                  <div className="flex items-center space-x-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={handleCallOwner}
+                      className="px-4 py-2.5 rounded-xl bg-[#222428] text-white hover:bg-[#34373C] font-bold flex items-center space-x-1.5 transition border border-[#34373C]"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-[#FCC837]" />
+                      <span>Call {effectivePhone}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleWhatsAppOwner()}
+                      className="px-4 py-2.5 rounded-xl bg-[#222428] text-[#FCC837] hover:bg-[#34373C] font-bold flex items-center space-x-1.5 transition border border-[#34373C]"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setUnlockModalOpen(true)}
+                    className="px-5 py-2.5 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider transition border border-[#E6B01B] shadow-md flex items-center space-x-1.5"
+                  >
+                    <Lock className="h-4 w-4 text-[#222428]" />
+                    <span>Unlock Owner Contact (Free OTP)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Owner Alert Dispatched Banner */}
+              {contactUnlocked && ownerAlertDispatched && (
+                <div className="p-3 bg-[#FCC837]/15 rounded-xl border border-[#FCC837]/40 text-xs text-[#222428] flex items-start space-x-2">
+                  <CheckCircle className="h-4 w-4 text-[#222428] shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <strong>Owner Alert Dispatched via SMS:</strong>
+                    <p className="text-[#34373C] text-[11px]">
+                      An automated SMS alert was dispatched to the equipment owner notifying them of your inquiry. You may call or message them on WhatsApp directly.
+                    </p>
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Equipment Owner / Seller Profile */}
-            <div className="bg-white rounded-2xl p-6 border border-[#34373C]/15 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center space-x-4">
-                <div className="h-12 w-12 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center font-black border border-[#E6B01B] text-lg">
-                  {equipment.ownerId?.name?.charAt(0) || 'O'}
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h4 className="font-bold text-[#222428] text-base">
-                      {equipment.ownerId?.name || 'Machinery Owner'}
-                    </h4>
-                    <span className="px-2 py-0.2 rounded text-[10px] font-black bg-[#222428] text-[#FCC837] border border-[#34373C]">
-                      Verified Seller
-                    </span>
+              {/* Hirer Review & Rating Prompt */}
+              {contactUnlocked && !ratingSubmitted && (
+                <div className="pt-3 border-t border-[#34373C]/10 text-xs">
+                  <span className="font-bold text-[#222428] block mb-2">
+                    Rate your contact experience with this equipment owner:
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleRateOwner('responsive')}
+                      className="px-3 py-1.5 rounded-lg border border-[#34373C]/20 hover:border-[#FCC837] hover:bg-[#FCC837]/10 text-[#222428] font-bold flex items-center space-x-1 text-[11px] transition"
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5 text-[#222428]" />
+                      <span>Responsive &amp; Helpful</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRateOwner('incorrect_details')}
+                      className="px-3 py-1.5 rounded-lg border border-[#34373C]/20 hover:border-red-400 hover:bg-red-50 text-[#34373C] font-semibold flex items-center space-x-1 text-[11px] transition"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                      <span>Incorrect Listing Details</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRateOwner('no_response')}
+                      className="px-3 py-1.5 rounded-lg border border-[#34373C]/20 hover:border-slate-400 hover:bg-slate-50 text-[#34373C] font-semibold flex items-center space-x-1 text-[11px] transition"
+                    >
+                      <PhoneOff className="h-3.5 w-3.5 text-slate-500" />
+                      <span>Did Not Answer Phone</span>
+                    </button>
                   </div>
-                  <p className="text-xs text-[#34373C]/70 mt-0.5">
-                    STORENT Equipment Partner • Verified yard address & fleet inventory
-                  </p>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center space-x-2 text-xs">
-                <button
-                  type="button"
-                  onClick={handleCallSeller}
-                  className="px-3.5 py-2 rounded-lg bg-[#222428] text-white hover:bg-[#34373C] font-bold flex items-center space-x-1.5 transition border border-[#34373C]"
-                >
-                  <Phone className="h-3.5 w-3.5 text-[#FCC837]" />
-                  <span>Call Seller</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleWhatsAppSeller()}
-                  className="px-3.5 py-2 rounded-lg bg-[#222428] text-[#FCC837] hover:bg-[#34373C] font-bold flex items-center space-x-1.5 transition border border-[#34373C]"
-                >
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  <span>WhatsApp</span>
-                </button>
-              </div>
+              {ratingSubmitted && (
+                <div className="pt-2 text-xs text-green-700 font-bold flex items-center space-x-1.5">
+                  <CheckCircle className="h-3.5 w-3.5 text-green-700" />
+                  <span>Feedback recorded! Thank you for keeping STORENT authentic.</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column: Sticky Action Box (Rental Booking OR Direct Buy) (4 cols) */}
+          {/* Right Column: Sticky Action Box (Rental Estimate OR Direct Purchase) (4 cols) */}
           <div className="lg:col-span-4">
             <div className="sticky top-20 bg-white rounded-2xl p-6 border border-[#34373C]/15 shadow-xl space-y-5">
-              {/* BUY EQUIPMENT ACTION BOX (For Sale Listings) */}
+              {/* SALE LISTING ACTION BOX */}
               {isSaleListing ? (
                 <div className="space-y-5">
                   <div className="pb-4 border-b border-[#34373C]/10">
@@ -598,10 +692,6 @@ const EquipmentDetailPage = () => {
                       <strong>{equipment.usageHours || '0'} hrs</strong>
                     </div>
                     <div className="flex items-center justify-between text-[#34373C]">
-                      <span>Ownership:</span>
-                      <strong>{equipment.ownershipType === 'first_owner' ? '1st Owner' : '2nd+ Owner'}</strong>
-                    </div>
-                    <div className="flex items-center justify-between text-[#34373C]">
                       <span>Registration (RC):</span>
                       <strong className={equipment.rcAvailable ? 'text-green-700' : 'text-slate-500'}>
                         {equipment.rcAvailable ? '✓ Original RC Available' : 'Under Process'}
@@ -615,49 +705,60 @@ const EquipmentDetailPage = () => {
                     </div>
                   </div>
 
-                  {/* Direct Contact CTAs */}
+                  {/* Actions */}
                   <div className="space-y-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setOfferModalOpen(true)}
-                      className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B]"
-                    >
-                      <Tag className="h-4 w-4" />
-                      <span>Make an Offer to Seller</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleWhatsAppSeller()}
-                      className="w-full py-3 px-4 rounded-xl bg-[#222428] hover:bg-[#34373C] text-white font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center space-x-2 border border-[#34373C]"
-                    >
-                      <MessageSquare className="h-4 w-4 text-[#FCC837]" />
-                      <span>Chat on WhatsApp</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleCallSeller}
-                      className="w-full py-3 px-4 rounded-xl border-2 border-[#34373C]/20 hover:border-[#FCC837] text-[#222428] font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-2"
-                    >
-                      <Phone className="h-4 w-4 text-[#222428]" />
-                      <span>Call {equipment.sellerContactPhone || equipment.ownerId?.phone || 'Seller'}</span>
-                    </button>
+                    {contactUnlocked ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setOfferModalOpen(true)}
+                          className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B]"
+                        >
+                          <Tag className="h-4 w-4" />
+                          <span>Make an Offer to Seller</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleWhatsAppOwner()}
+                          className="w-full py-3 px-4 rounded-xl bg-[#222428] hover:bg-[#34373C] text-[#FCC837] font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center space-x-2 border border-[#34373C]"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span>Chat on WhatsApp</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCallOwner}
+                          className="w-full py-3 px-4 rounded-xl border border-[#34373C]/30 text-[#222428] hover:bg-[#F8F9FA] font-bold text-xs uppercase tracking-wider transition flex items-center justify-center space-x-2"
+                        >
+                          <Phone className="h-4 w-4 text-[#222428]" />
+                          <span>Call {effectivePhone}</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnlockModalOpen(true)}
+                        className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B]"
+                      >
+                        <Lock className="h-4 w-4" />
+                        <span>Unlock Seller Contact Details</span>
+                      </button>
+                    )}
                   </div>
 
-                  {/* Safety Advice */}
-                  <div className="p-3 bg-[#FCC837]/15 rounded-xl border border-[#FCC837]/40 text-[11px] text-[#222428] space-y-1">
-                    <div className="font-bold flex items-center space-x-1">
-                      <ShieldCheck className="h-3.5 w-3.5 text-[#222428]" />
-                      <span>STORENT Buyer Protection Tips</span>
+                  {/* Safe Harbor Notice */}
+                  <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#34373C]/10 text-[11px] text-[#34373C] space-y-1">
+                    <div className="font-bold text-[#222428] flex items-center space-x-1">
+                      <Scale className="h-3.5 w-3.5 text-[#FCC837]" />
+                      <span>Safe Harbor Notice</span>
                     </div>
                     <p className="leading-relaxed">
-                      Visit the machinery yard in {equipment.address?.city || 'site'} to physically inspect hydraulics, engine, and tracks/tyres before finalizing payment.
+                      Independent physical inspection and document verification are mandatory prior to financial payment.
                     </p>
                   </div>
                 </div>
               ) : (
-                /* RENTAL BOOKING FORM */
+                /* RENTAL LISTING ACTION BOX */
                 <div className="space-y-5">
                   <div className="pb-4 border-b border-[#34373C]/10">
                     <span className="text-xs font-semibold text-[#34373C]/70 uppercase">Daily Rental Rate</span>
@@ -669,103 +770,88 @@ const EquipmentDetailPage = () => {
                     </div>
                   </div>
 
-                  {bookingError && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-start space-x-2">
-                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-600" />
-                      <span>{bookingError}</span>
-                    </div>
-                  )}
-
-                  {/* Booking Request Form */}
-                  <form onSubmit={handleBookingSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                        Rental Start Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        min={today}
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
-                        Rental End Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        min={startDate}
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none"
-                      />
-                    </div>
-
-                    {equipment.operatorOption === 'optional' && (
-                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-[#34373C]/15 text-xs">
-                        <span className="font-semibold text-[#34373C]">Request Certified Operator</span>
+                  {/* Rental Cost Calculator */}
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#34373C] mb-1">Start Date</label>
                         <input
-                          type="checkbox"
-                          checked={needOperator}
-                          onChange={(e) => setNeedOperator(e.target.checked)}
-                          className="h-4 w-4 accent-[#222428] rounded"
+                          type="date"
+                          min={today}
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-[#34373C]/20 text-xs focus:border-[#FCC837] outline-none"
                         />
                       </div>
-                    )}
-
-                    {/* Estimate Breakdown */}
-                    <div className="p-4 bg-slate-50 rounded-xl border border-[#34373C]/15 text-xs space-y-2">
-                      <div className="font-bold text-[#222428] pb-1 border-b border-[#34373C]/10">
-                        Pricing Breakdown ({rentalDays} {rentalDays === 1 ? 'day' : 'days'})
-                      </div>
-                      <div className="flex justify-between text-[#34373C]">
-                        <span>Base Rental ({rentalDays}d × ₹{equipment.dailyRate}):</span>
-                        <span>₹{rentalBaseFee.toLocaleString('en-IN')}</span>
-                      </div>
-                      {deliveryFee > 0 && (
-                        <div className="flex justify-between text-[#34373C]">
-                          <span>Transport & Delivery:</span>
-                          <span>₹{deliveryFee.toLocaleString('en-IN')}</span>
-                        </div>
-                      )}
-                      {securityDeposit > 0 && (
-                        <div className="flex justify-between text-[#34373C]">
-                          <span>Refundable Security Deposit:</span>
-                          <span>₹{securityDeposit.toLocaleString('en-IN')}</span>
-                        </div>
-                      )}
-                      <div className="pt-2 border-t border-[#34373C]/10 flex justify-between font-black text-[#222428] text-sm">
-                        <span>Total Payable:</span>
-                        <span className="text-[#222428] font-black">₹{estimatedTotal.toLocaleString('en-IN')}</span>
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#34373C] mb-1">End Date</label>
+                        <input
+                          type="date"
+                          min={startDate}
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg border border-[#34373C]/20 text-xs focus:border-[#FCC837] outline-none"
+                        />
                       </div>
                     </div>
 
-                    <button
-                      type="submit"
-                      disabled={submittingBooking}
-                      className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-60"
-                    >
-                      {submittingBooking ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin text-[#222428]" />
-                          <span>Submitting Request...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Calendar className="h-4 w-4" />
-                          <span>Submit Rental Request</span>
-                        </>
+                    <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#34373C]/10 text-xs space-y-1.5 text-[#34373C]">
+                      <div className="flex justify-between">
+                        <span>Duration:</span>
+                        <strong>{rentalDays} {rentalDays === 1 ? 'day' : 'days'}</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Base Hire ({rentalDays}d × ₹{equipment.dailyRate}):</span>
+                        <strong>₹{rentalBaseFee.toLocaleString('en-IN')}</strong>
+                      </div>
+                      {securityDeposit > 0 && (
+                        <div className="flex justify-between">
+                          <span>Refundable Deposit:</span>
+                          <strong>₹{securityDeposit.toLocaleString('en-IN')}</strong>
+                        </div>
                       )}
-                    </button>
-                  </form>
+                      <div className="pt-1.5 border-t border-[#34373C]/10 flex justify-between font-black text-[#222428]">
+                        <span>Estimated Total:</span>
+                        <span>₹{estimatedTotal.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-2.5">
+                    {contactUnlocked ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleWhatsAppOwner()}
+                          className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B]"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span>Chat on WhatsApp</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCallOwner}
+                          className="w-full py-3 px-4 rounded-xl bg-[#222428] hover:bg-[#34373C] text-white font-bold text-xs uppercase tracking-wider shadow-sm transition flex items-center justify-center space-x-2 border border-[#34373C]"
+                        >
+                          <Phone className="h-4 w-4 text-[#FCC837]" />
+                          <span>Call Owner Directly</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setUnlockModalOpen(true)}
+                        className="w-full py-3.5 px-4 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B]"
+                      >
+                        <Lock className="h-4 w-4" />
+                        <span>Unlock Owner Contact Details</span>
+                      </button>
+                    )}
+                  </div>
 
                   <div className="text-[11px] text-slate-400 text-center leading-relaxed">
-                    Submitting a request does not charge your card immediately. The machine owner will review and confirm availability.
+                    STORENT operates solely as an Intermediary Listing Directory under Section 79 IT Act, 2000. Renters coordinate directly with equipment owners.
                   </div>
                 </div>
               )}
@@ -773,7 +859,136 @@ const EquipmentDetailPage = () => {
           </div>
         </div>
 
-        {/* MAKE AN OFFER MODAL (OLX BUY MODE) */}
+        {/* HIRER MOBILE OTP CONTACT UNLOCK MODAL */}
+        {unlockModalOpen && (
+          <div className="fixed inset-0 z-50 bg-[#181A1D]/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#34373C]/20 relative">
+              <button
+                type="button"
+                onClick={() => setUnlockModalOpen(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center space-x-2 pb-3 border-b border-[#34373C]/10 mb-4">
+                <div className="p-2 rounded-xl bg-[#FCC837] text-[#222428]">
+                  <Unlock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#222428]">
+                    Unlock Owner Contact Details
+                  </h3>
+                  <p className="text-[11px] text-[#34373C]/70">
+                    Verify mobile OTP to access direct phone &amp; WhatsApp
+                  </p>
+                </div>
+              </div>
+
+              {unlockError && (
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-start space-x-2">
+                  <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>{unlockError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleVerifyOtpAndUnlock} className="space-y-4">
+                {/* Mobile Number Input */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                    Your Mobile Number *
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-2.5 text-xs font-bold text-[#34373C]/60">+91</span>
+                      <input
+                        type="tel"
+                        required
+                        maxLength={10}
+                        placeholder="9876543210"
+                        value={hirerPhone.replace('+91', '').trim()}
+                        onChange={(e) => setHirerPhone(e.target.value)}
+                        className="w-full pl-11 pr-3 py-2.5 rounded-xl border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none font-semibold text-[#222428]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={otpCountdown > 0}
+                      className="px-3.5 py-2.5 rounded-xl bg-[#222428] text-white hover:bg-[#34373C] text-xs font-bold transition shrink-0 disabled:opacity-50"
+                    >
+                      {otpCountdown > 0 ? `${otpCountdown}s` : otpSent ? 'Resend' : 'Send OTP'}
+                    </button>
+                  </div>
+                  {otpSent && (
+                    <div className="mt-1.5 text-[11px] text-green-700 font-semibold flex items-center space-x-1">
+                      <CheckCircle className="h-3 w-3 text-green-700" />
+                      <span>OTP sent to your phone! (Demo testing OTP: <strong>123456</strong>)</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* OTP Verification Input */}
+                {otpSent && (
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#34373C] mb-1.5">
+                      Enter 6-Digit OTP *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={6}
+                      placeholder="123456"
+                      value={hirerOtp}
+                      onChange={(e) => setHirerOtp(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-[#34373C]/30 text-base font-black tracking-widest text-center focus:border-[#FCC837] outline-none"
+                    />
+                  </div>
+                )}
+
+                {/* Mandatory Acceptance Checkbox */}
+                <div className="p-3 bg-[#F8F9FA] rounded-xl border border-[#34373C]/15 text-[11px] text-[#34373C] space-y-2">
+                  <label className="flex items-start space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 accent-[#222428] rounded shrink-0 cursor-pointer"
+                    />
+                    <span className="leading-relaxed">
+                      I agree to the{' '}
+                      <Link to="/safe-harbor" target="_blank" className="font-bold text-[#222428] underline">
+                        Terms of Service, &quot;As-Is&quot; Disclaimer &amp; Intermediary Safe Harbor Policy
+                      </Link>{' '}
+                      under Section 79 of the IT Act, 2000. I acknowledge that STORENT does not inspect machines or process payments, and independent verification is mandatory.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Action CTA */}
+                <button
+                  type="submit"
+                  disabled={unlocking || !termsAccepted || (!otpSent && !hirerOtp)}
+                  className="w-full py-3.5 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center space-x-2 border border-[#E6B01B] disabled:opacity-50"
+                >
+                  {unlocking ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-[#222428]" />
+                      <span>Verifying &amp; Unlocking...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Unlock className="h-4 w-4 text-[#222428]" />
+                      <span>Verify &amp; Unlock Contact Details</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MAKE AN OFFER MODAL (BUY MODE) */}
         {offerModalOpen && (
           <div className="fixed inset-0 z-50 bg-[#181A1D]/80 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#34373C]/20 relative">
@@ -797,7 +1012,7 @@ const EquipmentDetailPage = () => {
                   <div className="h-12 w-12 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center mx-auto font-black">
                     <CheckCircle className="h-7 w-7" />
                   </div>
-                  <h4 className="text-base font-black text-[#222428]">Offer Prepared & Opened on WhatsApp!</h4>
+                  <h4 className="text-base font-black text-[#222428]">Offer Prepared &amp; Opened on WhatsApp!</h4>
                   <p className="text-xs text-[#34373C]/70">
                     Your offer of ₹{Number(offerAmount).toLocaleString('en-IN')} has been forwarded to the seller.
                   </p>
@@ -828,11 +1043,6 @@ const EquipmentDetailPage = () => {
                         className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#34373C]/30 text-sm focus:border-[#FCC837] outline-none font-bold"
                       />
                     </div>
-                    {offerAmount && (
-                      <p className="text-[11px] text-[#34373C]/70 mt-1">
-                        Offer: <strong>₹{Number(offerAmount).toLocaleString('en-IN')}</strong>
-                      </p>
-                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -869,7 +1079,7 @@ const EquipmentDetailPage = () => {
                     </label>
                     <textarea
                       rows={2}
-                      placeholder="e.g. Can do site inspection tomorrow. Ready to pay 10% advance upon verification..."
+                      placeholder="e.g. Can do yard inspection tomorrow. Ready for immediate deal upon verification..."
                       value={offerMessage}
                       onChange={(e) => setOfferMessage(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-[#34373C]/30 text-xs focus:border-[#FCC837] outline-none"
@@ -894,54 +1104,6 @@ const EquipmentDetailPage = () => {
                   </div>
                 </form>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Phase 5 Interactive Confirmation Modal */}
-        {bookingSuccess && (
-          <div className="fixed inset-0 z-50 bg-[#181A1D]/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl text-center border border-[#34373C]/20">
-              <div className="h-14 w-14 rounded-full bg-[#FCC837] text-[#222428] flex items-center justify-center mx-auto mb-4 font-black">
-                <CheckCircle className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-black text-[#222428]">Rental Request Submitted!</h3>
-              <p className="text-xs text-[#34373C]/80 mt-2">
-                Your request to hire <strong>{equipment.name}</strong> has been delivered to the equipment owner.
-              </p>
-
-              <div className="mt-5 p-3 rounded-xl bg-slate-50 border border-[#34373C]/10 text-xs text-[#34373C] text-left space-y-1">
-                <div>
-                  <strong>Booking ID:</strong> <span className="font-mono">{bookingSuccess._id}</span>
-                </div>
-                <div>
-                  <strong>Dates:</strong> {new Date(bookingSuccess.startDate).toLocaleDateString()} to {new Date(bookingSuccess.endDate).toLocaleDateString()} ({bookingSuccess.rentalDurationDays} days)
-                </div>
-                <div>
-                  <strong>Total Amount:</strong> ₹{(bookingSuccess.pricingBreakdown?.totalAmountPaise / 100).toLocaleString('en-IN')}
-                </div>
-                <div>
-                  <strong>Status:</strong>{' '}
-                  <span className="font-bold text-[#222428] bg-[#FCC837]/20 border border-[#FCC837]/40 px-2 py-0.5 rounded">
-                    {bookingSuccess.bookingStatus} (Awaiting Owner Review)
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col space-y-2">
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full py-2.5 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs uppercase tracking-wider transition border border-[#E6B01B]"
-                >
-                  Track in My Bookings
-                </button>
-                <button
-                  onClick={() => setBookingSuccess(null)}
-                  className="w-full py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  Keep Browsing
-                </button>
-              </div>
             </div>
           </div>
         )}

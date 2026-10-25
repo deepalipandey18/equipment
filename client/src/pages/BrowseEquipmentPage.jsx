@@ -26,11 +26,22 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+const GUIDELINE_CATEGORIES = [
+  { _id: 'cat_construction', name: 'Construction', slug: 'construction' },
+  { _id: 'cat_transport', name: 'Transport', slug: 'transport' },
+  { _id: 'cat_industrial', name: 'Industrial', slug: 'industrial' },
+  { _id: 'cat_marine', name: 'Marine', slug: 'marine' },
+  { _id: 'cat_road_works', name: 'Road Works', slug: 'road-works' },
+  { _id: 'cat_warehouse', name: 'Warehouse', slug: 'warehouse' },
+  { _id: 'cat_agriculture', name: 'Agriculture', slug: 'agriculture' },
+];
+
 const BrowseEquipmentPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Filters state initialized from URL params
   const [keyword, setKeyword] = useState(searchParams.get('search') || '');
+  const [locationParam, setLocationParam] = useState(searchParams.get('location') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [listingType, setListingType] = useState(searchParams.get('listingType') || 'all'); // 'all' | 'rent' | 'sale'
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
@@ -63,6 +74,7 @@ const BrowseEquipmentPage = () => {
 
         const params = {};
         if (keyword.trim()) params.keyword = keyword.trim();
+        if (locationParam.trim()) params.location = locationParam.trim();
         if (selectedCategory) params.category = selectedCategory;
         if (activeType && activeType !== 'all') params.listingType = activeType;
         if (minPrice) params.minPrice = minPrice;
@@ -124,11 +136,14 @@ const BrowseEquipmentPage = () => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/categories');
-        if (res.data?.success) {
+        if (res.data?.success && res.data.data?.length > 0) {
           setCategories(res.data.data);
+        } else {
+          setCategories(GUIDELINE_CATEGORIES);
         }
       } catch (err) {
         console.warn('Could not load categories:', err);
+        setCategories(GUIDELINE_CATEGORIES);
       }
     };
     fetchCategories();
@@ -543,8 +558,6 @@ const BrowseEquipmentPage = () => {
                           <span>
                             {isSale
                               ? `₹${Number(item.salePrice || 0).toLocaleString('en-IN')}`
-                              : isBoth
-                              ? `₹${item.dailyRate}/d • Sale ₹${Number(item.salePrice || 0).toLocaleString('en-IN')}`
                               : `₹${item.dailyRate?.toLocaleString('en-IN')}/day`}
                           </span>
                           <div className="flex items-center space-x-1">
@@ -596,8 +609,14 @@ const BrowseEquipmentPage = () => {
                                 FOR SALE
                               </span>
                             ) : (
-                              <span className="text-[11px] font-black uppercase tracking-wider bg-slate-100 text-[#34373C] px-2 py-0.5 rounded border border-slate-300">
+                              <span className="text-[11px] font-black uppercase tracking-wider bg-[#FCC837] text-[#222428] px-2 py-0.5 rounded border border-[#E6B01B]">
                                 FOR RENT
+                              </span>
+                            )}
+                            {(item.rcAvailable || (item.verificationDocuments && item.verificationDocuments.length > 0)) && (
+                              <span className="text-[11px] font-black uppercase tracking-wider bg-[#222428] text-[#FCC837] px-2 py-0.5 rounded border border-[#FCC837]/40 flex items-center space-x-1">
+                                <ShieldCheck className="h-3 w-3 text-[#FCC837]" />
+                                <span>Verified Owner</span>
                               </span>
                             )}
                           </div>
@@ -718,8 +737,14 @@ const BrowseEquipmentPage = () => {
                             FOR SALE
                           </span>
                         ) : (
-                          <span className="bg-slate-100 text-[#34373C] px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-slate-300 shadow-sm">
+                          <span className="bg-[#FCC837] text-[#222428] px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-[#E6B01B] shadow-sm">
                             FOR RENT
+                          </span>
+                        )}
+                        {(item.rcAvailable || (item.verificationDocuments && item.verificationDocuments.length > 0)) && (
+                          <span className="bg-[#222428]/95 text-[#FCC837] px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-[#FCC837]/40 shadow-sm flex items-center space-x-1">
+                            <ShieldCheck className="h-2.5 w-2.5 text-[#FCC837]" />
+                            <span>Verified Owner</span>
                           </span>
                         )}
                       </div>

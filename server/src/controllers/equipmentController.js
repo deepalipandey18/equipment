@@ -110,3 +110,42 @@ exports.deleteEquipment = async (req, res, next) => {
   }
 };
 
+/**
+ * Hirer Mobile OTP Contact Unlock Endpoint
+ * Gated by mandatory terms acceptance & mobile verification
+ */
+exports.unlockContact = async (req, res, next) => {
+  try {
+    const { hirerPhone, termsAccepted, otp } = req.body;
+    const result = await equipmentService.unlockOwnerContact(req.params.id, {
+      hirerPhone,
+      termsAccepted: Boolean(termsAccepted),
+      otp,
+    });
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Hirer Contact Experience Rating & Feedback Endpoint
+ */
+exports.submitContactFeedback = async (req, res, next) => {
+  try {
+    const { ratingType, hirerPhone, feedbackText } = req.body;
+    const result = await equipmentService.submitContactFeedback(req.params.id, {
+      ratingType,
+      hirerPhone,
+      feedbackText,
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

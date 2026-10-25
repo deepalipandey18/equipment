@@ -232,7 +232,10 @@ const RegisterEquipmentPage = () => {
     // Step 4: Media & Specs (Defaults to 3D Cartoon Illustration)
     photos: ['/images/illustrations/jcb-excavator.svg'],
     serialNumber: '',
+    verificationDocumentUrl: '',
   });
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Verify Subscription and Quota on mount
   useEffect(() => {
@@ -448,6 +451,12 @@ const RegisterEquipmentPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+
+    if (!termsAccepted) {
+      setErrorMessage('You must accept the Terms of Service & Intermediary Safe Harbor Disclaimer.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -1385,6 +1394,31 @@ const RegisterEquipmentPage = () => {
                   />
                 </div>
 
+                {/* Basic Document Verification (Optional Perk for Verified Owner Badge) */}
+                <div className="p-4 bg-white rounded-xl border border-[#34373C]/20 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#222428]">
+                      RC Book or Machinery Purchase Invoice (Optional Perk)
+                    </label>
+                    {formData.verificationDocumentUrl && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-black bg-[#FCC837] text-[#222428] border border-[#E6B01B] flex items-center space-x-1">
+                        <ShieldCheck className="h-3 w-3 text-[#222428]" />
+                        <span>Verified Owner Badge Active</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#34373C]/70">
+                    Provide an RC book copy or machinery purchase invoice URL to earn a <strong>&quot;🛡️ Verified Owner&quot;</strong> badge on your marketplace card.
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="https://example.com/rc-book-copy.pdf or invoice URL (Optional)"
+                    value={formData.verificationDocumentUrl}
+                    onChange={(e) => handleInputChange('verificationDocumentUrl', e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-lg border border-[#34373C]/30 text-xs focus:border-[#FCC837] outline-none"
+                  />
+                </div>
+
                 {/* Summary Card with 3D Cartoon Image Preview */}
                 <div className="p-4 bg-[#F8F9FA] rounded-2xl border border-[#34373C]/15 text-xs space-y-3">
                   <div className="font-bold text-[#222428] text-sm pb-1.5 border-b border-[#34373C]/10 flex items-center justify-between">
@@ -1463,6 +1497,25 @@ const RegisterEquipmentPage = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Mandatory Terms Checkbox in Step 4 */}
+                <div className="p-3.5 bg-[#FCC837]/10 rounded-xl border border-[#FCC837]/40 text-xs text-[#222428]">
+                  <label className="flex items-start space-x-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 accent-[#222428] rounded shrink-0 cursor-pointer"
+                    />
+                    <span className="leading-relaxed">
+                      I agree to the{' '}
+                      <Link to="/safe-harbor" target="_blank" className="font-black text-[#222428] underline">
+                        Terms of Service, &quot;As-Is&quot; Disclaimer &amp; Intermediary Safe Harbor Policy
+                      </Link>{' '}
+                      under Section 79 of the Information Technology Act, 2000. I certify that all machinery specifications and ownership documents are authentic.
+                    </span>
+                  </label>
+                </div>
               </div>
             )}
 
@@ -1492,8 +1545,8 @@ const RegisterEquipmentPage = () => {
               ) : (
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-6 py-3 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-[#222428] border border-[#E6B01B] shadow-md flex items-center space-x-2 disabled:opacity-60 transition"
+                  disabled={submitting || !termsAccepted}
+                  className="px-6 py-3 rounded-lg bg-[#FCC837] hover:bg-[#F0BA28] text-xs font-black uppercase tracking-wider text-[#222428] border border-[#E6B01B] shadow-md flex items-center space-x-2 disabled:opacity-50 transition"
                 >
                   {submitting ? (
                     <>

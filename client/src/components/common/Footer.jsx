@@ -1,71 +1,95 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StorentLogo from './StorentLogo';
-import { ShieldCheck, MapPin, Phone, Mail } from 'lucide-react';
+import { ShieldCheck, MapPin, Phone, Mail, Scale, UserCheck, AlertCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#222428] text-slate-300 pt-12 pb-8 border-t border-[#34373C]">
+    <footer className="bg-[#181A1D] text-slate-300 pt-12 pb-8 border-t border-[#34373C]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main 4-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#34373C]">
-          {/* Brand Col */}
+          {/* Brand & Intermediary Role */}
           <div className="space-y-4">
             <Link to="/" className="inline-block">
               <StorentLogo variant="light" className="h-10 w-auto" />
             </Link>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              India's premier heavy machinery rental platform. Rent JCBs, excavators,
-              cranes, generators, and tractors with verified machine owners and secure escrow payments.
+            <p className="text-xs text-slate-300 leading-relaxed">
+              <strong>STORENT.SI</strong> operates solely as a digital listing directory, information portal,
+              and communication enabler under Section 79 &amp; Section 2(1)(w) of the Information
+              Technology Act, 2000 (India).
             </p>
             <div className="flex items-center space-x-2 text-xs text-[#FCC837] font-bold">
               <ShieldCheck className="h-4 w-4" />
-              <span>Verified Fleet Owners & Escrow Shield</span>
+              <span>Section 79 Intermediary Safe Harbor</span>
             </div>
+            <Link
+              to="/safe-harbor"
+              className="inline-flex items-center space-x-1.5 text-xs text-[#FCC837] hover:underline font-bold"
+            >
+              <Scale className="h-3.5 w-3.5" />
+              <span>Safe Harbor &amp; Intermediary Disclaimer →</span>
+            </Link>
           </div>
 
-          {/* Quick Links */}
+          {/* 7 Industry Categories */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">
-              Explore Machinery
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4">
+              Machinery Categories
             </h4>
-            <ul className="space-y-2 text-sm text-slate-300">
+            <ul className="space-y-2 text-xs text-slate-300">
               <li>
-                <Link to="/browse?category=jcb-excavators" className="hover:text-[#FCC837] transition">
-                  JCB & Excavators
+                <Link to="/browse?category=construction" className="hover:text-[#FCC837] transition">
+                  Construction
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=cranes-lifting" className="hover:text-[#FCC837] transition">
-                  Cranes & Aerial Lifts
+                <Link to="/browse?category=transport" className="hover:text-[#FCC837] transition">
+                  Transport
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=generators-power" className="hover:text-[#FCC837] transition">
-                  Diesel Generators
+                <Link to="/browse?category=industrial" className="hover:text-[#FCC837] transition">
+                  Industrial
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=tractors-farm" className="hover:text-[#FCC837] transition">
-                  Tractors & Farm Machinery
+                <Link to="/browse?category=marine" className="hover:text-[#FCC837] transition">
+                  Marine
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=concrete-mixers" className="hover:text-[#FCC837] transition">
-                  Concrete Mixers
+                <Link to="/browse?category=road-works" className="hover:text-[#FCC837] transition">
+                  Road Works
+                </Link>
+              </li>
+              <li>
+                <Link to="/browse?category=warehouse" className="hover:text-[#FCC837] transition">
+                  Warehouse
+                </Link>
+              </li>
+              <li>
+                <Link to="/browse?category=agriculture" className="hover:text-[#FCC837] transition">
+                  Agriculture
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* For Equipment Owners */}
+          {/* Equipment Owners & Legal Links */}
           <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">
-              Fleet Owners
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4">
+              Fleet Owners &amp; Legal
             </h4>
-            <ul className="space-y-2 text-sm text-slate-300">
+            <ul className="space-y-2 text-xs text-slate-300">
               <li>
                 <Link to="/plans" className="hover:text-[#FCC837] transition">
-                  Subscription Plans & Pricing
+                  Subscription Plans (18% GST Incl.)
+                </Link>
+              </li>
+              <li>
+                <Link to="/equipment/register" className="hover:text-[#FCC837] transition">
+                  List Equipment for Rent or Sale
                 </Link>
               </li>
               <li>
@@ -74,47 +98,76 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/plans" className="hover:text-[#FCC837] transition">
-                  Lifetime VIP Access
+                <Link
+                  to="/safe-harbor"
+                  className="hover:text-[#FCC837] transition font-bold text-white flex items-center space-x-1"
+                >
+                  <span>Safe Harbor &amp; Intermediary Disclaimer</span>
                 </Link>
               </li>
               <li>
-                <span className="text-slate-400">Rental Agreement Guidelines</span>
+                <span className="text-slate-400">&quot;As-Is&quot; Machinery Listing Policy</span>
               </li>
               <li>
-                <span className="text-slate-400">Insurance & Verification Help</span>
+                <span className="text-slate-400">RC &amp; Document Verification Guide</span>
               </li>
             </ul>
           </div>
 
-          {/* Contact & Support */}
-          <div>
-            <h4 className="text-sm font-bold uppercase tracking-wider text-white mb-4">
-              Support & Inquiries
+          {/* Statutory Grievance Redressal (Rule 3(2) IT Rules 2021) */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-white mb-2 flex items-center space-x-1.5">
+              <UserCheck className="h-4 w-4 text-[#FCC837]" />
+              <span>Grievance Officer</span>
             </h4>
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li className="flex items-start space-x-2.5">
-                <MapPin className="h-4 w-4 text-[#FCC837] mt-0.5 shrink-0" />
-                <span>CyberCity Tech Corridor, Gurugram, NCR, India</span>
-              </li>
-              <li className="flex items-center space-x-2.5">
-                <Phone className="h-4 w-4 text-[#FCC837] shrink-0" />
-                <span>+91 1800-200-STORENT (Toll Free)</span>
-              </li>
-              <li className="flex items-center space-x-2.5">
-                <Mail className="h-4 w-4 text-[#FCC837] shrink-0" />
-                <span>support@storent.in</span>
-              </li>
-            </ul>
+            <div className="p-3 bg-[#222428] rounded-xl border border-[#34373C] text-xs space-y-1.5 text-slate-300">
+              <div className="font-bold text-white">Rajesh V. Kulkarni</div>
+              <div className="text-[11px] text-slate-400">Grievance &amp; Compliance Officer</div>
+              <div className="flex items-center space-x-1 text-[11px]">
+                <Mail className="h-3.5 w-3.5 text-[#FCC837] shrink-0" />
+                <a href="mailto:grievance@storent.si" className="hover:text-[#FCC837] transition">
+                  grievance@storent.si
+                </a>
+              </div>
+              <div className="flex items-center space-x-1 text-[11px]">
+                <Phone className="h-3.5 w-3.5 text-[#FCC837] shrink-0" />
+                <span>1800-889-STORENT (Toll Free)</span>
+              </div>
+            </div>
+            <div className="flex items-start space-x-2 text-[11px] text-slate-400">
+              <MapPin className="h-3.5 w-3.5 text-[#FCC837] mt-0.5 shrink-0" />
+              <span>Sector 37 Industrial Corridor, Gurugram, Haryana - 122001, India</span>
+            </div>
           </div>
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} STORENT Technologies India Pvt Ltd. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 sm:mt-0">
-            <span className="hover:text-[#FCC837] cursor-pointer">Terms of Service</span>
-            <span className="hover:text-[#FCC837] cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-[#FCC837] cursor-pointer">Escrow Shield Guarantee</span>
+        {/* Legal Disclaimer Box */}
+        <div className="my-6 p-4 rounded-xl bg-[#222428] border border-[#34373C] text-[11px] text-slate-400 leading-relaxed space-y-1">
+          <div className="font-bold text-slate-200 uppercase tracking-wider text-[10px] flex items-center space-x-1.5">
+            <AlertCircle className="h-3.5 w-3.5 text-[#FCC837]" />
+            <span>Statutory Legal Notice &amp; Disclaimer of Liability</span>
+          </div>
+          <p>
+            STORENT.SI provides advertising listing space for equipment owners. Listings are published
+            by third-party owners on an <strong>&quot;As-Is&quot;</strong> basis. STORENT.SI does not inspect, possess,
+            transport, or lease machinery, nor does it process or hold rental payments. Independent verification
+            and due diligence by hirers are mandatory prior to any financial transaction.
+          </p>
+        </div>
+
+        {/* Bottom Bar with Links */}
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
+          <p>© {new Date().getFullYear()} STORENT.SI (Intermediary Platform). All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-4 mt-4 sm:mt-0">
+            <Link to="/safe-harbor" className="hover:text-[#FCC837] transition font-bold text-slate-300">
+              Safe Harbor &amp; Intermediary Disclaimer
+            </Link>
+            <Link to="/safe-harbor#grievance" className="hover:text-[#FCC837] transition">
+              Grievance Redressal
+            </Link>
+            <Link to="/plans" className="hover:text-[#FCC837] transition">
+              Subscription &amp; GST Invoicing
+            </Link>
           </div>
         </div>
       </div>

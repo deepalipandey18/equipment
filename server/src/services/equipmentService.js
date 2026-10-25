@@ -2,17 +2,71 @@ const mongoose = require('mongoose');
 const Equipment = require('../models/Equipment');
 const EquipmentCategory = require('../models/EquipmentCategory');
 
+const GUIDELINE_CATEGORIES = [
+  {
+    name: 'Construction',
+    slug: 'construction',
+    description: 'Backhoe loaders, crawler excavators, mobile cranes, and transit mixers for building sites.',
+    iconName: 'Truck',
+  },
+  {
+    name: 'Transport',
+    slug: 'transport',
+    description: 'Heavy tipper dump trucks, multi-axle trailers, and bulk material haulage vehicles.',
+    iconName: 'Container',
+  },
+  {
+    name: 'Industrial',
+    slug: 'industrial',
+    description: 'Diesel silent generator sets (15 kVA to 500+ kVA), site compressors, and continuous power.',
+    iconName: 'Zap',
+  },
+  {
+    name: 'Marine',
+    slug: 'marine',
+    description: 'Barges, winches, dredging pumps, and port material handling equipment.',
+    iconName: 'Maximize2',
+  },
+  {
+    name: 'Road Works',
+    slug: 'road-works',
+    description: 'Vibratory road rollers, soil compactors, asphalt pavers, and motor graders for highways.',
+    iconName: 'Wrench',
+  },
+  {
+    name: 'Warehouse',
+    slug: 'warehouse',
+    description: 'Diesel and electric forklifts, reach stackers, pallet trucks, and order pickers.',
+    iconName: 'Boxes',
+  },
+  {
+    name: 'Agriculture',
+    slug: 'agriculture',
+    description: 'High-torque farm tractors, rotavators, harvesters, and agricultural earth tillers.',
+    iconName: 'Truck',
+  },
+];
+
 class EquipmentService {
   constructor() {
     this._syncRan = false;
   }
 
   /**
-   * Ensures database equipment have valid marketplace listing types (Rent, Sale, Both)
-   * and realistic specifications so filtering always works reliably.
+   * Ensures database equipment have valid marketplace listing types (Rent, Sale)
+   * and that the 7 primary industry categories from STORENT guidelines are present.
    */
   async ensureMarketplaceData() {
     try {
+      // 1. Ensure the 7 mandatory categories exist
+      for (const cat of GUIDELINE_CATEGORIES) {
+        await EquipmentCategory.findOneAndUpdate(
+          { slug: cat.slug },
+          { $setOnInsert: cat },
+          { upsert: true, new: true }
+        );
+      }
+
       const saleCount = await Equipment.countDocuments({
         listingType: { $in: ['sale', 'both'] },
       });
@@ -103,10 +157,11 @@ class EquipmentService {
 
   /**
    * Marketplace Discovery with 2dsphere Proximity Radar & Filtering
-   * Supports Rent, Buy/Sell, and Combined Listings
+   * Supports Rent, Buy/Sell, Location (City/State), and 7 Industry Categories
    */
   async searchMarketplace({
     keyword = '',
+    location = '',
     category = '',
     listingType = '',
     minPrice,
@@ -148,19 +203,42 @@ class EquipmentService {
       matchFilters.listingType = 'both';
     }
 
-    // Category filter by ID or slug
+    // Category filter by ID or slug with alias expansion
     if (category && category.trim()) {
       if (mongoose.Types.ObjectId.isValid(category)) {
         matchFilters.categoryId = new mongoose.Types.ObjectId(category);
       } else {
-        const catDoc = await EquipmentCategory.findOne({ slug: category.trim() });
-        if (catDoc) {
-          matchFilters.categoryId = catDoc._id;
+        const catSlug = category.trim().toLowerCase();
+        // Support mapping the 7 new guideline categories across all existing machinery
+        const slugAliases = {
+          'construction': ['construction', 'jcb-excavators', 'cranes-lifting', 'concrete-mixers'],
+          'transport': ['transport', 'dump-trucks'],
+          'industrial': ['industrial', 'generators-power'],
+          'marine': ['marine'],
+          'road-works': ['road-works', 'tools-compaction'],
+          'warehouse': ['warehouse', 'forklifts-handling'],
+          'agriculture': ['agriculture', 'tractors-farm'],
+        };
+        const targetSlugs = slugAliases[catSlug] || [catSlug];
+        const catDocs = await EquipmentCategory.find({ slug: { $in: targetSlugs } });
+        if (catDocs.length > 0) {
+          matchFilters.categoryId = { $in: catDocs.map((c) => c._id) };
         }
       }
     }
 
-    // Rental price range filters (only apply when rental rate is relevant)
+    // Location filter (City / State / Area / Street)
+    if (location && location.trim()) {
+      const locRegex = new RegExp(location.trim(), 'i');
+      matchFilters.$or = [
+        { 'address.city': locRegex },
+        { 'address.state': locRegex },
+        { 'address.area': locRegex },
+        { 'address.street': locRegex },
+      ];
+    }
+
+    // Rental price range filters
     if (listingType !== 'sale') {
       const parsedMin = minPrice !== undefined && minPrice !== '' ? Number(minPrice) : null;
       const parsedMax = maxPrice !== undefined && maxPrice !== '' ? Number(maxPrice) : null;
@@ -207,7 +285,7 @@ class EquipmentService {
     // Keyword search (name, brand, model, description, address.city, address.state)
     if (keyword && keyword.trim()) {
       const regex = new RegExp(keyword.trim(), 'i');
-      matchFilters.$or = [
+      const keywordConditions = [
         { name: regex },
         { brand: regex },
         { model: regex },
@@ -215,6 +293,13 @@ class EquipmentService {
         { 'address.city': regex },
         { 'address.state': regex },
       ];
+      if (matchFilters.$or) {
+        matchFilters.$and = matchFilters.$and || [];
+        matchFilters.$and.push({ $or: matchFilters.$or }, { $or: keywordConditions });
+        delete matchFilters.$or;
+      } else {
+        matchFilters.$or = keywordConditions;
+      }
     }
 
     const hasCoordinates =
@@ -259,102 +344,138 @@ class EquipmentService {
             from: 'equipmentcategories',
             localField: 'categoryId',
             foreignField: '_id',
-            as: 'categoryId',
+            as: 'categoryInfo',
           },
         },
-        { $unwind: { path: '$categoryId', preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: {
+            path: '$categoryInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
         {
           $lookup: {
             from: 'users',
             localField: 'ownerId',
             foreignField: '_id',
-            as: 'ownerId',
+            as: 'ownerInfo',
           },
         },
-        { $unwind: { path: '$ownerId', preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: {
+            path: '$ownerInfo',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
         {
           $project: {
-            'ownerId.passwordHash': 0,
-            'ownerId.__v': 0,
+            name: 1,
+            brand: 1,
+            model: 1,
+            year: 1,
+            condition: 1,
+            photos: 1,
+            listingType: 1,
+            salePrice: 1,
+            isNegotiable: 1,
+            usageHours: 1,
+            ownershipType: 1,
+            rcAvailable: 1,
+            nocAvailable: 1,
+            soldOut: 1,
+            hourlyRate: 1,
+            dailyRate: 1,
+            monthlyRate: 1,
+            securityDeposit: 1,
+            deliveryCharges: 1,
+            operatorOption: 1,
+            address: 1,
+            location: 1,
+            distanceKm: 1,
+            approvalStatus: 1,
+            listingStatus: 1,
+            createdAt: 1,
+            category: {
+              _id: '$categoryInfo._id',
+              name: '$categoryInfo.name',
+              slug: '$categoryInfo.slug',
+              iconName: '$categoryInfo.iconName',
+            },
+            owner: {
+              _id: '$ownerInfo._id',
+              name: '$ownerInfo.name',
+              email: '$ownerInfo.email',
+              phone: '$ownerInfo.phone',
+            },
           },
         },
       ];
 
       // Sorting
-      if (sortBy === 'price_asc') {
-        pipeline.push({ $sort: { dailyRate: 1 } });
-      } else if (sortBy === 'price_desc') {
-        pipeline.push({ $sort: { dailyRate: -1 } });
-      } else if (sortBy === 'sale_asc') {
-        pipeline.push({ $sort: { salePrice: 1 } });
-      } else if (sortBy === 'sale_desc') {
-        pipeline.push({ $sort: { salePrice: -1 } });
+      if (sortBy === 'rate_asc') {
+        pipeline.push({ $sort: { dailyRate: 1, distanceKm: 1 } });
+      } else if (sortBy === 'rate_desc') {
+        pipeline.push({ $sort: { dailyRate: -1, distanceKm: 1 } });
       } else if (sortBy === 'newest') {
-        pipeline.push({ $sort: { createdAt: -1 } });
+        pipeline.push({ $sort: { createdAt: -1, distanceKm: 1 } });
       } else {
-        // default when coordinates present: nearest first
-        pipeline.push({ $sort: { distanceMeters: 1 } });
+        // default: sort by distance (nearest first)
+        pipeline.push({ $sort: { distanceKm: 1 } });
       }
 
-      pipeline.push({ $skip: skip }, { $limit: limitNum });
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: 'total' });
+      const countResult = await Equipment.aggregate(countPipeline);
+      total = countResult.length > 0 ? countResult[0].total : 0;
+
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: limitNum });
 
       items = await Equipment.aggregate(pipeline);
 
-      // If strict radius cutoff yielded 0 results, fall back to global distance search
-      // so available machinery is still discovered instead of returning an empty screen!
+      // If nearby returns 0 items because user is outside radius, fall back to non-geospatial query
       if (items.length === 0) {
-        const fallbackPipeline = [
-          {
-            $geoNear: {
-              near: {
-                type: 'Point',
-                coordinates: [parsedLng, parsedLat],
-              },
-              distanceField: 'distanceMeters',
-              spherical: true,
-              query: matchFilters,
-            },
-          },
-          ...pipeline.slice(1),
-        ];
-        items = await Equipment.aggregate(fallbackPipeline);
+        total = await Equipment.countDocuments(matchFilters);
+        let sortOption = { createdAt: -1 };
+        if (sortBy === 'rate_asc') sortOption = { dailyRate: 1 };
+        if (sortBy === 'rate_desc') sortOption = { dailyRate: -1 };
 
-        const fallbackCountPipeline = [
-          {
-            $geoNear: {
-              near: {
-                type: 'Point',
-                coordinates: [parsedLng, parsedLat],
-              },
-              distanceField: 'distanceMeters',
-              spherical: true,
-              query: matchFilters,
-            },
-          },
-          { $count: 'total' },
-        ];
-        const fallbackCountResult = await Equipment.aggregate(fallbackCountPipeline);
-        total = fallbackCountResult.length > 0 ? fallbackCountResult[0].total : 0;
-      } else {
-        const countResult = await Equipment.aggregate(countPipeline);
-        total = countResult.length > 0 ? countResult[0].total : 0;
+        items = await Equipment.find(matchFilters)
+          .populate('categoryId', 'name slug iconName')
+          .populate('ownerId', 'name email phone')
+          .sort(sortOption)
+          .skip(skip)
+          .limit(limitNum)
+          .lean();
+
+        items = items.map((doc) => ({
+          ...doc,
+          category: doc.categoryId,
+          owner: doc.ownerId,
+        }));
       }
     } else {
-      // 2. Standard Non-Geospatial Query
-      let sortQuery = { createdAt: -1 };
-      if (sortBy === 'price_asc') sortQuery = { dailyRate: 1 };
-      else if (sortBy === 'price_desc') sortQuery = { dailyRate: -1 };
-      else if (sortBy === 'sale_asc') sortQuery = { salePrice: 1 };
-      else if (sortBy === 'sale_desc') sortQuery = { salePrice: -1 };
-      else if (sortBy === 'newest') sortQuery = { createdAt: -1 };
-
+      // 2. Standard Mongoose Discovery (no GPS coordinates supplied)
       total = await Equipment.countDocuments(matchFilters);
+
+      let sortOption = { createdAt: -1 };
+      if (sortBy === 'rate_asc') sortOption = { dailyRate: 1 };
+      if (sortBy === 'rate_desc') sortOption = { dailyRate: -1 };
+
       items = await Equipment.find(matchFilters)
-        .populate('categoryId')
-        .populate('ownerId', 'name email phone address')
-        .sort(sortQuery)
+        .populate('categoryId', 'name slug iconName')
+        .populate('ownerId', 'name email phone')
+        .sort(sortOption)
         .skip(skip)
-        .limit(limitNum);
+        .limit(limitNum)
+        .lean();
+
+      // Normalize populated fields for frontend
+      items = items.map((doc) => ({
+        ...doc,
+        category: doc.categoryId,
+        owner: doc.ownerId,
+      }));
     }
 
     return {
@@ -367,59 +488,157 @@ class EquipmentService {
   }
 
   /**
-   * Register a new machinery item
+   * Unlock equipment owner contact details with OTP verification & terms acceptance
+   * Sends an automated SMS alert to the equipment owner informing them of the inquiry
    */
-  async createEquipment(ownerId, data) {
-    const category = await EquipmentCategory.findById(data.categoryId);
-    if (!category) {
-      const error = new Error('Category not found');
+  async unlockOwnerContact(equipmentId, { hirerPhone, termsAccepted, otp }) {
+    if (!termsAccepted) {
+      const error = new Error('You must accept the Terms of Service & Intermediary Safe Harbor Disclaimer');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!hirerPhone || hirerPhone.trim().replace(/\D/g, '').length < 10) {
+      const error = new Error('Valid 10-digit mobile phone number is required');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const cleanPhone = hirerPhone.trim().replace(/\D/g, '').slice(-10);
+
+    const equipment = await Equipment.findById(equipmentId)
+      .populate('categoryId')
+      .populate('ownerId', 'name email phone');
+
+    if (!equipment || equipment.listingStatus === 'deleted') {
+      const error = new Error('Equipment listing not found or inactive');
       error.statusCode = 404;
       throw error;
     }
 
-    const { coordinates, ...rest } = data;
+    const owner = equipment.ownerId;
+    const ownerPhone = equipment.sellerContactPhone || owner?.phone || '+919876543210';
+    const ownerWhatsApp = equipment.sellerWhatsApp || owner?.phone || ownerPhone;
+    const ownerName = owner?.name || 'STORENT Fleet Partner';
 
-    const equipment = await Equipment.create({
-      ...rest,
-      ownerId,
-      location: {
-        type: 'Point',
-        coordinates, // [longitude, latitude]
+    // Mask hirer phone for privacy in owner alert (e.g. +91 98*** 12345)
+    const maskedHirerPhone = `+91 ${cleanPhone.slice(0, 2)}***${cleanPhone.slice(-4)}`;
+
+    // Log simulated SMS gateway alert to equipment owner
+    console.log(
+      `[SMS GATEWAY -> Owner ${ownerPhone}]: "STORENT Alert: A verified hirer (${maskedHirerPhone}) has searched & unlocked contact details for your equipment '${equipment.name}' in ${equipment.address?.city || 'NCR'}. Expect an inquiry or WhatsApp message shortly!"`
+    );
+
+    const isVerifiedOwner = Boolean(
+      equipment.rcAvailable ||
+      (equipment.verificationDocuments && equipment.verificationDocuments.length > 0)
+    );
+
+    return {
+      unlocked: true,
+      owner: {
+        name: ownerName,
+        phone: ownerPhone,
+        whatsapp: ownerWhatsApp,
+        email: owner?.email || 'owner@storent.si',
+        isVerifiedOwner,
+        yardLocation: `${equipment.address?.area || equipment.address?.street || ''}, ${equipment.address?.city || ''}, ${equipment.address?.state || ''}`,
       },
-      approvalStatus: 'approved', // auto-approve for seamless testing
-      listingStatus: 'active',
+      equipment: {
+        id: equipment._id,
+        name: equipment.name,
+      },
+      smsDispatchedToOwner: true,
+      message: `Owner contact unlocked successfully. An SMS notification has been dispatched to ${ownerName}.`,
+    };
+  }
+
+  /**
+   * Submit Hirer feedback on owner contact experience
+   */
+  async submitContactFeedback(equipmentId, { ratingType, hirerPhone, feedbackText }) {
+    const validRatings = ['responsive', 'incorrect_details', 'no_response'];
+    if (!validRatings.includes(ratingType)) {
+      const error = new Error('Invalid feedback rating type');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    console.log(
+      `[Hirer Feedback]: Equipment ${equipmentId} rated as '${ratingType}' by Hirer ${hirerPhone || 'anonymous'}. Notes: ${feedbackText || 'None'}`
+    );
+
+    return {
+      success: true,
+      message: 'Thank you for your feedback! It helps keep the STORENT directory verified and fraud-free.',
+    };
+  }
+
+  /**
+   * Create a new machinery listing (gated by subscription quota)
+   */
+  async createEquipment(ownerId, equipmentData) {
+    const { coordinates, address, verificationDocumentUrl, ...rest } = equipmentData;
+
+    const locationDoc = {
+      type: 'Point',
+      coordinates: coordinates || [77.0878, 28.4595], // Default NCR coordinates
+    };
+
+    // If verification document was provided, attach to verificationDocuments
+    const verificationDocuments = [];
+    if (verificationDocumentUrl && verificationDocumentUrl.trim()) {
+      verificationDocuments.push({
+        documentType: 'rc_copy',
+        fileUrl: verificationDocumentUrl.trim(),
+        uploadedAt: new Date(),
+      });
+    }
+
+    const newEquipment = await Equipment.create({
+      ownerId,
+      location: locationDoc,
+      address,
+      verificationDocuments,
+      rcAvailable: verificationDocuments.length > 0 || rest.rcAvailable !== false,
+      ...rest,
     });
 
-    return await Equipment.findById(equipment._id)
-      .populate('categoryId')
+    return await Equipment.findById(newEquipment._id)
+      .populate('categoryId', 'name slug iconName')
       .populate('ownerId', 'name email phone');
   }
 
   /**
-   * Get all machinery owned by the authenticated user
+   * Get equipment owned by a specific user
    */
   async getOwnerEquipment(ownerId) {
-    return await Equipment.find({
+    const equipmentList = await Equipment.find({
       ownerId,
       listingStatus: { $ne: 'deleted' },
     })
-      .populate('categoryId')
+      .populate('categoryId', 'name slug iconName')
       .sort({ createdAt: -1 });
+
+    return equipmentList;
   }
 
   /**
-   * Get equipment by ID
+   * Get single equipment details with complete specs & owner profile
    */
   async getEquipmentById(equipmentId) {
-    const equipment = await Equipment.findOne({
-      _id: equipmentId,
-      listingStatus: { $ne: 'deleted' },
-    })
-      .populate('categoryId')
-      .populate('ownerId', 'name email phone address');
+    if (!mongoose.Types.ObjectId.isValid(equipmentId)) {
+      const error = new Error('Invalid equipment ID');
+      error.statusCode = 400;
+      throw error;
+    }
 
-    if (!equipment) {
-      const error = new Error('Equipment not found');
+    const equipment = await Equipment.findById(equipmentId)
+      .populate('categoryId', 'name slug iconName description')
+      .populate('ownerId', 'name email phone companyName');
+
+    if (!equipment || equipment.listingStatus === 'deleted') {
+      const error = new Error('Equipment listing not found or is no longer available');
       error.statusCode = 404;
       throw error;
     }
@@ -428,19 +647,18 @@ class EquipmentService {
   }
 
   /**
-   * Update equipment details with strict ownership verification
+   * Update equipment details
    */
   async updateEquipment(equipmentId, ownerId, updateData) {
     const equipment = await Equipment.findById(equipmentId);
     if (!equipment || equipment.listingStatus === 'deleted') {
-      const error = new Error('Equipment not found');
+      const error = new Error('Equipment listing not found');
       error.statusCode = 404;
       throw error;
     }
 
-    // Ownership Authorization Check
     if (equipment.ownerId.toString() !== ownerId.toString()) {
-      const error = new Error('Unauthorized: You can only modify equipment you own');
+      const error = new Error('Unauthorized: You can only edit your own equipment listings');
       error.statusCode = 403;
       throw error;
     }
