@@ -222,8 +222,8 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col overflow-x-hidden">
-      {/* Hero Section: Left Content + Right Aesthetic 3D Cartoon Video Arena */}
-      <section className="relative bg-[#181A1D] text-white overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-32 border-b border-[#34373C]">
+      {/* Hero Section: 50/50 Equal Balance (Left Content + Right Borderless Aesthetic 3D Stage) */}
+      <section className="relative bg-[#181A1D] text-white overflow-hidden pt-6 pb-8 sm:pt-10 sm:pb-12 border-b border-[#34373C]">
         {/* Ambient Dark Charcoal Background with Isometric Floor & Glow */}
         <div className="absolute inset-0 bg-[#141619] pointer-events-none overflow-hidden">
           {/* Isometric Perspective Grid */}
@@ -245,11 +245,11 @@ const LandingPage = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            {/* Left Content (6 cols): Badge, Headings, Search, CTAs, Machine Tabs */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left Content (6 cols): 50% Equal Balance */}
             <div className="lg:col-span-6 xl:col-span-6 z-10 flex flex-col justify-center">
               {/* Badge */}
-              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-[#222428] text-xs font-black uppercase tracking-wider mb-6 shadow-lg shadow-[#FCC837]/20 self-start animate-hero-fade-in">
+              <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCC837] border border-[#E6B01B] text-[#222428] text-xs font-black uppercase tracking-wider mb-3.5 shadow-lg shadow-[#FCC837]/20 self-start animate-hero-fade-in">
                 <span className="h-2 w-2 rounded-full bg-[#222428] animate-ping mr-1" />
                 <span>STORENT • Heavy Machinery Rental Platform</span>
               </div>
@@ -348,64 +348,52 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right Column (6 cols): Aesthetic 3D Cartoon Video Showcase Arena */}
-            <div className="lg:col-span-6 xl:col-span-6 relative mt-6 lg:mt-0 flex items-center justify-center">
-              {/* Glowing Halo Backdrop */}
-              <div className="absolute -inset-2 bg-gradient-to-r from-[#FCC837]/20 via-[#FCC837]/5 to-[#FCC837]/20 rounded-[2.5rem] blur-2xl opacity-60 pointer-events-none animate-pulse-glow" />
+            {/* Right Column (6 cols): Borderless Ultra-Aesthetic 3D Showcase Arena (50% Equal Balance) */}
+            <div className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center min-h-[460px] sm:min-h-[520px] lg:min-h-[580px]">
+              {/* Soft Ethereal Center Spotlight Aura (Seamless background glow, zero outlines) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] sm:w-[32rem] sm:h-[32rem] rounded-full bg-[#FCC837]/15 blur-[120px] pointer-events-none animate-pulse-glow" />
 
-              {/* Aesthetic 3D Stage Container */}
-              <div className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-3xl overflow-hidden bg-gradient-to-b from-[#1C1E22]/90 via-[#181A1D] to-[#121417] border border-[#FCC837]/30 shadow-[0_25px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(252,200,55,0.12)] group hover:border-[#FCC837]/60 transition-all duration-500">
-                {/* Internal Ground Perspective Grid */}
-                <div
-                  className="absolute inset-x-0 bottom-0 h-3/5 opacity-25 pointer-events-none"
-                  style={{
-                    backgroundImage: `
-                      linear-gradient(to right, #FCC837 1px, transparent 1px),
-                      linear-gradient(to bottom, #FCC837 1px, transparent 1px)
-                    `,
-                    backgroundSize: '40px 40px',
-                    transform: 'perspective(500px) rotateX(65deg) scale(2)',
-                    transformOrigin: 'center bottom',
-                  }}
-                />
+              {/* Seamless Ground Perspective Grid with Soft Vignette Fade */}
+              <div
+                className="absolute inset-x-0 bottom-4 h-60 opacity-25 pointer-events-none"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(to right, #FCC837 1px, transparent 1px),
+                    linear-gradient(to bottom, #FCC837 1px, transparent 1px)
+                  `,
+                  backgroundSize: '40px 40px',
+                  transform: 'perspective(450px) rotateX(65deg) scale(1.8)',
+                  transformOrigin: 'center bottom',
+                  maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, transparent 75%)',
+                  WebkitMaskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, transparent 75%)',
+                }}
+              />
 
-                {/* Center Golden Spotlight Aura */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#FCC837]/15 blur-[90px] pointer-events-none animate-pulse-glow" />
-
-                {/* 60 FPS Animated 3D Cartoon Stage */}
+              {/* Borderless 3D Animated Stage Canvas (Completely border-free, pure motion) */}
+              <div className="relative w-full h-[460px] sm:h-[520px] lg:h-[580px] flex items-center justify-center select-none">
                 <Cartoon3DHeroStage activeSceneId={currentScene.id} showBackground={false} />
+              </div>
 
-                {/* Aesthetic Top Floating Badge */}
-                <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-30">
-                  <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#181A1D]/90 border border-[#FCC837]/50 text-[#FCC837] text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-lg">
-                    <span className="h-2 w-2 rounded-full bg-[#FCC837] animate-ping" />
-                    <span>3D Dynamic Video • 60 FPS</span>
-                  </div>
-                  <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#222428]/90 border border-[#34373C] text-white/80 text-[10px] font-bold backdrop-blur-md">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837]" />
-                    <span>STORENT Live Fleet</span>
+              {/* Floating Minimalist Top Status Pill */}
+              <div className="absolute top-3 right-4 flex items-center space-x-2 pointer-events-none z-20">
+                <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[#181A1D]/80 backdrop-blur-md border border-[#FCC837]/30 text-[#FCC837] text-[10px] font-black uppercase tracking-wider shadow-lg">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FCC837] animate-ping" />
+                  <span>3D Dynamic Simulation • 60 FPS</span>
+                </div>
+              </div>
+
+              {/* Floating Minimalist Bottom Machine Tag */}
+              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
+                <div className="bg-[#181A1D]/85 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-[#34373C]/70 shadow-lg flex items-center space-x-2.5">
+                  <span className="h-2 w-2 rounded-full bg-[#FCC837]" />
+                  <div>
+                    <div className="text-xs font-black text-white">{currentScene.name}</div>
+                    <div className="text-[10px] text-[#FCC837] font-semibold">{currentScene.category}</div>
                   </div>
                 </div>
 
-                {/* Aesthetic Bottom Info Glass Bar */}
-                <div className="absolute bottom-4 left-4 right-4 bg-[#181A1D]/90 backdrop-blur-md p-3.5 rounded-2xl border border-[#34373C]/80 flex items-center justify-between z-30 shadow-2xl">
-                  <div className="truncate mr-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="h-2 w-2 rounded-full bg-[#FCC837]" />
-                      <h3 className="text-sm sm:text-base font-black text-white truncate">{currentScene.name}</h3>
-                    </div>
-                    <p className="text-[11px] text-[#FCC837] font-semibold mt-0.5 truncate pl-4">
-                      {currentScene.category}
-                    </p>
-                  </div>
-
-                  <Link
-                    to={`/browse?search=${encodeURIComponent(currentScene.shortLabel)}`}
-                    className="px-4 py-2 rounded-xl bg-[#FCC837] hover:bg-[#F0BA28] text-[#222428] font-black text-xs transition border border-[#E6B01B] shrink-0 shadow-lg flex items-center space-x-1.5"
-                  >
-                    <span>Check Dates</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+                <div className="bg-[#181A1D]/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#34373C]/70 text-[10px] font-bold text-white/70">
+                  Model 100% Match
                 </div>
               </div>
             </div>

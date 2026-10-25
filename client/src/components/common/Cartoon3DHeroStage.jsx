@@ -38,7 +38,7 @@ const Cartoon3DHeroStage = ({ activeSceneId = 'truck', showBackground = true, cl
       <div
         className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-in-out ${
           activeSceneId === 'truck'
-            ? 'opacity-100 scale-100 translate-y-0 z-20'
+            ? 'opacity-100 scale-115 sm:scale-120 lg:scale-130 translate-y-0 z-20'
             : 'opacity-0 scale-95 translate-y-8 z-0 pointer-events-none'
         }`}
       >
@@ -278,7 +278,7 @@ const Cartoon3DHeroStage = ({ activeSceneId = 'truck', showBackground = true, cl
       <div
         className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-in-out ${
           activeSceneId === 'jcb'
-            ? 'opacity-100 scale-100 translate-y-0 z-20'
+            ? 'opacity-100 scale-115 sm:scale-120 lg:scale-130 translate-y-0 z-20'
             : 'opacity-0 scale-95 translate-y-8 z-0 pointer-events-none'
         }`}
       >
@@ -441,7 +441,7 @@ const Cartoon3DHeroStage = ({ activeSceneId = 'truck', showBackground = true, cl
       <div
         className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ease-in-out ${
           activeSceneId === 'crane'
-            ? 'opacity-100 scale-100 translate-y-0 z-20'
+            ? 'opacity-100 scale-115 sm:scale-120 lg:scale-130 translate-y-0 z-20'
             : 'opacity-0 scale-95 translate-y-8 z-0 pointer-events-none'
         }`}
       >
