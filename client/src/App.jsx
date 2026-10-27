@@ -16,6 +16,8 @@ import RegisterEquipmentPage from './pages/RegisterEquipmentPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import SafeHarborPage from './pages/SafeHarborPage';
+import AboutPage from './pages/AboutPage';
+import CareersPage from './pages/CareersPage';
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/careers" element={<CareersPage />} />
               <Route path="/plans" element={<SubscriptionPlansPage />} />
               <Route path="/browse" element={<BrowseEquipmentPage />} />
               <Route path="/equipment/:id" element={<EquipmentDetailPage />} />

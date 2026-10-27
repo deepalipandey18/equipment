@@ -6,6 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'],
+        serif: ['"Cormorant Garamond"', 'Playfair Display', 'Georgia', 'serif'],
+        cormorant: ['"Cormorant Garamond"', 'Playfair Display', 'Georgia', 'serif'],
+        display: ['"Cormorant Garamond"', 'Playfair Display', 'Georgia', 'serif'],
+        heading: ['"Cormorant Garamond"', 'Playfair Display', 'Georgia', 'serif'],
+      },
       colors: {
         // Strict STORENT Tri-Color Palette: Yellow, Dark Grey, White
         storent: {
@@ -65,3 +73,4 @@ export default {
   },
   plugins: [],
 }
+

@@ -3,15 +3,16 @@ import React from 'react';
 /**
  * Official STORENT Brand Logo Component
  * Matches the uploaded brand identity:
- * - Yellow: #FCC837
- * - Dark Grey / Slate Charcoal: #34373C
+ * - Yellow: #FFD400 / #FCC837
+ * - Dark Grey / Slate Charcoal: #181A1D / #34373C
  * - White: #FFFFFF
  *
  * Variants:
+ * - 'yellow-on-black': Yellow Rhino & Yellow STORENT wordmark on Black background (for Yellow Navbar)
  * - 'banner': Full yellow background banner with dark circle, yellow rhino, and dark STORENT wordmark
- * - 'default': Transparent background with dark circle, yellow rhino, and dark STORENT wordmark (for light backgrounds)
- * - 'light': Dark background variant with yellow circle, dark rhino, and crisp white STORENT wordmark (for dark footer / navbar)
- * - 'badge-only': Just the circular rhino icon (for favicons, avatars, mobile)
+ * - 'default': Transparent background with dark circle, yellow rhino, and dark STORENT wordmark
+ * - 'light': Dark background variant with yellow circle, dark rhino, and crisp white STORENT wordmark (for Footer)
+ * - 'badge-only': Just the circular rhino icon
  */
 const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtitle = false }) => {
   // Exact vector trace of the uploaded Storent Rhino emblem facing left
@@ -21,7 +22,67 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
     </g>
   );
 
-  // Variant 1: "banner" - Yellow banner with dark circle & yellow rhino
+  // Variant 1: "yellow-on-black" / "black-background" - Yellow Rhino & Yellow STORENT text on Black background
+  if (
+    variant === 'yellow-on-black' ||
+    variant === 'black-background' ||
+    variant === 'black-badge' ||
+    variant === 'black-bg'
+  ) {
+    return (
+      <div className={`inline-flex items-center shrink-0 select-none ${className}`}>
+        <svg
+          viewBox="0 0 350 90"
+          className="h-full w-auto"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Black Background Plate */}
+          <rect width="350" height="90" rx="14" fill="#000000" />
+
+          {/* Yellow Subtle Rim Accent */}
+          <rect
+            x="1.5"
+            y="1.5"
+            width="347"
+            height="87"
+            rx="12.5"
+            stroke="#FFD400"
+            strokeWidth="2"
+            strokeOpacity="0.45"
+          />
+
+          {/* Yellow Rhino Emblem Circle */}
+          <circle cx="45" cy="45" r="33" fill="#181A1D" stroke="#FFD400" strokeWidth="2.5" />
+
+          {/* Yellow Rhino Facing Left */}
+          <g transform="translate(0, 0) scale(0.92)">
+            {rhinoSvgPath('#FFD400')}
+          </g>
+
+          {/* Yellow STORENT Wordmark */}
+          <text
+            x="96"
+            y="61"
+            fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+            fontWeight="900"
+            fontSize="48"
+            letterSpacing="2.5"
+            fill="#FFD400"
+          >
+            STORENT
+          </text>
+        </svg>
+        {showSubtitle && (
+          <span className="text-[10px] uppercase font-bold tracking-widest text-[#FFD400] border-l border-neutral-700 pl-2.5 ml-2.5 hidden sm:inline">
+            Heavy Machinery Rental
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // Variant 2: "banner" - Yellow banner with dark circle & yellow rhino
   if (variant === 'banner') {
     return (
       <div className={`inline-flex items-center shrink-0 select-none ${className}`}>
@@ -32,14 +93,14 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Yellow Banner Background */}
-          <rect width="450" height="140" fill="#FCC837" rx="8" />
+          <rect width="450" height="140" fill="#FFD400" rx="8" />
 
           {/* Dark Charcoal Circle */}
-          <circle cx="82" cy="70" r="48" fill="#34373C" />
+          <circle cx="82" cy="70" r="48" fill="#181A1D" />
 
           {/* Yellow Rhino Facing Left Inside Circle */}
           <g transform="translate(37, 25) scale(0.95)">
-            {rhinoSvgPath('#FCC837')}
+            {rhinoSvgPath('#FFD400')}
           </g>
 
           {/* Dark Charcoal STORENT Wordmark */}
@@ -50,7 +111,7 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
             fontWeight="900"
             fontSize="68"
             letterSpacing="3"
-            fill="#34373C"
+            fill="#181A1D"
           >
             STORENT
           </text>
@@ -59,7 +120,7 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
     );
   }
 
-  // Variant 2: "badge-only" - Circular emblem only
+  // Variant 3: "badge-only" - Circular emblem only
   if (variant === 'badge-only') {
     return (
       <div className={`inline-flex items-center justify-center shrink-0 select-none ${className}`}>
@@ -69,16 +130,16 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle cx="50" cy="50" r="48" fill="#34373C" />
+          <circle cx="50" cy="50" r="48" fill="#181A1D" />
           <g transform="translate(5, 5) scale(0.95)">
-            {rhinoSvgPath('#FCC837')}
+            {rhinoSvgPath('#FFD400')}
           </g>
         </svg>
       </div>
     );
   }
 
-  // Variant 3: "light" - For Dark backgrounds (Header, Hero, Footer)
+  // Variant 4: "light" - For Dark backgrounds (Header, Hero, Footer)
   if (variant === 'light') {
     return (
       <div className={`inline-flex items-center shrink-0 select-none ${className}`}>
@@ -89,11 +150,11 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Yellow Emblem Circle */}
-          <circle cx="48" cy="48" r="44" fill="#FCC837" />
+          <circle cx="48" cy="48" r="44" fill="#FFD400" />
 
           {/* Dark Charcoal Rhino */}
           <g transform="translate(3, 3) scale(0.95)">
-            {rhinoSvgPath('#34373C')}
+            {rhinoSvgPath('#181A1D')}
           </g>
 
           {/* Pure White STORENT Wordmark */}
@@ -110,7 +171,7 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
           </text>
         </svg>
         {showSubtitle && (
-          <span className="text-[10px] uppercase font-bold tracking-widest text-[#FCC837] border-l border-slate-700 pl-2.5 ml-2.5 hidden sm:inline">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-[#FFD400] border-l border-slate-700 pl-2.5 ml-2.5 hidden sm:inline">
             Heavy Machinery Rental
           </span>
         )}
@@ -118,7 +179,7 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
     );
   }
 
-  // Variant 4: "default" - Standard transparent logo for light background
+  // Variant 5: "default" - Standard transparent logo for light background
   return (
     <div className={`inline-flex items-center shrink-0 select-none ${className}`}>
       <svg
@@ -128,11 +189,11 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Dark Charcoal Circle */}
-        <circle cx="48" cy="48" r="44" fill="#34373C" />
+        <circle cx="48" cy="48" r="44" fill="#181A1D" />
 
         {/* Yellow Rhino Facing Left */}
         <g transform="translate(3, 3) scale(0.95)">
-          {rhinoSvgPath('#FCC837')}
+          {rhinoSvgPath('#FFD400')}
         </g>
 
         {/* Dark Charcoal STORENT Wordmark */}
@@ -143,7 +204,7 @@ const StorentLogo = ({ variant = 'default', className = 'h-9 w-auto', showSubtit
           fontWeight="900"
           fontSize="54"
           letterSpacing="2.5"
-          fill="#34373C"
+          fill="#181A1D"
         >
           STORENT
         </text>

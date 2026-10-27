@@ -282,8 +282,8 @@ const LandingPage = () => {
                 <span>STORENT.SI • Heavy Machinery Listing Directory</span>
               </div>
 
-              {/* Heading */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none animate-hero-fade-in-delay-1 drop-shadow-lg text-white">
+              {/* Luxury Editorial Heading: Cormorant Garamond */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-serif tracking-tight leading-tight sm:leading-none animate-hero-fade-in-delay-1 drop-shadow-lg text-white">
                 Find the right Equipments <br />
                 <span className="text-[#FCC837]">
                   for your next PROJECT.
@@ -473,10 +473,10 @@ const LandingPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8">
           <div>
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#FCC837]/20 text-[#222428] border border-[#FCC837]/40 text-xs font-bold uppercase tracking-wider mb-2">
-              <span>Machinery Categories</span>
+              <span>Equipment Categories</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#222428]">
-              Browse by Industry Category
+              Browse by Industry 
             </h2>
             <p className="text-sm text-[#34373C]/70 mt-1">
               Select any of the 7 industry sectors to find available equipment near your site.

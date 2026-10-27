@@ -19,13 +19,13 @@ const Footer = () => {
               and communication enabler under Section 79 &amp; Section 2(1)(w) of the Information
               Technology Act, 2000 (India).
             </p>
-            <div className="flex items-center space-x-2 text-xs text-[#FCC837] font-bold">
+            <div className="flex items-center space-x-2 text-xs text-[#FFD400] font-bold">
               <ShieldCheck className="h-4 w-4" />
               <span>Section 79 Intermediary Safe Harbor</span>
             </div>
             <Link
               to="/safe-harbor"
-              className="inline-flex items-center space-x-1.5 text-xs text-[#FCC837] hover:underline font-bold"
+              className="inline-flex items-center space-x-1.5 text-xs text-[#FFD400] hover:underline font-bold"
             >
               <Scale className="h-3.5 w-3.5" />
               <span>Safe Harbor &amp; Intermediary Disclaimer →</span>
@@ -39,37 +39,37 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
-                <Link to="/browse?category=construction" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=construction" className="hover:text-[#FFD400] transition">
                   Construction
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=transport" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=transport" className="hover:text-[#FFD400] transition">
                   Transport
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=industrial" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=industrial" className="hover:text-[#FFD400] transition">
                   Industrial
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=marine" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=marine" className="hover:text-[#FFD400] transition">
                   Marine
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=road-works" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=road-works" className="hover:text-[#FFD400] transition">
                   Road Works
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=warehouse" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=warehouse" className="hover:text-[#FFD400] transition">
                   Warehouse
                 </Link>
               </li>
               <li>
-                <Link to="/browse?category=agriculture" className="hover:text-[#FCC837] transition">
+                <Link to="/browse?category=agriculture" className="hover:text-[#FFD400] transition">
                   Agriculture
                 </Link>
               </li>
@@ -79,37 +79,41 @@ const Footer = () => {
           {/* Equipment Owners & Legal Links */}
           <div>
             <h4 className="text-xs font-black uppercase tracking-wider text-white mb-4">
-              Fleet Owners &amp; Legal
+              Company &amp; Fleet Legal
             </h4>
             <ul className="space-y-2 text-xs text-slate-300">
               <li>
-                <Link to="/plans" className="hover:text-[#FCC837] transition">
+                <Link to="/about" className="hover:text-[#FFD400] transition font-bold text-white">
+                  About STORENT
+                </Link>
+              </li>
+              <li>
+                <Link to="/careers" className="hover:text-[#FFD400] transition font-bold text-white">
+                  Careers &amp; Open Roles
+                </Link>
+              </li>
+              <li>
+                <Link to="/plans" className="hover:text-[#FFD400] transition">
                   Subscription Plans (18% GST Incl.)
                 </Link>
               </li>
               <li>
-                <Link to="/equipment/register" className="hover:text-[#FCC837] transition">
+                <Link to="/equipment/register" className="hover:text-[#FFD400] transition">
                   List Equipment for Rent or Sale
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard" className="hover:text-[#FCC837] transition">
+                <Link to="/dashboard" className="hover:text-[#FFD400] transition">
                   Owner Dashboard
                 </Link>
               </li>
               <li>
                 <Link
                   to="/safe-harbor"
-                  className="hover:text-[#FCC837] transition font-bold text-white flex items-center space-x-1"
+                  className="hover:text-[#FFD400] transition font-bold text-white flex items-center space-x-1"
                 >
                   <span>Safe Harbor &amp; Intermediary Disclaimer</span>
                 </Link>
-              </li>
-              <li>
-                <span className="text-slate-400">&quot;As-Is&quot; Machinery Listing Policy</span>
-              </li>
-              <li>
-                <span className="text-slate-400">RC &amp; Document Verification Guide</span>
               </li>
             </ul>
           </div>
@@ -117,25 +121,25 @@ const Footer = () => {
           {/* Statutory Grievance Redressal (Rule 3(2) IT Rules 2021) */}
           <div className="space-y-3">
             <h4 className="text-xs font-black uppercase tracking-wider text-white mb-2 flex items-center space-x-1.5">
-              <UserCheck className="h-4 w-4 text-[#FCC837]" />
+              <UserCheck className="h-4 w-4 text-[#FFD400]" />
               <span>Grievance Officer</span>
             </h4>
             <div className="p-3 bg-[#222428] rounded-xl border border-[#34373C] text-xs space-y-1.5 text-slate-300">
               <div className="font-bold text-white">Rajesh V. Kulkarni</div>
               <div className="text-[11px] text-slate-400">Grievance &amp; Compliance Officer</div>
               <div className="flex items-center space-x-1 text-[11px]">
-                <Mail className="h-3.5 w-3.5 text-[#FCC837] shrink-0" />
-                <a href="mailto:grievance@storent.si" className="hover:text-[#FCC837] transition">
+                <Mail className="h-3.5 w-3.5 text-[#FFD400] shrink-0" />
+                <a href="mailto:grievance@storent.si" className="hover:text-[#FFD400] transition">
                   grievance@storent.si
                 </a>
               </div>
               <div className="flex items-center space-x-1 text-[11px]">
-                <Phone className="h-3.5 w-3.5 text-[#FCC837] shrink-0" />
+                <Phone className="h-3.5 w-3.5 text-[#FFD400] shrink-0" />
                 <span>1800-889-STORENT (Toll Free)</span>
               </div>
             </div>
             <div className="flex items-start space-x-2 text-[11px] text-slate-400">
-              <MapPin className="h-3.5 w-3.5 text-[#FCC837] mt-0.5 shrink-0" />
+              <MapPin className="h-3.5 w-3.5 text-[#FFD400] mt-0.5 shrink-0" />
               <span>Sector 37 Industrial Corridor, Gurugram, Haryana - 122001, India</span>
             </div>
           </div>
@@ -144,7 +148,7 @@ const Footer = () => {
         {/* Legal Disclaimer Box */}
         <div className="my-6 p-4 rounded-xl bg-[#222428] border border-[#34373C] text-[11px] text-slate-400 leading-relaxed space-y-1">
           <div className="font-bold text-slate-200 uppercase tracking-wider text-[10px] flex items-center space-x-1.5">
-            <AlertCircle className="h-3.5 w-3.5 text-[#FCC837]" />
+            <AlertCircle className="h-3.5 w-3.5 text-[#FFD400]" />
             <span>Statutory Legal Notice &amp; Disclaimer of Liability</span>
           </div>
           <p>
@@ -159,13 +163,19 @@ const Footer = () => {
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
           <p>© {new Date().getFullYear()} STORENT.SI (Intermediary Platform). All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-4 mt-4 sm:mt-0">
-            <Link to="/safe-harbor" className="hover:text-[#FCC837] transition font-bold text-slate-300">
+            <Link to="/about" className="hover:text-[#FFD400] transition font-bold text-slate-300">
+              About Us
+            </Link>
+            <Link to="/careers" className="hover:text-[#FFD400] transition font-bold text-slate-300">
+              Careers
+            </Link>
+            <Link to="/safe-harbor" className="hover:text-[#FFD400] transition font-bold text-slate-300">
               Safe Harbor &amp; Intermediary Disclaimer
             </Link>
-            <Link to="/safe-harbor#grievance" className="hover:text-[#FCC837] transition">
+            <Link to="/safe-harbor#grievance" className="hover:text-[#FFD400] transition">
               Grievance Redressal
             </Link>
-            <Link to="/plans" className="hover:text-[#FCC837] transition">
+            <Link to="/plans" className="hover:text-[#FFD400] transition">
               Subscription &amp; GST Invoicing
             </Link>
           </div>
