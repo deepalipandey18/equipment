@@ -282,8 +282,8 @@ const LandingPage = () => {
                 <span>STORENT.SI • Heavy Machinery Listing Directory</span>
               </div>
 
-              {/* Luxury Editorial Heading: Cormorant Garamond */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-serif tracking-tight leading-tight sm:leading-none animate-hero-fade-in-delay-1 drop-shadow-lg text-white">
+              {/* Heading */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none animate-hero-fade-in-delay-1 drop-shadow-lg text-white">
                 Find the right Equipments <br />
                 <span className="text-[#FCC837]">
                   for your next PROJECT.
